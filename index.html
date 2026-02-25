@@ -254,6 +254,19 @@
     .copyable:hover { background: rgba(255,255,255,0.08); }
     .copyable.copied { background: rgba(80,200,120,0.2) !important; }
 
+    /* ── Semantic tab distinction ─────────────────────────── */
+    .semantic-info {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+    }
+    .semantic-badge {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.2rem 0.55rem; border-radius: 4px;
+      background: var(--accent-bg); color: var(--accent-text); border: 1px solid var(--accent);
+      white-space: nowrap;
+    }
+    .semantic-note { font-size: 0.7rem; color: var(--text-dim); font-style: italic; }
+    .code-block-semantic { border-left: 3px solid var(--accent); }
+
     .toast {
       position: fixed; bottom: 1.5rem; left: 50%;
       transform: translateX(-50%) translateY(20px);
@@ -437,7 +450,11 @@
         <div class="code-block" id="code-hex"><button class="copy-block-btn" onclick="copyBlock('code-hex')">Copy</button></div>
       </div>
       <div class="tab-content" data-tab="semantic">
-        <div class="code-block" id="code-semantic"><button class="copy-block-btn" onclick="copyBlock('code-semantic')">Copy</button></div>
+        <div class="semantic-info">
+          <span class="semantic-badge">Semantic Layer</span>
+          <span class="semantic-note">References Primitive Tokens — paste after your :root block</span>
+        </div>
+        <div class="code-block code-block-semantic" id="code-semantic"><button class="copy-block-btn" onclick="copyBlock('code-semantic')">Copy</button></div>
       </div>
     </div>
   </div>
@@ -772,104 +789,101 @@ function renderTable(tbodyId, palette, showHC = false) {
       // ── Semantic ──
       const semBlock = document.getElementById('code-semantic');
       const btn3 = semBlock.querySelector('.copy-block-btn').outerHTML;
-      semBlock.innerHTML = btn3 + renderSemantic(brand, bg, error, errorSlated);
+      semBlock.innerHTML = btn3 + renderSemantic();
     }
 
-    function renderSemantic(brand, surface, error, errorSlated) {
-      const b  = {}; brand.forEach(r       => b[r.step]  = r);
-      const s  = {}; surface.forEach(r     => s[r.step]  = r);
-      const e  = {}; error.forEach(r       => e[r.step]  = r);
-      const es = {}; errorSlated.forEach(r => es[r.step] = r);
-
-      const v    = r    => `<span class="val">${r.css}</span>`;
+    function renderSemantic() {
       const prop = name => `  <span class="prop">--${name}</span>`;
-      const line = (name, r) => `${prop(name)}: ${v(r)};\n`;
-      const cmt  = t    => `  <span class="cmt">/* ${t} */</span>\n`;
+      const ref  = (prefix, step) => `<span class="val">var(--color-${prefix}-${step})</span>`;
+      const line = (name, prefix, step) => `${prop(name)}: ${ref(prefix, step)};\n`;
+      const cmt  = t => `  <span class="cmt">/* ${t} */</span>\n`;
 
       const block = (sel, rows) => {
         let o = `${sel} {\n`;
-        rows.forEach(([name, r]) => { o += Array.isArray(r) ? cmt(r[0]) : line(name, r); });
+        rows.forEach(([name, prefix, step]) => {
+          o += prefix === null ? cmt(step) : line(name, prefix, step);
+        });
         return o + `}\n`;
       };
 
       const root = block(':root', [
-        [null, ['Base']],
-        ['background',              s[50]],
-        ['foreground',              s[975]],
-        [null, ['Card']],
-        ['card',                    s[25]],
-        ['card-foreground',         s[975]],
-        [null, ['Popover']],
-        ['popover',                 s[25]],
-        ['popover-foreground',      s[975]],
-        [null, ['Primary']],
-        ['primary',                 b[600]],
-        ['primary-foreground',      b[50]],
-        [null, ['Secondary — softened brand']],
-        ['secondary',               b[200]],
-        ['secondary-foreground',    b[900]],
-        [null, ['Muted']],
-        ['muted',                   s[75]],
-        ['muted-foreground',        s[700]],
-        [null, ['Accent']],
-        ['accent',                  b[100]],
-        ['accent-foreground',       b[950]],
-        [null, ['Destructive']],
-        ['destructive',             e[600]],
-        ['destructive-foreground',  es[100]],
-        [null, ['Border / Input / Ring']],
-        ['border',                  s[400]],
-        ['input',                   s[300]],
-        ['ring',                    s[400]],
-        [null, ['Sidebar']],
-        ['sidebar',                         s[25]],
-        ['sidebar-foreground',              s[975]],
-        ['sidebar-primary',                 b[600]],
-        ['sidebar-primary-foreground',      b[50]],
-        ['sidebar-accent',                  b[100]],
-        ['sidebar-accent-foreground',       b[950]],
-        ['sidebar-border',                  s[400]],
-        ['sidebar-ring',                    s[400]],
+        [null,    null,             'Base'],
+        ['background',              'surface', 50],
+        ['foreground',              'surface', 975],
+        [null,    null,             'Card'],
+        ['card',                    'surface', 25],
+        ['card-foreground',         'surface', 975],
+        [null,    null,             'Popover'],
+        ['popover',                 'surface', 25],
+        ['popover-foreground',      'surface', 975],
+        [null,    null,             'Primary'],
+        ['primary',                 'brand',   600],
+        ['primary-foreground',      'brand',   50],
+        [null,    null,             'Secondary — softened brand'],
+        ['secondary',               'brand',   200],
+        ['secondary-foreground',    'brand',   900],
+        [null,    null,             'Muted'],
+        ['muted',                   'surface', 75],
+        ['muted-foreground',        'surface', 700],
+        [null,    null,             'Accent'],
+        ['accent',                  'brand',   100],
+        ['accent-foreground',       'brand',   950],
+        [null,    null,             'Destructive'],
+        ['destructive',             'error',   600],
+        ['destructive-foreground',  'error-surface', 100],
+        [null,    null,             'Border / Input / Ring'],
+        ['border',                  'surface', 400],
+        ['input',                   'surface', 300],
+        ['ring',                    'surface', 400],
+        [null,    null,             'Sidebar'],
+        ['sidebar',                      'surface', 25],
+        ['sidebar-foreground',           'surface', 975],
+        ['sidebar-primary',              'brand',   600],
+        ['sidebar-primary-foreground',   'brand',   50],
+        ['sidebar-accent',               'brand',   100],
+        ['sidebar-accent-foreground',    'brand',   950],
+        ['sidebar-border',               'surface', 400],
+        ['sidebar-ring',                 'surface', 400],
       ]);
 
       const dark = block('.dark', [
-        [null, ['Base']],
-        ['background',              s[850]],
-        ['foreground',              s[25]],
-        [null, ['Card']],
-        ['card',                    s[875]],
-        ['card-foreground',         s[25]],
-        [null, ['Popover']],
-        ['popover',                 s[875]],
-        ['popover-foreground',      s[25]],
-        [null, ['Primary']],
-        ['primary',                 b[400]],
-        ['primary-foreground',      b[975]],
-        [null, ['Secondary — softened brand']],
-        ['secondary',               b[800]],
-        ['secondary-foreground',    b[100]],
-        [null, ['Muted']],
-        ['muted',                   s[825]],
-        ['muted-foreground',        s[300]],
-        [null, ['Accent']],
-        ['accent',                  b[800]],
-        ['accent-foreground',       b[50]],
-        [null, ['Destructive']],
-        ['destructive',             e[400]],
-        ['destructive-foreground',  es[900]],
-        [null, ['Border / Input / Ring']],
-        ['border',                  s[600]],
-        ['input',                   s[700]],
-        ['ring',                    s[600]],
-        [null, ['Sidebar']],
-        ['sidebar',                         s[875]],
-        ['sidebar-foreground',              s[25]],
-        ['sidebar-primary',                 b[400]],
-        ['sidebar-primary-foreground',      b[975]],
-        ['sidebar-accent',                  b[800]],
-        ['sidebar-accent-foreground',       b[50]],
-        ['sidebar-border',                  s[600]],
-        ['sidebar-ring',                    s[600]],
+        [null,    null,             'Base'],
+        ['background',              'surface', 850],
+        ['foreground',              'surface', 25],
+        [null,    null,             'Card'],
+        ['card',                    'surface', 875],
+        ['card-foreground',         'surface', 25],
+        [null,    null,             'Popover'],
+        ['popover',                 'surface', 875],
+        ['popover-foreground',      'surface', 25],
+        [null,    null,             'Primary'],
+        ['primary',                 'brand',   400],
+        ['primary-foreground',      'brand',   975],
+        [null,    null,             'Secondary — softened brand'],
+        ['secondary',               'brand',   800],
+        ['secondary-foreground',    'brand',   100],
+        [null,    null,             'Muted'],
+        ['muted',                   'surface', 825],
+        ['muted-foreground',        'surface', 300],
+        [null,    null,             'Accent'],
+        ['accent',                  'brand',   800],
+        ['accent-foreground',       'brand',   50],
+        [null,    null,             'Destructive'],
+        ['destructive',             'error',   400],
+        ['destructive-foreground',  'error-surface', 900],
+        [null,    null,             'Border / Input / Ring'],
+        ['border',                  'surface', 600],
+        ['input',                   'surface', 700],
+        ['ring',                    'surface', 600],
+        [null,    null,             'Sidebar'],
+        ['sidebar',                      'surface', 875],
+        ['sidebar-foreground',           'surface', 25],
+        ['sidebar-primary',              'brand',   400],
+        ['sidebar-primary-foreground',   'brand',   975],
+        ['sidebar-accent',               'brand',   800],
+        ['sidebar-accent-foreground',    'brand',   50],
+        ['sidebar-border',               'surface', 600],
+        ['sidebar-ring',                 'surface', 600],
       ]);
 
       return `<span class="cmt">/* Semantic Tokens — shadcn/ui compatible */</span>\n` + root + '\n' + dark;
