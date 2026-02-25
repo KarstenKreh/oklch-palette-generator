@@ -39,7 +39,7 @@
       margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
     }
     .controls-left  { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; align-items: flex-start; }
-    .controls-right { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end; }
+    .controls-right { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; margin-bottom: 2rem; }
 
     /* ── Input area ───────────────────────────────────────── */
     .color-input-wrapper {
@@ -55,13 +55,38 @@
       width: 36px; height: 36px; border-radius: 5px;
       border: 2px solid rgba(255,255,255,0.1); cursor: pointer; flex-shrink: 0;
     }
-    #hexInput {
+    #hexInput, #bgHexInput, #errorHexInput {
       background: transparent; border: none; color: #fff;
       font-size: 1.1rem; font-family: 'Cascadia Code','Fira Code',monospace;
       width: 8ch; outline: none;
     }
-    #hexInput::placeholder { color: var(--text-faint); }
-    #colorPicker { position: absolute; opacity: 0; width: 0; height: 0; }
+    #hexInput::placeholder, #bgHexInput::placeholder, #errorHexInput::placeholder { color: var(--text-faint); }
+    #colorPicker, #bgColorPicker, #errorColorPicker { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    /* ── Color inputs container ────────────────────────────── */
+    .color-inputs-container {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      border: 1px solid var(--border-hi); border-radius: 8px; overflow: hidden;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.35s ease;
+    }
+    .color-input-col {
+      display: flex; flex-direction: column; gap: 0.3rem;
+      padding: 1rem 1.25rem;
+    }
+    .color-input-col:not(:last-child) { border-right: 1px solid var(--border-hi); }
+    .color-col-label {
+      font-size: 0.65rem; color: var(--text-dim); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+    .color-col-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .auto-btn {
+      font-size: 0.6rem; padding: 0.15rem 0.45rem; border-radius: 3px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-dim); cursor: pointer; font-family: inherit; font-weight: 600;
+      transition: background 0.15s, color 0.15s, border-color 0.15s; letter-spacing: 0.04em;
+    }
+    .auto-btn.active { background: var(--accent-bg); color: var(--accent-text); border-color: var(--accent); }
     .input-info {
       font-size: 0.75rem; color: var(--text-dim);
       font-family: 'Cascadia Code','Fira Code',monospace;
@@ -86,15 +111,20 @@
     .mode-hint { font-size: 0.7rem; color: var(--text-faint); font-style: italic; }
 
     /* ── Chroma slider ────────────────────────────────────── */
+    .chroma-section { margin-bottom: 1.75rem; }
+    .chroma-header { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; margin-bottom: 0.4rem; }
+    .chroma-title { font-size: 1.15rem; color: var(--text-hi); font-weight: 600; }
+    .chroma-hint-text { font-size: 0.7rem; color: var(--text-faint); font-style: italic; }
     .chroma-row {
-      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem;
+      display: flex; align-items: center; gap: 1rem;
     }
     .chroma-label { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
-    .chroma-value {
-      font-size: 0.8rem; color: var(--accent-text);
-      font-family: 'Cascadia Code','Fira Code',monospace;
-      min-width: 3.5ch; text-align: right;
+    .chroma-input {
+      background: transparent; border: none; color: var(--accent-text);
+      font-size: 1.1rem; font-family: 'Cascadia Code','Fira Code',monospace;
+      width: 4.5ch; outline: none; text-align: right; cursor: text;
     }
+    .chroma-input:focus { color: #fff; }
     input[type=range] {
       flex: 1; -webkit-appearance: none; appearance: none;
       height: 4px; border-radius: 2px;
@@ -134,8 +164,9 @@
       font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em;
       opacity: 0.5; margin-bottom: 0.15rem;
     }
-    .surface-card { border-radius: 6px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
+    .surface-card { border-radius: 12px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
     .surface-card p { font-size: 0.65rem; opacity: 0.85; }
+    .surface-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .surface-btn {
       display: inline-block; padding: 0.5rem 1.1rem; border-radius: 5px;
       font-size: 0.65rem; font-weight: 600; border: none; cursor: default;
@@ -215,6 +246,7 @@
       transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .tab-content.active { display: block; }
+    .tab-content > table { margin-bottom: 0; }
 
     #output { display: none; }
     #output.visible { display: block; }
@@ -228,8 +260,10 @@
     (full chroma), a <strong>Slated</strong> variant (50&nbsp;% chroma) and a <strong>Grey</strong> variant (pure grey) in the OKLCH color space.
   </p>
 
-  <div class="controls-row">
-    <div class="controls-left">
+  <div class="color-inputs-container">
+    <!-- Brand -->
+    <div class="color-input-col">
+      <span class="color-col-label">Brand</span>
       <div class="color-input-wrapper">
         <div class="color-preview-swatch" id="swatchPreview" style="background:#335A7F" onclick="document.getElementById('colorPicker').click()"></div>
         <input type="color" id="colorPicker" value="#335A7F">
@@ -238,54 +272,114 @@
       </div>
       <div class="input-info" id="oklchInfo"></div>
     </div>
-    <div class="controls-right">
-      <div class="mode-switch">
-        <button class="mode-option active" data-mode="balanced" onclick="setMode('balanced')">Balanced Midpoint</button>
-        <button class="mode-option" data-mode="exact" onclick="setMode('exact')">Exact Brand Match</button>
+    <!-- Surface -->
+    <div class="color-input-col">
+      <div class="color-col-header">
+        <span class="color-col-label">Surface</span>
+        <button class="auto-btn active" id="bgAutoBtn" onclick="toggleBgAutoMatch()">Auto</button>
       </div>
-      <div class="mode-hint" id="modeHint">500 = perceptual midpoint (L=0.50) &mdash; palette is symmetric around the brightest point of the hue</div>
+      <div class="color-input-wrapper">
+        <div class="color-preview-swatch" id="bgSwatchPreview" style="background:#335A7F" onclick="document.getElementById('bgColorPicker').click()"></div>
+        <input type="color" id="bgColorPicker" value="#335A7F">
+        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+        <input type="text" id="bgHexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+      </div>
+      <div class="input-info" id="bgOklchInfo"></div>
     </div>
+    <!-- Error -->
+    <div class="color-input-col">
+      <div class="color-col-header">
+        <span class="color-col-label">Error</span>
+        <button class="auto-btn active" id="errorAutoBtn" onclick="toggleErrorAutoMatch()">Auto</button>
+      </div>
+      <div class="color-input-wrapper">
+        <div class="color-preview-swatch" id="errorSwatchPreview" style="background:#CC3333" onclick="document.getElementById('errorColorPicker').click()"></div>
+        <input type="color" id="errorColorPicker" value="#CC3333">
+        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+        <input type="text" id="errorHexInput" value="CC3333" placeholder="CC3333" maxlength="7" spellcheck="false">
+      </div>
+      <div class="input-info" id="errorOklchInfo"></div>
+    </div>
+  </div>
+  <div class="controls-right">
+    <div class="mode-switch">
+      <button class="mode-option active" data-mode="balanced" onclick="setMode('balanced')">Balanced Midpoint</button>
+      <button class="mode-option" data-mode="exact" onclick="setMode('exact')">Exact Brand Match</button>
+    </div>
+    <div class="mode-hint" id="modeHint">500 = perceptual midpoint (L=0.50) &mdash; palette is symmetric around the brightest point of the hue</div>
   </div>
 
   <div id="output">
 
     <!-- ── Chroma slider ───────────────────────────────────── -->
-    <div class="chroma-row">
-      <span class="chroma-label">Grey</span>
-      <input type="range" id="chromaSlider" min="0" max="100" value="25">
-      <span class="chroma-label">Vibrant</span>
-      <span class="chroma-value" id="chromaValue">25%</span>
+    <div class="chroma-section">
+      <div class="chroma-header">
+        <span class="chroma-title">Surface Chroma</span>
+        <span class="chroma-hint-text">Sättigungsstärke für Hintergrund- und Surface-Tokens</span>
+      </div>
+      <div class="chroma-row">
+        <span class="chroma-label">Grey</span>
+        <input type="range" id="chromaSlider" min="0" max="100" value="25">
+        <span class="chroma-label">Vibrant</span>
+        <input type="text" class="chroma-input" id="chromaInput" value="25%" maxlength="4">
+      </div>
     </div>
 
     <!-- ── Surface demo ────────────────────────────────────── -->
     <div class="surface-demo" id="surfaces-demo"></div>
 
-    <!-- ── Brand Tokens ────────────────────────────────────── -->
-    <h2 class="section-title first">Brand Tokens</h2>
-    <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
-    <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-      <tbody id="table-brand"></tbody>
-    </table>
-
-    <!-- ── Background Tokens ───────────────────────────────── -->
-    <h2 class="section-title">Background Tokens</h2>
-    <p class="section-desc">Surfaces &middot; containers &mdash; <span id="chromaDescValue">25%</span> chroma</p>
-    <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-      <tbody id="table-bg"></tbody>
-    </table>
+    <!-- ── Brand / Background Tokens ──────────────────────── -->
+    <div class="tab-group" style="margin-bottom:2rem">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="brand">Brand</button>
+        <button class="tab-btn" data-tab="bg">Surface</button>
+        <button class="tab-btn" data-tab="error">Error</button>
+        <button class="tab-btn" data-tab="neutral">Neutral</button>
+      </div>
+      <div class="tab-content active" data-tab="brand">
+        <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
+        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+          <tbody id="table-brand"></tbody>
+        </table>
+      </div>
+      <div class="tab-content" data-tab="bg">
+        <p class="section-desc">Surfaces &middot; containers &mdash; <span id="chromaDescValue">25%</span> chroma<span id="bgColorNote"></span></p>
+        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+          <tbody id="table-bg"></tbody>
+        </table>
+      </div>
+      <div class="tab-content" data-tab="error">
+        <p class="section-desc">Error / destructive states &mdash; full chroma</p>
+        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+          <tbody id="table-error"></tbody>
+        </table>
+      </div>
+      <div class="tab-content" data-tab="neutral">
+        <p class="section-desc">0% chroma &mdash; High Contrast surfaces &middot; #fff and #000 included</p>
+        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+          <tbody id="table-neutral"></tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- ── Code blocks (always visible) ───────────────────── -->
     <h2 class="section-title">Export</h2>
     <p class="section-desc">Click the button in the top-right corner to copy the entire block</p>
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="oklch">OKLCH</button>
-      <button class="tab-btn" data-tab="hex">Hex Fallback</button>
-    </div>
-    <div class="tab-content active" data-tab="oklch">
-      <div class="code-block" id="code-oklch"><button class="copy-block-btn" onclick="copyBlock('code-oklch')">Copy</button></div>
-    </div>
-    <div class="tab-content" data-tab="hex">
-      <div class="code-block" id="code-hex"><button class="copy-block-btn" onclick="copyBlock('code-hex')">Copy</button></div>
+    <div class="tab-group">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="oklch">Primitives OKLCH</button>
+        <button class="tab-btn" data-tab="hex">Primitives Hex</button>
+        <button class="tab-btn" data-tab="semantic">Semantic</button>
+      </div>
+      <div class="tab-content active" data-tab="oklch">
+        <div class="code-block" id="code-oklch"><button class="copy-block-btn" onclick="copyBlock('code-oklch')">Copy</button></div>
+      </div>
+      <div class="tab-content" data-tab="hex">
+        <div class="code-block" id="code-hex"><button class="copy-block-btn" onclick="copyBlock('code-hex')">Copy</button></div>
+      </div>
+      <div class="tab-content" data-tab="semantic">
+        <div class="code-block" id="code-semantic"><button class="copy-block-btn" onclick="copyBlock('code-semantic')">Copy</button></div>
+      </div>
     </div>
   </div>
 
@@ -374,6 +468,31 @@
 
     let currentMode = 'balanced'; // 'balanced' or 'exact'
     let chromaScale = 0.25;      // background palette chroma (0–1)
+    let bgColorHex = '#335A7F';  // default = initial primary
+    let bgAutoMatch = true;
+    let errorColorHex = '#CC3333'; // placeholder, overwritten on first generate if auto
+    let errorAutoMatch = true;
+
+    function computeAutoErrorHex(primaryHex) {
+      const [pL, pC, pH] = hexToOklch(primaryHex);
+      const ERROR_HUE = 25; // warm red
+      const primaryMaxC = maxChromaInGamut(pL, pH);
+      const saturation = primaryMaxC > 0.001 ? pC / primaryMaxC : 0.5;
+      const errorMaxC = maxChromaInGamut(pL, ERROR_HUE);
+      return oklchToHex(pL, errorMaxC * saturation * 0.95, ERROR_HUE);
+    }
+
+    function toggleBgAutoMatch() {
+      bgAutoMatch = !bgAutoMatch;
+      document.getElementById('bgAutoBtn').classList.toggle('active', bgAutoMatch);
+      if (bgAutoMatch) generate();
+    }
+
+    function toggleErrorAutoMatch() {
+      errorAutoMatch = !errorAutoMatch;
+      document.getElementById('errorAutoBtn').classList.toggle('active', errorAutoMatch);
+      if (errorAutoMatch) generate();
+    }
 
     function generatePalette(hex, chromaScale = 1.0) {
       const [bL, bC, bH] = hexToOklch(hex);
@@ -434,19 +553,21 @@
     // ================================================================
     //  Rendering
     // ================================================================
-    function getZone(step) {
-      if (step <= 100) return { label: 'Light Surfaces', cls: 'light' };
+    function getZone(step, showHC = false) {
+      if (step === 0)    return showHC ? { label: 'HC White', cls: 'hc' } : null;
+      if (step === 1000) return showHC ? { label: 'HC Black', cls: 'hc' } : null;
+      if (step <= 100)   return { label: 'Light Surfaces', cls: 'light' };
       if (step >= 825 && step <= 875) return { label: 'Dark Surfaces', cls: 'dark' };
-      if (step >= 900) return { label: 'High Contrast', cls: 'hc' };
+      if (step >= 900 && showHC) return { label: 'High Contrast', cls: 'hc' };
       return null;
     }
 
-function renderTable(tbodyId, palette) {
+function renderTable(tbodyId, palette, showHC = false) {
       document.getElementById(tbodyId).innerHTML = palette.map(r => {
         const is500 = r.step === 500;
         const bg = is500 ? ' style="background:rgba(255,255,255,0.04)"' : '';
         const b = is500 ? s => `<strong>${s}</strong>` : s => s;
-        const zone = getZone(r.step);
+        const zone = getZone(r.step, showHC);
         const zt = zone ? `<span class="zone-tag ${zone.cls}">${zone.label}</span>` : '';
         const dotOutline = is500 ? ';outline:2px solid rgba(255,255,255,0.5)' : '';
         return `<tr${bg}>
@@ -461,62 +582,187 @@ function renderTable(tbodyId, palette) {
       }).join('');
     }
 
-    function renderSurfaces(containerId, palette, slatedPalette, accentSwatch) {
+    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, errorSwatch) {
       const s = {}; palette.forEach(r => s[r.step] = r);
-      const sl = {}; slatedPalette.forEach(r => sl[r.step] = r);
-      const btnBg = accentSwatch.hex;
-      const btnFg = accentSwatch.L < 0.55 ? '#fff' : '#111';
-      const textLight = sl[850].hex;   // Normal light mode: softer text from slated 850
-      const textLightHC = s[950].hex;  // HC light mode: maximum contrast text 950
-      const textDark = s[75].hex;      // Dark panels: light text
+      const n = {}; neutral.forEach(r => n[r.step] = r);
+      const btnBg  = accentSwatch.hex;
+      const btnFg  = accentSwatch.L < 0.55 ? '#fff' : '#111';
+      const errBg  = errorSwatch.hex;
+      const errFg  = errorSwatch.L < 0.55 ? '#fff' : '#111';
+      const textLight = s[850].hex;  // Normal light: softened text from bg palette
+      const textDark  = s[75].hex;   // Normal dark: light text from bg palette
+      const btns = `<div class="surface-btns">
+          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Primary</div>
+          <div class="surface-btn" style="background:${errBg};color:${errFg}">Error</div>
+        </div>`;
       document.getElementById(containerId).innerHTML = `
         <div class="surface-panel" style="background:${s[100].hex};color:${textLight}">
           <div class="mode-tag">Light</div><h3>Surfaces (25&ndash;100)</h3>
           <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
-          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
-        </div>
-        <div class="surface-panel" style="background:${s[100].hex};color:${textLightHC}">
-          <div class="mode-tag">Light &middot; High Contrast</div><h3>Surfaces (25&ndash;100)</h3>
-          <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
-          <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
-          <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
-          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
+          ${btns}
         </div>
         <div class="surface-panel" style="background:${s[875].hex};color:${textDark}">
           <div class="mode-tag">Dark</div><h3>Surfaces (800&ndash;875)</h3>
           <div class="surface-card" style="background:${s[800].hex}"><p><strong>Card (800)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
-          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
+          ${btns}
         </div>
-        <div class="surface-panel" style="background:${s[975].hex};color:${textDark}">
-          <div class="mode-tag">Dark &middot; High Contrast</div><h3>Surfaces (900&ndash;975)</h3>
-          <div class="surface-card" style="background:${s[900].hex}"><p><strong>Card (900)</strong> on BG (975)</p></div>
-          <div class="surface-card" style="background:${s[925].hex}"><p><strong>Elevated (925)</strong> on BG (975)</p></div>
-          <div class="surface-card" style="background:${s[950].hex}"><p><strong>Active (950)</strong> on BG (975)</p></div>
-          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
+        <div class="surface-panel" style="background:${n[75].hex};color:#000000">
+          <div class="mode-tag">Light &middot; High Contrast</div><h3>Neutral Surfaces</h3>
+          <div class="surface-card" style="background:#ffffff"><p><strong>Card (#fff)</strong> on BG (n75)</p></div>
+          <div class="surface-card" style="background:${n[25].hex}"><p><strong>Elevated (n25)</strong> on BG (n75)</p></div>
+          <div class="surface-card" style="background:${n[50].hex}"><p><strong>Active (n50)</strong> on BG (n75)</p></div>
+          ${btns}
+        </div>
+        <div class="surface-panel" style="background:#000000;color:#ffffff">
+          <div class="mode-tag">Dark &middot; High Contrast</div><h3>Neutral Surfaces</h3>
+          <div class="surface-card" style="background:${n[975].hex}"><p><strong>Card (n975)</strong> on BG (#000)</p></div>
+          <div class="surface-card" style="background:${n[950].hex}"><p><strong>Elevated (n950)</strong> on BG (#000)</p></div>
+          <div class="surface-card" style="background:${n[925].hex}"><p><strong>Active (n925)</strong> on BG (#000)</p></div>
+          ${btns}
         </div>`;
     }
 
-    function renderCodeBlocks(brand, bg) {
+    function renderCodeBlocks(brand, bg, error, errorSlated, neutral, customBgHex = null) {
       const pct = Math.round(chromaScale * 100);
+      const bgLabel = customBgHex ? `${pct}% chroma — base ${customBgHex}` : `${pct}% chroma`;
+      const neutralExt = [
+        { step: 0,    L: 1, C: 0, H: 0, hex: '#FFFFFF', css: 'oklch(1 0 0)' },
+        ...neutral,
+        { step: 1000, L: 0, C: 0, H: 0, hex: '#000000', css: 'oklch(0 0 0)' }
+      ];
+
+      const cmt = t => `\n  <span class="cmt">/* ${t} */</span>\n`;
+
+      // ── Primitives OKLCH ──
       const oklchBlock = document.getElementById('code-oklch');
       const btn1 = oklchBlock.querySelector('.copy-block-btn').outerHTML;
-      let o = `<span class="cmt">/* Brand Tokens — vibrant */</span>\n:root {\n`;
-      o += fmtSec(brand, 'brand', 'css');
-      o += `\n  <span class="cmt">/* Background Tokens — ${pct}% chroma */</span>\n`;
-      o += fmtSec(bg, 'bg', 'css');
+      let o = `<span class="cmt">/* Primitive Tokens */</span>\n:root {\n`;
+      o += cmt('Brand') + fmtSec(brand, 'brand', 'css');
+      o += cmt(`Surface — ${bgLabel}`) + fmtSec(bg, 'surface', 'css');
+      o += cmt('Error') + fmtSec(error, 'error', 'css');
+      o += cmt(`Error Surface — ${pct}% chroma`) + fmtSec(errorSlated, 'error-surface', 'css');
+      o += cmt('Neutral') + fmtSec(neutralExt, 'neutral', 'css');
       o += `}`; oklchBlock.innerHTML = btn1 + o;
 
+      // ── Primitives Hex ──
       const hexBlock = document.getElementById('code-hex');
       const btn2 = hexBlock.querySelector('.copy-block-btn').outerHTML;
-      let h = `<span class="cmt">/* Brand Tokens — vibrant (Hex) */</span>\n:root {\n`;
-      h += fmtSec(brand, 'brand', 'hex');
-      h += `\n  <span class="cmt">/* Background Tokens — ${pct}% chroma (Hex) */</span>\n`;
-      h += fmtSec(bg, 'bg', 'hex');
+      let h = `<span class="cmt">/* Primitive Tokens (Hex) */</span>\n:root {\n`;
+      h += cmt('Brand') + fmtSec(brand, 'brand', 'hex');
+      h += cmt(`Surface — ${bgLabel}`) + fmtSec(bg, 'surface', 'hex');
+      h += cmt('Error') + fmtSec(error, 'error', 'hex');
+      h += cmt(`Error Surface — ${pct}% chroma`) + fmtSec(errorSlated, 'error-surface', 'hex');
+      h += cmt('Neutral') + fmtSec(neutralExt, 'neutral', 'hex');
       h += `}`; hexBlock.innerHTML = btn2 + h;
+
+      // ── Semantic ──
+      const semBlock = document.getElementById('code-semantic');
+      const btn3 = semBlock.querySelector('.copy-block-btn').outerHTML;
+      semBlock.innerHTML = btn3 + renderSemantic(brand, bg, error, errorSlated);
+    }
+
+    function renderSemantic(brand, surface, error, errorSlated) {
+      const b  = {}; brand.forEach(r       => b[r.step]  = r);
+      const s  = {}; surface.forEach(r     => s[r.step]  = r);
+      const e  = {}; error.forEach(r       => e[r.step]  = r);
+      const es = {}; errorSlated.forEach(r => es[r.step] = r);
+
+      const v    = r    => `<span class="val">${r.css}</span>`;
+      const prop = name => `  <span class="prop">--${name}</span>`;
+      const line = (name, r) => `${prop(name)}: ${v(r)};\n`;
+      const cmt  = t    => `  <span class="cmt">/* ${t} */</span>\n`;
+
+      const block = (sel, rows) => {
+        let o = `${sel} {\n`;
+        rows.forEach(([name, r]) => { o += Array.isArray(r) ? cmt(r[0]) : line(name, r); });
+        return o + `}\n`;
+      };
+
+      const root = block(':root', [
+        [null, ['Base']],
+        ['background',              s[50]],
+        ['foreground',              s[975]],
+        [null, ['Card']],
+        ['card',                    s[25]],
+        ['card-foreground',         s[975]],
+        [null, ['Popover']],
+        ['popover',                 s[25]],
+        ['popover-foreground',      s[975]],
+        [null, ['Primary']],
+        ['primary',                 b[600]],
+        ['primary-foreground',      b[50]],
+        [null, ['Secondary — softened brand']],
+        ['secondary',               b[200]],
+        ['secondary-foreground',    b[900]],
+        [null, ['Muted']],
+        ['muted',                   s[75]],
+        ['muted-foreground',        s[700]],
+        [null, ['Accent']],
+        ['accent',                  b[100]],
+        ['accent-foreground',       b[950]],
+        [null, ['Destructive']],
+        ['destructive',             e[600]],
+        ['destructive-foreground',  es[100]],
+        [null, ['Border / Input / Ring']],
+        ['border',                  s[400]],
+        ['input',                   s[300]],
+        ['ring',                    s[400]],
+        [null, ['Sidebar']],
+        ['sidebar',                         s[25]],
+        ['sidebar-foreground',              s[975]],
+        ['sidebar-primary',                 b[600]],
+        ['sidebar-primary-foreground',      b[50]],
+        ['sidebar-accent',                  b[100]],
+        ['sidebar-accent-foreground',       b[950]],
+        ['sidebar-border',                  s[400]],
+        ['sidebar-ring',                    s[400]],
+      ]);
+
+      const dark = block('.dark', [
+        [null, ['Base']],
+        ['background',              s[850]],
+        ['foreground',              s[25]],
+        [null, ['Card']],
+        ['card',                    s[875]],
+        ['card-foreground',         s[25]],
+        [null, ['Popover']],
+        ['popover',                 s[875]],
+        ['popover-foreground',      s[25]],
+        [null, ['Primary']],
+        ['primary',                 b[400]],
+        ['primary-foreground',      b[975]],
+        [null, ['Secondary — softened brand']],
+        ['secondary',               b[800]],
+        ['secondary-foreground',    b[100]],
+        [null, ['Muted']],
+        ['muted',                   s[825]],
+        ['muted-foreground',        s[300]],
+        [null, ['Accent']],
+        ['accent',                  b[800]],
+        ['accent-foreground',       b[50]],
+        [null, ['Destructive']],
+        ['destructive',             e[400]],
+        ['destructive-foreground',  es[900]],
+        [null, ['Border / Input / Ring']],
+        ['border',                  s[600]],
+        ['input',                   s[700]],
+        ['ring',                    s[600]],
+        [null, ['Sidebar']],
+        ['sidebar',                         s[875]],
+        ['sidebar-foreground',              s[25]],
+        ['sidebar-primary',                 b[400]],
+        ['sidebar-primary-foreground',      b[975]],
+        ['sidebar-accent',                  b[800]],
+        ['sidebar-accent-foreground',       b[50]],
+        ['sidebar-border',                  s[600]],
+        ['sidebar-ring',                    s[600]],
+      ]);
+
+      return `<span class="cmt">/* Semantic Tokens — shadcn/ui compatible */</span>\n` + root + '\n' + dark;
     }
 
     function fmtSec(palette, prefix, mode) {
@@ -552,6 +798,7 @@ function renderTable(tbodyId, palette) {
       root.style.setProperty('--bg-code',     n[975].hex);
       root.style.setProperty('--border',      n[900].hex);
       root.style.setProperty('--border-sub',  n[925].hex);
+      root.style.setProperty('--border-hi',   n[800].hex);
       root.style.setProperty('--toast-bg',    n[900].hex);
 
       root.style.setProperty('--text-hi',     sl[75].hex);
@@ -607,18 +854,60 @@ function renderTable(tbodyId, palette) {
       document.getElementById('oklchInfo').innerHTML =
         `OKLCH: <span>L=${bL.toFixed(4)}</span>  <span>C=${bC.toFixed(4)}</span>  <span>H=${bH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${sat}%${satLabel}</span>`;
 
-      const brand   = generatePalette(hex, 1.0);
-      const bg      = generatePalette(hex, chromaScale);
-      const neutral = generatePalette(hex, 0.0);  // for page chrome
-      const slated  = generatePalette(hex, 0.5);  // for theme text + surface text
+      // Surface auto-match: mirror primary
+      if (bgAutoMatch) {
+        bgColorHex = hex;
+        document.getElementById('bgHexInput').value = raw.toUpperCase();
+        document.getElementById('bgSwatchPreview').style.background = hex;
+        document.getElementById('bgColorPicker').value = hex;
+      }
+
+      // Background OKLCH info
+      const [bgL, bgC, bgH] = hexToOklch(bgColorHex);
+      const bgMaxC = maxChromaInGamut(bgL, bgH);
+      const bgSat = bgMaxC > 0.001 ? (bgC / bgMaxC * 100).toFixed(0) : 0;
+      const bgSatLabel = bgSat < 5 ? ' (neutral)' : bgSat < 30 ? ' (muted)' : '';
+      document.getElementById('bgOklchInfo').innerHTML =
+        `OKLCH: <span>L=${bgL.toFixed(4)}</span>  <span>C=${bgC.toFixed(4)}</span>  <span>H=${bgH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${bgSat}%${bgSatLabel}</span>`;
+      document.getElementById('bgColorNote').textContent =
+        bgColorHex.toLowerCase() !== hex.toLowerCase() ? ` · ${bgColorHex}` : '';
+
+      // Error color (auto-match if enabled)
+      if (errorAutoMatch) {
+        errorColorHex = computeAutoErrorHex(hex);
+        document.getElementById('errorHexInput').value = errorColorHex.replace('#', '');
+        document.getElementById('errorSwatchPreview').style.background = errorColorHex;
+        document.getElementById('errorColorPicker').value = errorColorHex;
+      }
+      const [eL, eC, eH] = hexToOklch(errorColorHex);
+      const eMaxC = maxChromaInGamut(eL, eH);
+      const eSat = eMaxC > 0.001 ? (eC / eMaxC * 100).toFixed(0) : 0;
+      const eSatLabel = eSat < 5 ? ' (neutral)' : eSat < 30 ? ' (muted)' : '';
+      document.getElementById('errorOklchInfo').innerHTML =
+        `OKLCH: <span>L=${eL.toFixed(4)}</span>  <span>C=${eC.toFixed(4)}</span>  <span>H=${eH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${eSat}%${eSatLabel}</span>`;
+
+      const brand        = generatePalette(hex, 1.0);
+      const bg           = generatePalette(bgColorHex, chromaScale);
+      const error        = generatePalette(errorColorHex, 1.0);
+      const errorSlated  = generatePalette(errorColorHex, chromaScale);
+      const neutral      = generatePalette(bgColorHex, 0.0);
+      const slated       = generatePalette(bgColorHex, 0.5);
 
       const c500brand = brand.find(r => r.step === 500);
+      const c500error = error.find(r => r.step === 500);
+      const neutralExtended = [
+        { step: 0,    L: 1, C: 0, H: 0, hex: '#FFFFFF', css: 'oklch(1 0 0)' },
+        ...neutral,
+        { step: 1000, L: 0, C: 0, H: 0, hex: '#000000', css: 'oklch(0 0 0)' }
+      ];
 
       updateTheme(brand, slated, neutral);
       renderTable('table-brand', brand);
       renderTable('table-bg', bg);
-      renderSurfaces('surfaces-demo', bg, slated, c500brand);
-      renderCodeBlocks(brand, bg);
+      renderTable('table-error', error);
+      renderTable('table-neutral', neutralExtended, true);
+      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, c500error);
+      renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null);
       document.getElementById('output').classList.add('visible');
     }
 
@@ -641,21 +930,79 @@ function renderTable(tbodyId, palette) {
       }
     });
 
+    // Surface color inputs
+    document.getElementById('bgColorPicker').addEventListener('input', e => {
+      bgAutoMatch = false;
+      document.getElementById('bgAutoBtn').classList.remove('active');
+      bgColorHex = e.target.value.toUpperCase();
+      document.getElementById('bgHexInput').value = bgColorHex.replace('#', '');
+      document.getElementById('bgSwatchPreview').style.background = bgColorHex;
+      generate();
+    });
+    document.getElementById('bgHexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.getElementById('bgHexInput').addEventListener('input', e => {
+      const cleaned = e.target.value.replace(/#/g, '');
+      if (cleaned !== e.target.value) e.target.value = cleaned;
+      if (/^[0-9a-fA-F]{6}$/.test(cleaned)) {
+        bgAutoMatch = false;
+        document.getElementById('bgAutoBtn').classList.remove('active');
+        bgColorHex = '#' + cleaned.toUpperCase();
+        document.getElementById('bgSwatchPreview').style.background = bgColorHex;
+        document.getElementById('bgColorPicker').value = bgColorHex;
+        generate();
+      }
+    });
+
+    // Error color inputs
+    document.getElementById('errorColorPicker').addEventListener('input', e => {
+      errorAutoMatch = false;
+      document.getElementById('errorAutoBtn').classList.remove('active');
+      errorColorHex = e.target.value.toUpperCase();
+      document.getElementById('errorHexInput').value = errorColorHex.replace('#', '');
+      document.getElementById('errorSwatchPreview').style.background = errorColorHex;
+      generate();
+    });
+    document.getElementById('errorHexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.getElementById('errorHexInput').addEventListener('input', e => {
+      const cleaned = e.target.value.replace(/#/g, '');
+      if (cleaned !== e.target.value) e.target.value = cleaned;
+      if (/^[0-9a-fA-F]{6}$/.test(cleaned)) {
+        errorAutoMatch = false;
+        document.getElementById('errorAutoBtn').classList.remove('active');
+        errorColorHex = '#' + cleaned.toUpperCase();
+        document.getElementById('errorSwatchPreview').style.background = errorColorHex;
+        document.getElementById('errorColorPicker').value = errorColorHex;
+        generate();
+      }
+    });
+
     // Chroma slider
     document.getElementById('chromaSlider').addEventListener('input', e => {
       chromaScale = e.target.value / 100;
-      document.getElementById('chromaValue').textContent = e.target.value + '%';
+      document.getElementById('chromaInput').value = e.target.value + '%';
       document.getElementById('chromaDescValue').textContent = e.target.value + '%';
       generate();
     });
+    document.getElementById('chromaInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') e.target.blur();
+    });
+    document.getElementById('chromaInput').addEventListener('change', e => {
+      const val = Math.round(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)));
+      chromaScale = val / 100;
+      document.getElementById('chromaSlider').value = val;
+      e.target.value = val + '%';
+      document.getElementById('chromaDescValue').textContent = val + '%';
+      generate();
+    });
 
-    // Code format tabs
+    // Tabs (scoped per .tab-group)
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const group = btn.closest('.tab-group');
+        group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        group.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
-        document.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
+        group.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
       });
     });
 
