@@ -1,0 +1,7 @@
+services:
+  oklch-palette:
+    build: .
+    container_name: oklch-palette
+    restart: unless-stopped
+    ports:
+      - "8080:80"

@@ -1,31 +1,55 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OKLCH Tonal Palette Generator</title>
   <style>
+    :root {
+      --bg-page:     #0e0e14;
+      --bg-surface:  #16162a;
+      --bg-code:     #0a0a12;
+      --border:      #2a2a3a;
+      --border-sub:  #18182a;
+      --text-hi:     #e0e0e0;
+      --text-mid:    #aaa;
+      --text-low:    #777;
+      --text-dim:    #666;
+      --text-faint:  #555;
+      --text-info:   #999;
+      --accent:      #4a7aaa;
+      --accent-bg:   #2a4a6a;
+      --accent-text: #8cb4ff;
+      --focus-ring:  rgba(74,122,170,0.15);
+      --toast-bg:    #222;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #0e0e14; color: #e0e0e0;
+      background: var(--bg-page); color: var(--text-hi);
       padding: 2.5rem 3rem; min-height: 100vh;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
     h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; color: #fff; }
-    .subtitle { font-size: 0.85rem; color: #777; margin-bottom: 2rem; line-height: 1.5; }
+    .subtitle { font-size: 0.85rem; color: var(--text-low); margin-bottom: 2rem; line-height: 1.5; }
+
+    /* ── Controls row ─────────────────────────────────────── */
+    .controls-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .controls-left  { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; align-items: flex-start; }
+    .controls-right { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end; }
 
     /* ── Input area ───────────────────────────────────────── */
-    .input-area {
-      display: flex; align-items: center; gap: 1rem;
-      margin-bottom: 1rem; flex-wrap: wrap;
-    }
     .color-input-wrapper {
       display: flex; align-items: center; gap: 0.5rem;
-      background: #16162a; border: 1px solid #2a2a3a;
+      background: var(--bg-surface); border: 1px solid var(--border);
       border-radius: 6px; padding: 0.5rem 0.75rem;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .color-input-wrapper:focus-within {
-      border-color: #4a7aaa; box-shadow: 0 0 0 3px rgba(74,122,170,0.15);
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-ring);
     }
     .color-preview-swatch {
       width: 36px; height: 36px; border-radius: 5px;
@@ -36,81 +60,63 @@
       font-size: 1.1rem; font-family: 'Cascadia Code','Fira Code',monospace;
       width: 8ch; outline: none;
     }
-    #hexInput::placeholder { color: #555; }
+    #hexInput::placeholder { color: var(--text-faint); }
     #colorPicker { position: absolute; opacity: 0; width: 0; height: 0; }
     .input-info {
-      font-size: 0.75rem; color: #666;
+      font-size: 0.75rem; color: var(--text-dim);
       font-family: 'Cascadia Code','Fira Code',monospace;
     }
-    .input-info span { color: #8cb4ff; }
-    .generate-btn {
-      padding: 0.6rem 1.4rem; color: #fff;
-      border: 1px solid rgba(255,255,255,0.15); border-radius: 5px;
-      font-size: 0.85rem; font-weight: 600; cursor: pointer;
-      transition: filter 0.15s, box-shadow 0.15s; font-family: inherit;
-    }
-    .generate-btn:hover { filter: brightness(1.15); box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    .input-info span { color: var(--accent-text); }
 
     /* ── Mode switch ──────────────────────────────────────── */
-    .mode-switch-area {
-      display: flex; align-items: center; gap: 0.75rem;
-      margin-bottom: 2rem; flex-wrap: wrap;
-    }
     .mode-switch {
-      display: flex; background: #16162a; border: 1px solid #2a2a3a;
+      display: flex; background: var(--bg-surface); border: 1px solid var(--border);
       border-radius: 5px; overflow: hidden;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .mode-option {
       padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 600;
       cursor: pointer; transition: background 0.15s, color 0.15s;
-      color: #666; border: none; background: transparent;
+      color: var(--text-dim); border: none; background: transparent;
       font-family: inherit; white-space: nowrap;
     }
-    .mode-option:first-child { border-right: 1px solid #2a2a3a; }
-    .mode-option:hover { color: #aaa; }
-    .mode-option.active { background: #2a4a6a; color: #fff; }
-    .mode-hint {
-      font-size: 0.7rem; color: #555; font-style: italic; max-width: 44ch;
+    .mode-option:first-child { border-right: 1px solid var(--border); }
+    .mode-option:hover { color: var(--text-mid); }
+    .mode-option.active { background: var(--accent-bg); color: #fff; }
+    .mode-hint { font-size: 0.7rem; color: var(--text-faint); font-style: italic; }
+
+    /* ── Variant tabs ─────────────────────────────────────── */
+    .vtab-bar {
+      display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.75rem;
+      transition: border-color 0.35s ease;
     }
+    .vtab-btn {
+      padding: 0.7rem 2rem; font-size: 0.9rem; font-weight: 600;
+      background: transparent; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      color: var(--text-faint); cursor: pointer; font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .vtab-btn:hover { color: var(--text-mid); }
+    .vtab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+    .vpanel { display: none; }
+    .vpanel.active { display: block; }
 
     /* ── Section titles ───────────────────────────────────── */
     .section-title {
-      font-size: 1.15rem; font-weight: 600; color: #ddd;
+      font-size: 1.15rem; font-weight: 600; color: var(--text-hi);
       margin-top: 2.5rem; margin-bottom: 0.25rem;
     }
-    .section-desc { font-size: 0.8rem; color: #666; margin-bottom: 1rem; }
-
-    /* ── Palette strip ────────────────────────────────────── */
-    .palette-row {
-      display: flex; gap: 0; border-radius: 6px; overflow: hidden;
-      margin-bottom: 0.5rem; box-shadow: 0 2px 16px rgba(0,0,0,0.5);
-    }
-    .swatch {
-      flex: 1; min-height: 80px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 0.4rem 0.1rem; cursor: default;
-    }
-    .swatch .label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.03em; }
-    .swatch .hex-label {
-      font-size: 0.45rem; font-family: 'Cascadia Code','Fira Code',monospace;
-      opacity: 0.75; margin-top: 2px;
-    }
-    .swatch.light .label, .swatch.light .hex-label { color: #1a1a2e; }
-    .swatch.dark  .label, .swatch.dark  .hex-label { color: #fff; }
-    .swatch.midpoint { outline: 2px solid rgba(255,255,255,0.6); outline-offset: -2px; z-index: 1; }
-
-    .zone-labels {
-      display: flex; font-size: 0.6rem; color: #555;
-      margin-bottom: 1.5rem; margin-top: 0.25rem;
-    }
-    .zone-label { text-align: center; border-top: 2px solid; padding-top: 4px; margin-right: 2px; }
-    .zone-label.zl { flex: 4; border-color: #445; }
-    .zone-label.zc { flex: 7; border-color: #556; }
-    .zone-label.zd { flex: 3; border-color: #4a6a4a; }
-    .zone-label.zh { flex: 4; border-color: #6a4a4a; }
+    .section-title.first { margin-top: 0; }
+    .section-desc { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; }
 
     /* ── Surface demo ─────────────────────────────────────── */
-    .surface-demo { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1rem; }
+    .surface-demo {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 900px)  { .surface-demo { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px)  { .surface-demo { grid-template-columns: 1fr; } }
     .surface-panel { border-radius: 8px; padding: 1.1rem; min-height: 170px; }
     .surface-panel h3 { font-size: 0.8rem; margin-bottom: 0.6rem; font-weight: 600; }
     .surface-panel .mode-tag {
@@ -119,6 +125,11 @@
     }
     .surface-card { border-radius: 6px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
     .surface-card p { font-size: 0.65rem; opacity: 0.85; }
+    .surface-btn {
+      display: inline-block; padding: 0.5rem 1.1rem; border-radius: 5px;
+      font-size: 0.65rem; font-weight: 600; border: none; cursor: default;
+      margin-top: 0.65rem; font-family: inherit; letter-spacing: 0.02em;
+    }
 
     /* ── Detail table ─────────────────────────────────────── */
     table {
@@ -126,11 +137,11 @@
       font-family: 'Cascadia Code','Fira Code',monospace; margin-bottom: 2rem;
     }
     th {
-      text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid #2a2a3a;
-      color: #777; font-weight: 500; font-size: 0.65rem;
+      text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border);
+      color: var(--text-low); font-weight: 500; font-size: 0.65rem;
       text-transform: uppercase; letter-spacing: 0.08em;
     }
-    td { padding: 0.45rem 0.65rem; border-bottom: 1px solid #18182a; }
+    td { padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border-sub); }
     tr:hover td { background: rgba(255,255,255,0.025); }
     .color-dot {
       width: 24px; height: 24px; border-radius: 4px;
@@ -155,7 +166,7 @@
     .toast {
       position: fixed; bottom: 1.5rem; left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: #222; color: #fff; padding: 0.6rem 1.2rem; border-radius: 5px;
+      background: var(--toast-bg); color: #fff; padding: 0.6rem 1.2rem; border-radius: 5px;
       font-size: 0.8rem; font-family: 'Cascadia Code','Fira Code',monospace;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 100;
@@ -163,15 +174,16 @@
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .code-block {
-      background: #0a0a12; border: 1px solid #222; border-radius: 5px;
+      background: var(--bg-code); border: 1px solid var(--border); border-radius: 5px;
       padding: 1.1rem 1.25rem; font-family: 'Cascadia Code','Fira Code',monospace;
       font-size: 0.7rem; line-height: 1.6; overflow-x: auto; white-space: pre;
-      color: #b8b8c8; margin-bottom: 1rem; position: relative;
+      color: var(--text-info); margin-bottom: 1rem; position: relative;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .copy-block-btn {
       position: absolute; top: 0.6rem; right: 0.6rem;
       background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      color: #999; font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 4px;
+      color: var(--text-info); font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 4px;
       cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
     }
     .copy-block-btn:hover { background: rgba(255,255,255,0.1); color: #ccc; }
@@ -180,87 +192,89 @@
     .tab-bar { display: flex; gap: 0; margin-bottom: 0; }
     .tab-btn {
       padding: 0.55rem 1.2rem; font-size: 0.75rem; font-weight: 600;
-      background: transparent; border: 1px solid #2a2a3a; border-bottom: none;
-      color: #666; cursor: pointer; border-radius: 5px 5px 0 0;
+      background: transparent; border: 1px solid var(--border); border-bottom: none;
+      color: var(--text-dim); cursor: pointer; border-radius: 5px 5px 0 0;
       transition: background 0.15s, color 0.15s; font-family: inherit;
     }
-    .tab-btn:hover { color: #aaa; background: rgba(255,255,255,0.02); }
-    .tab-btn.active { color: #fff; background: #16162a; border-color: #333; }
+    .tab-btn:hover { color: var(--text-mid); background: rgba(255,255,255,0.02); }
+    .tab-btn.active { color: #fff; background: var(--bg-surface); border-color: var(--border); }
     .tab-content {
-      display: none; border: 1px solid #2a2a3a; border-radius: 0 5px 5px 5px;
-      padding: 1.5rem; background: #16162a;
+      display: none; border: 1px solid var(--border); border-radius: 0 5px 5px 5px;
+      padding: 1.5rem; background: var(--bg-surface);
+      transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .tab-content.active { display: block; }
 
     #output { display: none; }
     #output.visible { display: block; }
-    .variant-label { font-size: 0.75rem; color: #999; margin-bottom: 0.5rem; font-weight: 600; }
-    .variant-label.mt { margin-top: 1rem; }
   </style>
 </head>
 <body>
 
   <h1>OKLCH Tonal Palette Generator</h1>
   <p class="subtitle">
-    Gib einen Hex-Farbcode ein &rarr; generiert automatisch eine <strong>Brand</strong>-Palette
-    (volle Chroma) und eine <strong>Slated</strong>-Variante (50% Chroma) im OKLCH-Farbraum.
+    Enter a hex color code &rarr; automatically generates a <strong>Vibrant</strong> palette
+    (full chroma), a <strong>Slated</strong> variant (50&nbsp;% chroma) and a <strong>Grey</strong> variant (pure grey) in the OKLCH color space.
   </p>
 
-  <div class="input-area">
-    <div class="color-input-wrapper">
-      <div class="color-preview-swatch" id="swatchPreview" style="background:#335A7F" onclick="document.getElementById('colorPicker').click()"></div>
-      <input type="color" id="colorPicker" value="#335A7F">
-      <span style="color:#555;font-size:1.1rem;font-family:monospace">#</span>
-      <input type="text" id="hexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+  <div class="controls-row">
+    <div class="controls-left">
+      <div class="color-input-wrapper">
+        <div class="color-preview-swatch" id="swatchPreview" style="background:#335A7F" onclick="document.getElementById('colorPicker').click()"></div>
+        <input type="color" id="colorPicker" value="#335A7F">
+        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+        <input type="text" id="hexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+      </div>
+      <div class="input-info" id="oklchInfo"></div>
     </div>
-    <div class="input-info" id="oklchInfo"></div>
-    <button class="generate-btn" id="generateBtn" onclick="generate()">Palette generieren</button>
-  </div>
-
-  <div class="mode-switch-area">
-    <div class="mode-switch">
-      <button class="mode-option active" data-mode="balanced" onclick="setMode('balanced')">Balanced Midpoint</button>
-      <button class="mode-option" data-mode="exact" onclick="setMode('exact')">Exact Brand Match</button>
+    <div class="controls-right">
+      <div class="mode-switch">
+        <button class="mode-option active" data-mode="balanced" onclick="setMode('balanced')">Balanced Midpoint</button>
+        <button class="mode-option" data-mode="exact" onclick="setMode('exact')">Exact Brand Match</button>
+      </div>
+      <div class="mode-hint" id="modeHint">500 = perceptual midpoint (L=0.50) &mdash; palette is symmetric around the brightest point of the hue</div>
     </div>
-    <div class="mode-hint" id="modeHint">500 = perzeptueller Mittelwert (L=0.50) &mdash; Palette ist symmetrisch um den hellsten Punkt des Farbtons</div>
   </div>
 
   <div id="output">
-    <h2 class="section-title">Brand</h2>
-    <p class="section-desc">Volle Chroma &mdash; Akzentfarben, Buttons, Links</p>
-    <div class="palette-row" id="strip-brand"></div>
-    <div class="zone-labels">
-      <div class="zone-label zl">Light Surfaces</div>
-      <div class="zone-label zc">Core Palette</div>
-      <div class="zone-label zd">Dark Surfaces</div>
-      <div class="zone-label zh">High Contrast</div>
+
+    <!-- ── Variant tab bar ─────────────────────────────────── -->
+    <div class="vtab-bar">
+      <button class="vtab-btn active" data-vtab="vibrant">Vibrant</button>
+      <button class="vtab-btn" data-vtab="slated">Slated</button>
+      <button class="vtab-btn" data-vtab="grey">Grey</button>
     </div>
-    <table><thead><tr><th>Step</th><th>Farbe</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-      <tbody id="table-brand"></tbody>
-    </table>
 
-    <h2 class="section-title">Slated</h2>
-    <p class="section-desc">50% Chroma &mdash; ged&auml;mpft, ideal f&uuml;r Hintergrund-/Container-Farben</p>
-    <div class="palette-row" id="strip-slated"></div>
-    <div class="zone-labels">
-      <div class="zone-label zl">Light Surfaces</div>
-      <div class="zone-label zc">Core Palette</div>
-      <div class="zone-label zd">Dark Surfaces</div>
-      <div class="zone-label zh">High Contrast</div>
+    <!-- ── Vibrant panel ───────────────────────────────────── -->
+    <div class="vpanel active" data-vtab="vibrant">
+      <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
+      <div class="surface-demo" id="surfaces-vibrant"></div>
+      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+        <tbody id="table-vibrant"></tbody>
+      </table>
     </div>
-    <table><thead><tr><th>Step</th><th>Farbe</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-      <tbody id="table-slated"></tbody>
-    </table>
 
-    <h2 class="section-title">Surface-Farben Demo</h2>
-    <p class="section-desc">Light (25&ndash;100) &middot; Dark Normal (825&ndash;875) &middot; Dark High Contrast (925&ndash;975)</p>
-    <p class="variant-label">Brand</p>
-    <div class="surface-demo" id="surfaces-brand"></div>
-    <p class="variant-label mt">Slated</p>
-    <div class="surface-demo" id="surfaces-slated"></div>
+    <!-- ── Slated panel ────────────────────────────────────── -->
+    <div class="vpanel" data-vtab="slated">
+      <p class="section-desc">50% chroma &mdash; muted, ideal for background and container colors</p>
+      <div class="surface-demo" id="surfaces-slated"></div>
+      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+        <tbody id="table-slated"></tbody>
+      </table>
+    </div>
 
-    <h2 class="section-title">Zum Kopieren</h2>
-    <p class="section-desc">Klick auf den Button oben rechts kopiert den gesamten Block</p>
+    <!-- ── Grey panel ──────────────────────────────────────── -->
+    <div class="vpanel" data-vtab="grey">
+      <p class="section-desc">No chroma &mdash; neutral greys for backgrounds and containers</p>
+      <div class="surface-demo" id="surfaces-neutral"></div>
+      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+        <tbody id="table-neutral"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Code blocks (always visible) ───────────────────── -->
+    <h2 class="section-title">Export</h2>
+    <p class="section-desc">Click the button in the top-right corner to copy the entire block</p>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="oklch">OKLCH</button>
       <button class="tab-btn" data-tab="hex">Hex Fallback</button>
@@ -376,21 +390,14 @@
 
       // ── Mode-dependent: chroma strategy ──
       if (currentMode === 'exact') {
-        // ----------------------------------------------------------
-        // EXACT MODE: step-based envelope, uniform in step space.
-        // Chroma peaks at step 500 = input's exact chroma,
-        // falls parabolically toward 0 at the palette edges.
-        // ----------------------------------------------------------
         return STEPS.map(step => {
           const L = stepToL(step);
           const H = safeH;
           let C;
 
           if (step === 500) {
-            // Exact input chroma — already in gamut (came from hex)
             C = bC * chromaScale;
           } else {
-            // Parabolic envelope in step space: 0 at step 0, 1 at step 500, 0 at step 1000
             const stepNorm = step <= 500 ? step / 500 : (1000 - step) / 500;
             const envelope = 1 - Math.pow(1 - stepNorm, 2);
             const desired = bC * chromaScale * envelope;
@@ -404,9 +411,7 @@
         });
       }
 
-      // ----------------------------------------------------------
-      // BALANCED MODE (default): L_MID = 0.50, chroma from gamut max
-      // ----------------------------------------------------------
+      // BALANCED MODE
       const maxC500 = maxChromaInGamut(L_MID, safeH);
       const targetC500 = maxC500 * 0.88 * blend;
 
@@ -433,18 +438,7 @@
       return null;
     }
 
-    function renderStrip(containerId, palette) {
-      document.getElementById(containerId).innerHTML = palette.map(r => {
-        const cls = r.L < 0.55 ? 'dark' : 'light';
-        const mid = r.step === 500 ? ' midpoint' : '';
-        return `<div class="swatch ${cls}${mid}" style="background:${r.hex}">
-          <span class="label">${r.step}</span>
-          <span class="hex-label">${r.hex}</span>
-        </div>`;
-      }).join('');
-    }
-
-    function renderTable(tbodyId, palette) {
+function renderTable(tbodyId, palette) {
       document.getElementById(tbodyId).innerHTML = palette.map(r => {
         const is500 = r.step === 500;
         const bg = is500 ? ' style="background:rgba(255,255,255,0.04)"' : '';
@@ -464,44 +458,64 @@
       }).join('');
     }
 
-    function renderSurfaces(containerId, palette) {
+    function renderSurfaces(containerId, palette, slatedPalette, accentSwatch) {
       const s = {}; palette.forEach(r => s[r.step] = r);
+      const sl = {}; slatedPalette.forEach(r => sl[r.step] = r);
+      const btnBg = accentSwatch.hex;
+      const btnFg = accentSwatch.L < 0.55 ? '#fff' : '#111';
+      const textLight = sl[850].hex;   // Normal light mode: softer text from slated 850
+      const textLightHC = s[950].hex;  // HC light mode: maximum contrast text 950
+      const textDark = s[75].hex;      // Dark panels: light text
       document.getElementById(containerId).innerHTML = `
-        <div class="surface-panel" style="background:${s[25].hex};color:#1a1a2e">
-          <div class="mode-tag">Light Mode</div><h3>Surfaces</h3>
-          <div class="surface-card" style="background:${s[50].hex}"><p><strong>Card (50)</strong> auf BG (25)</p></div>
-          <div class="surface-card" style="background:${s[75].hex}"><p><strong>Elevated (75)</strong> auf BG (25)</p></div>
-          <div class="surface-card" style="background:${s[100].hex}"><p><strong>Active (100)</strong> auf BG (25)</p></div>
+        <div class="surface-panel" style="background:${s[100].hex};color:${textLight}">
+          <div class="mode-tag">Light</div><h3>Surfaces (25&ndash;100)</h3>
+          <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
+          <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
+          <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
+          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
         </div>
-        <div class="surface-panel" style="background:${s[875].hex};color:#e0e0e0">
-          <div class="mode-tag" style="color:#5cb87a">Dark Mode</div><h3>Surfaces (825&ndash;875)</h3>
-          <div class="surface-card" style="background:${s[850].hex}"><p><strong>Card (850)</strong> auf BG (875)</p></div>
-          <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> auf BG (875)</p></div>
-          <div class="surface-card" style="background:${s[800].hex}"><p><strong>Active (800)</strong> auf BG (875)</p></div>
+        <div class="surface-panel" style="background:${s[100].hex};color:${textLightHC}">
+          <div class="mode-tag">Light &middot; High Contrast</div><h3>Surfaces (25&ndash;100)</h3>
+          <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
+          <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
+          <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
+          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
         </div>
-        <div class="surface-panel" style="background:${s[975].hex};color:#e0e0e0">
-          <div class="mode-tag" style="color:#c88050">High Contrast</div><h3>Surfaces (925&ndash;975)</h3>
-          <div class="surface-card" style="background:${s[950].hex}"><p><strong>Card (950)</strong> auf BG (975)</p></div>
-          <div class="surface-card" style="background:${s[925].hex}"><p><strong>Elevated (925)</strong> auf BG (975)</p></div>
-          <div class="surface-card" style="background:${s[900].hex}"><p><strong>Active (900)</strong> auf BG (975)</p></div>
+        <div class="surface-panel" style="background:${s[875].hex};color:${textDark}">
+          <div class="mode-tag">Dark</div><h3>Surfaces (800&ndash;875)</h3>
+          <div class="surface-card" style="background:${s[800].hex}"><p><strong>Card (800)</strong> on BG (875)</p></div>
+          <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
+          <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
+          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
+        </div>
+        <div class="surface-panel" style="background:${s[975].hex};color:${textDark}">
+          <div class="mode-tag">Dark &middot; High Contrast</div><h3>Surfaces (900&ndash;975)</h3>
+          <div class="surface-card" style="background:${s[900].hex}"><p><strong>Card (900)</strong> on BG (975)</p></div>
+          <div class="surface-card" style="background:${s[925].hex}"><p><strong>Elevated (925)</strong> on BG (975)</p></div>
+          <div class="surface-card" style="background:${s[950].hex}"><p><strong>Active (950)</strong> on BG (975)</p></div>
+          <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Button (500)</div>
         </div>`;
     }
 
-    function renderCodeBlocks(bp, sp) {
+    function renderCodeBlocks(vp, sp, np) {
       const oklchBlock = document.getElementById('code-oklch');
       const btn1 = oklchBlock.querySelector('.copy-block-btn').outerHTML;
-      let o = `<span class="cmt">/* Brand Tonal Palette — OKLCH */</span>\n:root {\n`;
-      o += fmtSec(bp, 'brand', 'css');
+      let o = `<span class="cmt">/* Vibrant Tonal Palette — OKLCH */</span>\n:root {\n`;
+      o += fmtSec(vp, 'vibrant', 'css');
       o += `\n  <span class="cmt">/* Slated — 50% Chroma */</span>\n`;
       o += fmtSec(sp, 'slated', 'css');
+      o += `\n  <span class="cmt">/* Grey — 0% Chroma */</span>\n`;
+      o += fmtSec(np, 'grey', 'css');
       o += `}`; oklchBlock.innerHTML = btn1 + o;
 
       const hexBlock = document.getElementById('code-hex');
       const btn2 = hexBlock.querySelector('.copy-block-btn').outerHTML;
-      let h = `<span class="cmt">/* Brand Tonal Palette — Hex Fallback */</span>\n:root {\n`;
-      h += fmtSec(bp, 'brand', 'hex');
+      let h = `<span class="cmt">/* Vibrant Tonal Palette — Hex Fallback */</span>\n:root {\n`;
+      h += fmtSec(vp, 'vibrant', 'hex');
       h += `\n  <span class="cmt">/* Slated — 50% Chroma */</span>\n`;
       h += fmtSec(sp, 'slated', 'hex');
+      h += `\n  <span class="cmt">/* Grey — 0% Chroma */</span>\n`;
+      h += fmtSec(np, 'grey', 'hex');
       h += `}`; hexBlock.innerHTML = btn2 + h;
     }
 
@@ -525,6 +539,40 @@
     }
 
     // ================================================================
+    //  Theme update — Dark HC palette drives page chrome
+    // ================================================================
+    function updateTheme(vibrant, slated, neutral) {
+      const v  = {}; vibrant.forEach(r => v[r.step]  = r);
+      const sl = {}; slated.forEach(r  => sl[r.step] = r);
+      const n  = {}; neutral.forEach(r => n[r.step]  = r);
+      const root = document.documentElement;
+
+      root.style.setProperty('--bg-page',     n[975].hex);
+      root.style.setProperty('--bg-surface',  n[950].hex);
+      root.style.setProperty('--bg-code',     n[975].hex);
+      root.style.setProperty('--border',      n[900].hex);
+      root.style.setProperty('--border-sub',  n[925].hex);
+      root.style.setProperty('--toast-bg',    n[900].hex);
+
+      root.style.setProperty('--text-hi',     sl[75].hex);
+      root.style.setProperty('--text-mid',    sl[200].hex);
+      root.style.setProperty('--text-low',    sl[300].hex);
+      root.style.setProperty('--text-dim',    sl[400].hex);
+      root.style.setProperty('--text-faint',  sl[500].hex);
+      root.style.setProperty('--text-info',   sl[200].hex);
+
+      root.style.setProperty('--accent',      v[500].hex);
+      root.style.setProperty('--accent-bg',   v[800].hex);
+      root.style.setProperty('--accent-text', v[300].hex);
+
+      const h = v[500].hex.replace('#', '');
+      const r = parseInt(h.slice(0,2), 16);
+      const g = parseInt(h.slice(2,4), 16);
+      const b = parseInt(h.slice(4,6), 16);
+      root.style.setProperty('--focus-ring', `rgba(${r},${g},${b},0.2)`);
+    }
+
+    // ================================================================
     //  Mode switch
     // ================================================================
     function setMode(mode) {
@@ -533,8 +581,8 @@
         b.classList.toggle('active', b.dataset.mode === mode);
       });
       document.getElementById('modeHint').innerHTML = mode === 'balanced'
-        ? '500 = perzeptueller Mittelwert (L=0.50) &mdash; Palette ist symmetrisch um den hellsten Punkt des Farbtons'
-        : '500 = exakt deine Eingabefarbe &mdash; Helligkeit + Chroma werden gleichm&auml;&szlig;ig darum herum skaliert';
+        ? '500 = perceptual midpoint (L=0.50) &mdash; palette is symmetric around the brightest point of the hue'
+        : '500 = exactly your input color &mdash; lightness + chroma are scaled evenly around it';
       generate();
     }
 
@@ -544,7 +592,7 @@
     function generate() {
       const raw = document.getElementById('hexInput').value.replace(/#/g,'').trim();
       if (!/^[0-9a-fA-F]{6}$/.test(raw)) {
-        showToast('Bitte einen 6-stelligen Hex-Code eingeben');
+        showToast('Please enter a valid 6-digit hex code');
         return;
       }
       const hex = '#' + raw.toUpperCase();
@@ -559,22 +607,20 @@
       document.getElementById('oklchInfo').innerHTML =
         `OKLCH: <span>L=${bL.toFixed(4)}</span>  <span>C=${bC.toFixed(4)}</span>  <span>H=${bH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${sat}%${satLabel}</span>`;
 
-      const brand = generatePalette(hex, 1.0);
+      const vibrant = generatePalette(hex, 1.0);
       const slated = generatePalette(hex, 0.5);
+      const neutral = generatePalette(hex, 0.0);
 
-      // Style button with brand-500 color
-      const c500 = brand.find(r => r.step === 500);
-      const btn = document.getElementById('generateBtn');
-      btn.style.background = c500.hex;
-      btn.style.color = c500.L < 0.55 ? '#fff' : '#111';
+      const c500 = vibrant.find(r => r.step === 500);
 
-      renderStrip('strip-brand', brand);
-      renderStrip('strip-slated', slated);
-      renderTable('table-brand', brand);
+      updateTheme(vibrant, slated, neutral);
+      renderTable('table-vibrant', vibrant);
       renderTable('table-slated', slated);
-      renderSurfaces('surfaces-brand', brand);
-      renderSurfaces('surfaces-slated', slated);
-      renderCodeBlocks(brand, slated);
+      renderTable('table-neutral', neutral);
+      renderSurfaces('surfaces-vibrant', vibrant, slated, c500);
+      renderSurfaces('surfaces-slated', slated, slated, c500);
+      renderSurfaces('surfaces-neutral', neutral, neutral, c500);
+      renderCodeBlocks(vibrant, slated, neutral);
       document.getElementById('output').classList.add('visible');
     }
 
@@ -588,14 +634,26 @@
     });
     document.getElementById('hexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
     document.getElementById('hexInput').addEventListener('input', e => {
-      // Strip any # the user typed or pasted
       const cleaned = e.target.value.replace(/#/g, '');
       if (cleaned !== e.target.value) e.target.value = cleaned;
       if (/^[0-9a-fA-F]{6}$/.test(cleaned)) {
         document.getElementById('swatchPreview').style.background = '#' + cleaned;
         document.getElementById('colorPicker').value = '#' + cleaned;
+        generate();
       }
     });
+
+    // Variant tabs
+    document.querySelectorAll('.vtab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.vtab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.vpanel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.vpanel[data-vtab="${btn.dataset.vtab}"]`).classList.add('active');
+      });
+    });
+
+    // Code format tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -604,9 +662,10 @@
         document.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
       });
     });
+
     function copyValue(el) {
       navigator.clipboard.writeText(el.dataset.value).then(() => {
-        showToast('Kopiert: ' + el.dataset.value);
+        showToast('Copied: ' + el.dataset.value);
         el.classList.add('copied');
         setTimeout(() => el.classList.remove('copied'), 1200);
       });
@@ -616,7 +675,7 @@
       const text = block.innerText.replace(/^Copy\n?/, '').trim();
       const btn = block.querySelector('.copy-block-btn');
       navigator.clipboard.writeText(text).then(() => {
-        showToast('Block kopiert!');
+        showToast('Block copied!');
         btn.textContent = 'Copied!'; btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
       });
