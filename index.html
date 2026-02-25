@@ -1173,7 +1173,19 @@ function renderTable(tbodyId, palette, showHC = false) {
     }
 
     function copyShareLink() {
-      navigator.clipboard.writeText(window.location.href).then(() => showToast('Share link copied!'));
+      const url = window.location.href;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(() => showToast('Share link copied!'));
+      } else {
+        const el = document.createElement('textarea');
+        el.value = url;
+        el.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('Share link copied!');
+      }
     }
 
     function copyValue(el) {
