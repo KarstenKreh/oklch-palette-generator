@@ -112,24 +112,42 @@
 
     /* ── Chroma slider ────────────────────────────────────── */
     .chroma-section { margin-bottom: 1.75rem; }
-    .chroma-header { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; margin-bottom: 0.4rem; }
+    .chroma-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-bottom: 0.6rem;
+    }
+    .chroma-header-left { display: flex; flex-direction: column; gap: 0.2rem; }
     .chroma-title { font-size: 1.15rem; color: var(--text-hi); font-weight: 600; }
     .chroma-hint-text { font-size: 0.7rem; color: var(--text-faint); font-style: italic; }
-    .chroma-row {
-      display: flex; align-items: center; gap: 1rem;
-    }
-    .chroma-label { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+    .chroma-row { display: flex; align-items: center; }
+    .chroma-sublabels { display: flex; justify-content: space-between; margin-top: 0.35rem; }
+    .chroma-label { font-size: 0.75rem; color: var(--text-dim); white-space: nowrap; }
     .chroma-input {
-      background: transparent; border: none; color: var(--accent-text);
-      font-size: 1.1rem; font-family: 'Cascadia Code','Fira Code',monospace;
-      width: 4.5ch; outline: none; text-align: right; cursor: text;
+      background: var(--bg-surface); border: 1px solid var(--border-hi);
+      border-radius: 6px; color: var(--accent-text);
+      font-size: 1rem; font-family: 'Cascadia Code','Fira Code',monospace;
+      width: 7ch; padding: 0.3rem 0.5rem; outline: none;
+      text-align: center; cursor: text; flex-shrink: 0;
     }
-    .chroma-input:focus { color: #fff; }
+    .chroma-input:focus { border-color: var(--accent); color: #fff; }
+
+    /* ── Seed Colors header ───────────────────────────────── */
+    .seed-colors-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    .seed-colors-title { font-size: 1.15rem; color: var(--text-hi); font-weight: 600; }
+    .share-btn {
+      font-size: 0.7rem; padding: 0.3rem 0.75rem; border-radius: 5px;
+      border: 1px solid var(--accent); background: var(--accent-bg);
+      color: var(--accent-text); cursor: pointer; font-family: inherit; font-weight: 600;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .share-btn:hover { filter: brightness(1.15); }
     input[type=range] {
       flex: 1; -webkit-appearance: none; appearance: none;
-      height: 4px; border-radius: 2px;
+      height: 8px; border-radius: 4px;
       background: var(--border); outline: none; cursor: pointer;
-      transition: background 0.35s ease;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none; width: 16px; height: 16px;
@@ -158,7 +176,7 @@
     }
     @media (max-width: 900px)  { .surface-demo { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 500px)  { .surface-demo { grid-template-columns: 1fr; } }
-    .surface-panel { border-radius: 8px; padding: 1.1rem; min-height: 170px; }
+    .surface-panel { border-radius: 8px; padding: 1.1rem; }
     .surface-panel h3 { font-size: 0.8rem; margin-bottom: 0.6rem; font-weight: 600; }
     .surface-panel .mode-tag {
       font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -171,6 +189,37 @@
       display: inline-block; padding: 0.5rem 1.1rem; border-radius: 5px;
       font-size: 0.65rem; font-weight: 600; border: none; cursor: default;
       margin-top: 0.65rem; font-family: inherit; letter-spacing: 0.02em;
+    }
+
+    /* ── SVG Panel Animation ──────────────────────────────── */
+    .svg-anim-palette {
+      animation: svg-float-palette 5s ease-in-out 1 forwards;
+      transform-origin: 100px 120px;
+    }
+    .svg-anim-brush {
+      animation: svg-swipe-brush 4s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+      transform-origin: 0px 0px;
+    }
+    .svg-anim-splash {
+      animation: svg-splash-pop 4s ease-in-out 1 forwards;
+      transform-origin: 135px 120px;
+    }
+    @keyframes svg-float-palette {
+      0%   { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-4px) rotate(2deg); }
+    }
+    @keyframes svg-swipe-brush {
+      0%   { transform: translate(145px, 80px) rotate(-30deg) scale(1, 1); }
+      25%  { transform: translate(140px, 95px) rotate(-45deg) scale(1, 1); }
+      40%  { transform: translate(135px, 120px) rotate(-60deg) scale(1.15, 0.85); }
+      55%  { transform: translate(95px, 115px) rotate(-75deg) scale(1, 1); }
+      75%  { transform: translate(115px, 85px) rotate(-15deg) scale(1, 1); }
+      100% { transform: translate(145px, 80px) rotate(-30deg) scale(1, 1); }
+    }
+    @keyframes svg-splash-pop {
+      0%, 36%, 55%, 100% { transform: scale(0); opacity: 0; }
+      40%  { transform: scale(1); opacity: 1; }
+      48%  { transform: scale(1.6); opacity: 0; }
     }
 
     /* ── Detail table ─────────────────────────────────────── */
@@ -260,6 +309,10 @@
     (full chroma), a <strong>Slated</strong> variant (50&nbsp;% chroma) and a <strong>Grey</strong> variant (pure grey) in the OKLCH color space.
   </p>
 
+  <div class="seed-colors-header">
+    <span class="seed-colors-title">Seed Colors</span>
+    <button class="share-btn" onclick="copyShareLink()">Share Theme</button>
+  </div>
   <div class="color-inputs-container">
     <!-- Brand -->
     <div class="color-input-col">
@@ -314,14 +367,18 @@
     <!-- ── Chroma slider ───────────────────────────────────── -->
     <div class="chroma-section">
       <div class="chroma-header">
-        <span class="chroma-title">Surface Chroma</span>
-        <span class="chroma-hint-text">Sättigungsstärke für Hintergrund- und Surface-Tokens</span>
+        <div class="chroma-header-left">
+          <span class="chroma-title">Surface Chroma</span>
+          <span class="chroma-hint-text">Sättigungsstärke für Hintergrund- und Surface-Tokens</span>
+        </div>
+        <input type="text" class="chroma-input" id="chromaInput" value="25%" maxlength="5">
       </div>
       <div class="chroma-row">
-        <span class="chroma-label">Grey</span>
         <input type="range" id="chromaSlider" min="0" max="100" value="25">
+      </div>
+      <div class="chroma-sublabels">
+        <span class="chroma-label">Grey</span>
         <span class="chroma-label">Vibrant</span>
-        <input type="text" class="chroma-input" id="chromaInput" value="25%" maxlength="4">
       </div>
     </div>
 
@@ -386,6 +443,13 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    // ================================================================
+    //  Utilities
+    // ================================================================
+    function debounce(fn, ms) {
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
     // ================================================================
     //  OKLCH Color Math
     // ================================================================
@@ -582,43 +646,87 @@ function renderTable(tbodyId, palette, showHC = false) {
       }).join('');
     }
 
-    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, errorSwatch) {
+    function buildPanelSvg(idx) {
+      const fid = `svg-ps-${idx}`;
+      return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:130px;display:block;margin:0.5rem 0 0.75rem;">
+        <defs>
+          <filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="rgba(0,0,0,0.18)" flood-opacity="1"/>
+          </filter>
+        </defs>
+        <circle cx="100" cy="100" r="75" fill="var(--svg-bg)"/>
+        <g class="svg-anim-palette">
+          <path d="M 60 135 C 50 95, 100 90, 130 100 C 150 105, 155 140, 135 155 C 110 170, 70 175, 60 135 Z" fill="var(--svg-srf-2)" filter="url(#${fid})"/>
+          <path d="M 60 130 C 50 90, 100 85, 130 95 C 150 100, 155 135, 135 150 C 110 165, 70 170, 60 130 Z" fill="var(--svg-srf-1)"/>
+          <circle cx="75" cy="137" r="9" fill="var(--svg-srf-2)"/>
+          <circle cx="75" cy="135" r="9" fill="var(--svg-bg)"/>
+          <ellipse cx="78" cy="115" rx="8" ry="5" fill="var(--svg-brand-1)" transform="rotate(-15 78 115)"/>
+          <ellipse cx="98" cy="103" rx="8" ry="5.5" fill="var(--svg-brand-2)" transform="rotate(-5 98 103)"/>
+          <ellipse cx="118" cy="104" rx="9" ry="6" fill="var(--svg-brand-3)" transform="rotate(10 118 104)"/>
+          <ellipse cx="135" cy="120" rx="10" ry="6.5" fill="var(--svg-brand-4)" transform="rotate(30 135 120)"/>
+        </g>
+        <circle class="svg-anim-splash" cx="135" cy="120" r="10" fill="none" stroke="var(--svg-brand-4)" stroke-width="2"/>
+        <circle class="svg-anim-splash" cx="135" cy="120" r="14" fill="none" stroke="var(--svg-brand-2)" stroke-width="1.5" style="animation-delay:0.1s"/>
+        <g class="svg-anim-brush">
+          <path d="M -4 -35 Q -8 -60 -3 -80 Q 0 -85 3 -80 Q 8 -60 4 -35 Z" fill="var(--svg-srf-3)"/>
+          <path d="M 0 -35 Q -2 -60 0 -83 Q 6 -60 4 -35 Z" fill="var(--svg-srf-2)" opacity="0.4"/>
+          <rect x="-5" y="-35" width="10" height="12" rx="1" fill="var(--svg-srf-2)"/>
+          <line x1="-5" y1="-31" x2="5" y2="-31" stroke="var(--svg-srf-line)" stroke-width="1"/>
+          <line x1="-5" y1="-27" x2="5" y2="-27" stroke="var(--svg-srf-line)" stroke-width="1"/>
+          <path d="M -5 -23 C -10 -10 -5 -2 0 0 C 4 -2 8 -12 5 -23 Z" fill="var(--svg-bristle)"/>
+          <path d="M -3.5 -12 C -5 -5 -2 -1 0 0 C 2 -1 5 -5 3.5 -12 Q 0 -9 -3.5 -12 Z" fill="var(--svg-brand-4)"/>
+        </g>
+      </svg>`;
+    }
+
+    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, errorSwatch, brandPalette) {
       const s = {}; palette.forEach(r => s[r.step] = r);
       const n = {}; neutral.forEach(r => n[r.step] = r);
+      const v = {}; brandPalette.forEach(r => v[r.step] = r);
       const btnBg  = accentSwatch.hex;
       const btnFg  = accentSwatch.L < 0.55 ? '#fff' : '#111';
       const errBg  = errorSwatch.hex;
       const errFg  = errorSwatch.L < 0.55 ? '#fff' : '#111';
-      const textLight = s[850].hex;  // Normal light: softened text from bg palette
-      const textDark  = s[75].hex;   // Normal dark: light text from bg palette
+      const textLight = s[850].hex;
+      const textDark  = s[75].hex;
       const btns = `<div class="surface-btns">
           <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Primary</div>
           <div class="surface-btn" style="background:${errBg};color:${errFg}">Error</div>
         </div>`;
+
+      const lightVars = `--svg-bg:${s[200].hex};--svg-srf-1:${s[75].hex};--svg-srf-2:${s[300].hex};--svg-srf-3:${s[200].hex};--svg-srf-line:${s[400].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[300].hex};--svg-brand-2:${v[400].hex};--svg-brand-3:${v[500].hex};--svg-brand-4:${v[600].hex}`;
+      const darkVars  = `--svg-bg:${s[700].hex};--svg-srf-1:${s[500].hex};--svg-srf-2:${s[600].hex};--svg-srf-3:${s[500].hex};--svg-srf-line:${s[400].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[300].hex};--svg-brand-2:${v[400].hex};--svg-brand-3:${v[500].hex};--svg-brand-4:${v[600].hex}`;
+      const lhcVars   = `--svg-bg:${n[200].hex};--svg-srf-1:#ffffff;--svg-srf-2:${n[400].hex};--svg-srf-3:${n[300].hex};--svg-srf-line:${n[500].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[400].hex};--svg-brand-2:${v[500].hex};--svg-brand-3:${v[600].hex};--svg-brand-4:${v[700].hex}`;
+      const dhcVars   = `--svg-bg:${n[700].hex};--svg-srf-1:${n[500].hex};--svg-srf-2:${n[600].hex};--svg-srf-3:${n[500].hex};--svg-srf-line:${n[400].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[200].hex};--svg-brand-2:${v[300].hex};--svg-brand-3:${v[400].hex};--svg-brand-4:${v[500].hex}`;
+
       document.getElementById(containerId).innerHTML = `
-        <div class="surface-panel" style="background:${s[100].hex};color:${textLight}">
+        <div class="surface-panel" style="background:${s[100].hex};color:${textLight};${lightVars}">
           <div class="mode-tag">Light</div><h3>Surfaces (25&ndash;100)</h3>
+          ${buildPanelSvg(0)}
           <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
           ${btns}
         </div>
-        <div class="surface-panel" style="background:${s[875].hex};color:${textDark}">
+        <div class="surface-panel" style="background:${s[875].hex};color:${textDark};${darkVars}">
           <div class="mode-tag">Dark</div><h3>Surfaces (800&ndash;875)</h3>
+          ${buildPanelSvg(1)}
           <div class="surface-card" style="background:${s[800].hex}"><p><strong>Card (800)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
           ${btns}
         </div>
-        <div class="surface-panel" style="background:${n[75].hex};color:#000000">
+        <div class="surface-panel" style="background:${n[75].hex};color:#000000;${lhcVars}">
           <div class="mode-tag">Light &middot; High Contrast</div><h3>Neutral Surfaces</h3>
+          ${buildPanelSvg(2)}
           <div class="surface-card" style="background:#ffffff"><p><strong>Card (#fff)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[25].hex}"><p><strong>Elevated (n25)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[50].hex}"><p><strong>Active (n50)</strong> on BG (n75)</p></div>
           ${btns}
         </div>
-        <div class="surface-panel" style="background:#000000;color:#ffffff">
+        <div class="surface-panel" style="background:#000000;color:#ffffff;${dhcVars}">
           <div class="mode-tag">Dark &middot; High Contrast</div><h3>Neutral Surfaces</h3>
+          ${buildPanelSvg(3)}
           <div class="surface-card" style="background:${n[975].hex}"><p><strong>Card (n975)</strong> on BG (#000)</p></div>
           <div class="surface-card" style="background:${n[950].hex}"><p><strong>Elevated (n950)</strong> on BG (#000)</p></div>
           <div class="surface-card" style="background:${n[925].hex}"><p><strong>Active (n925)</strong> on BG (#000)</p></div>
@@ -895,6 +1003,9 @@ function renderTable(tbodyId, palette, showHC = false) {
 
       const c500brand = brand.find(r => r.step === 500);
       const c500error = error.find(r => r.step === 500);
+      const c500neutral = neutral.find(r => r.step === 500);
+      document.getElementById('chromaSlider').style.background =
+        `linear-gradient(to right, ${c500neutral.hex}, ${c500brand.hex})`;
       const neutralExtended = [
         { step: 0,    L: 1, C: 0, H: 0, hex: '#FFFFFF', css: 'oklch(1 0 0)' },
         ...neutral,
@@ -906,9 +1017,10 @@ function renderTable(tbodyId, palette, showHC = false) {
       renderTable('table-bg', bg);
       renderTable('table-error', error);
       renderTable('table-neutral', neutralExtended, true);
-      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, c500error);
+      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, c500error, brand);
       renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null);
       document.getElementById('output').classList.add('visible');
+      history.replaceState(null, '', '#' + encodeState());
     }
 
     // ================================================================
@@ -977,11 +1089,12 @@ function renderTable(tbodyId, palette, showHC = false) {
     });
 
     // Chroma slider
+    const debouncedGenerate = debounce(generate, 80);
     document.getElementById('chromaSlider').addEventListener('input', e => {
       chromaScale = e.target.value / 100;
       document.getElementById('chromaInput').value = e.target.value + '%';
       document.getElementById('chromaDescValue').textContent = e.target.value + '%';
-      generate();
+      debouncedGenerate();
     });
     document.getElementById('chromaInput').addEventListener('keydown', e => {
       if (e.key === 'Enter') e.target.blur();
@@ -1005,6 +1118,61 @@ function renderTable(tbodyId, palette, showHC = false) {
         group.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`).classList.add('active');
       });
     });
+
+    // ================================================================
+    //  URL State (share link)
+    // ================================================================
+    function encodeState() {
+      const brand = document.getElementById('hexInput').value.replace(/#/g,'').trim();
+      const bg    = bgColorHex.replace('#','');
+      const err   = errorColorHex.replace('#','');
+      const chroma = Math.round(chromaScale * 100);
+      return `${brand},${bg},${bgAutoMatch?1:0},${err},${errorAutoMatch?1:0},${chroma},${currentMode}`;
+    }
+
+    function applyStateFromHash() {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return;
+      const p = hash.split(',');
+      if (p.length < 7) return;
+      const [brand, bg, bgAuto, err, errAuto, chroma, mode] = p;
+      if (/^[0-9a-fA-F]{6}$/.test(brand)) {
+        document.getElementById('hexInput').value = brand.toUpperCase();
+        document.getElementById('colorPicker').value = '#' + brand;
+        document.getElementById('swatchPreview').style.background = '#' + brand;
+      }
+      bgAutoMatch = bgAuto === '1';
+      document.getElementById('bgAutoBtn').classList.toggle('active', bgAutoMatch);
+      if (/^[0-9a-fA-F]{6}$/.test(bg)) {
+        bgColorHex = '#' + bg.toUpperCase();
+        document.getElementById('bgHexInput').value = bg.toUpperCase();
+        document.getElementById('bgColorPicker').value = '#' + bg;
+        document.getElementById('bgSwatchPreview').style.background = '#' + bg;
+      }
+      errorAutoMatch = errAuto === '1';
+      document.getElementById('errorAutoBtn').classList.toggle('active', errorAutoMatch);
+      if (/^[0-9a-fA-F]{6}$/.test(err)) {
+        errorColorHex = '#' + err.toUpperCase();
+        document.getElementById('errorHexInput').value = err.toUpperCase();
+        document.getElementById('errorColorPicker').value = '#' + err;
+        document.getElementById('errorSwatchPreview').style.background = '#' + err;
+      }
+      const chromaVal = parseInt(chroma);
+      if (!isNaN(chromaVal) && chromaVal >= 0 && chromaVal <= 100) {
+        chromaScale = chromaVal / 100;
+        document.getElementById('chromaSlider').value = chromaVal;
+        document.getElementById('chromaInput').value = chromaVal + '%';
+      }
+      if (mode === 'balanced' || mode === 'exact') {
+        currentMode = mode;
+        document.querySelectorAll('.mode-option').forEach(btn =>
+          btn.classList.toggle('active', btn.dataset.mode === mode));
+      }
+    }
+
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => showToast('Share link copied!'));
+    }
 
     function copyValue(el) {
       navigator.clipboard.writeText(el.dataset.value).then(() => {
@@ -1031,6 +1199,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
     }
 
+    applyStateFromHash();
     generate();
   </script>
 </body>
