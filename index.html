@@ -85,22 +85,33 @@
     .mode-option.active { background: var(--accent-bg); color: #fff; }
     .mode-hint { font-size: 0.7rem; color: var(--text-faint); font-style: italic; }
 
-    /* ── Variant tabs ─────────────────────────────────────── */
-    .vtab-bar {
-      display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.75rem;
-      transition: border-color 0.35s ease;
+    /* ── Chroma slider ────────────────────────────────────── */
+    .chroma-row {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem;
     }
-    .vtab-btn {
-      padding: 0.7rem 2rem; font-size: 0.9rem; font-weight: 600;
-      background: transparent; border: none;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-      color: var(--text-faint); cursor: pointer; font-family: inherit;
-      transition: color 0.15s, border-color 0.15s;
+    .chroma-label { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+    .chroma-value {
+      font-size: 0.8rem; color: var(--accent-text);
+      font-family: 'Cascadia Code','Fira Code',monospace;
+      min-width: 3.5ch; text-align: right;
     }
-    .vtab-btn:hover { color: var(--text-mid); }
-    .vtab-btn.active { color: #fff; border-bottom-color: var(--accent); }
-    .vpanel { display: none; }
-    .vpanel.active { display: block; }
+    input[type=range] {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; border-radius: 2px;
+      background: var(--border); outline: none; cursor: pointer;
+      transition: background 0.35s ease;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--accent);
+      border: 2px solid var(--bg-page);
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg-page);
+      transition: background 0.35s ease;
+    }
 
     /* ── Section titles ───────────────────────────────────── */
     .section-title {
@@ -238,39 +249,30 @@
 
   <div id="output">
 
-    <!-- ── Variant tab bar ─────────────────────────────────── -->
-    <div class="vtab-bar">
-      <button class="vtab-btn active" data-vtab="vibrant">Vibrant</button>
-      <button class="vtab-btn" data-vtab="slated">Slated</button>
-      <button class="vtab-btn" data-vtab="grey">Grey</button>
+    <!-- ── Chroma slider ───────────────────────────────────── -->
+    <div class="chroma-row">
+      <span class="chroma-label">Grey</span>
+      <input type="range" id="chromaSlider" min="0" max="100" value="25">
+      <span class="chroma-label">Vibrant</span>
+      <span class="chroma-value" id="chromaValue">25%</span>
     </div>
 
-    <!-- ── Vibrant panel ───────────────────────────────────── -->
-    <div class="vpanel active" data-vtab="vibrant">
-      <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
-      <div class="surface-demo" id="surfaces-vibrant"></div>
-      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-        <tbody id="table-vibrant"></tbody>
-      </table>
-    </div>
+    <!-- ── Surface demo ────────────────────────────────────── -->
+    <div class="surface-demo" id="surfaces-demo"></div>
 
-    <!-- ── Slated panel ────────────────────────────────────── -->
-    <div class="vpanel" data-vtab="slated">
-      <p class="section-desc">50% chroma &mdash; muted, ideal for background and container colors</p>
-      <div class="surface-demo" id="surfaces-slated"></div>
-      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-        <tbody id="table-slated"></tbody>
-      </table>
-    </div>
+    <!-- ── Brand Tokens ────────────────────────────────────── -->
+    <h2 class="section-title first">Brand Tokens</h2>
+    <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
+    <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+      <tbody id="table-brand"></tbody>
+    </table>
 
-    <!-- ── Grey panel ──────────────────────────────────────── -->
-    <div class="vpanel" data-vtab="grey">
-      <p class="section-desc">No chroma &mdash; neutral greys for backgrounds and containers</p>
-      <div class="surface-demo" id="surfaces-neutral"></div>
-      <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-        <tbody id="table-neutral"></tbody>
-      </table>
-    </div>
+    <!-- ── Background Tokens ───────────────────────────────── -->
+    <h2 class="section-title">Background Tokens</h2>
+    <p class="section-desc">Surfaces &middot; containers &mdash; <span id="chromaDescValue">25%</span> chroma</p>
+    <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+      <tbody id="table-bg"></tbody>
+    </table>
 
     <!-- ── Code blocks (always visible) ───────────────────── -->
     <h2 class="section-title">Export</h2>
@@ -371,6 +373,7 @@
     const L_WHITE = 0.98, L_BLACK = 0.10;
 
     let currentMode = 'balanced'; // 'balanced' or 'exact'
+    let chromaScale = 0.25;      // background palette chroma (0–1)
 
     function generatePalette(hex, chromaScale = 1.0) {
       const [bL, bC, bH] = hexToOklch(hex);
@@ -497,25 +500,22 @@ function renderTable(tbodyId, palette) {
         </div>`;
     }
 
-    function renderCodeBlocks(vp, sp, np) {
+    function renderCodeBlocks(brand, bg) {
+      const pct = Math.round(chromaScale * 100);
       const oklchBlock = document.getElementById('code-oklch');
       const btn1 = oklchBlock.querySelector('.copy-block-btn').outerHTML;
-      let o = `<span class="cmt">/* Vibrant Tonal Palette — OKLCH */</span>\n:root {\n`;
-      o += fmtSec(vp, 'vibrant', 'css');
-      o += `\n  <span class="cmt">/* Slated — 50% Chroma */</span>\n`;
-      o += fmtSec(sp, 'slated', 'css');
-      o += `\n  <span class="cmt">/* Grey — 0% Chroma */</span>\n`;
-      o += fmtSec(np, 'grey', 'css');
+      let o = `<span class="cmt">/* Brand Tokens — vibrant */</span>\n:root {\n`;
+      o += fmtSec(brand, 'brand', 'css');
+      o += `\n  <span class="cmt">/* Background Tokens — ${pct}% chroma */</span>\n`;
+      o += fmtSec(bg, 'bg', 'css');
       o += `}`; oklchBlock.innerHTML = btn1 + o;
 
       const hexBlock = document.getElementById('code-hex');
       const btn2 = hexBlock.querySelector('.copy-block-btn').outerHTML;
-      let h = `<span class="cmt">/* Vibrant Tonal Palette — Hex Fallback */</span>\n:root {\n`;
-      h += fmtSec(vp, 'vibrant', 'hex');
-      h += `\n  <span class="cmt">/* Slated — 50% Chroma */</span>\n`;
-      h += fmtSec(sp, 'slated', 'hex');
-      h += `\n  <span class="cmt">/* Grey — 0% Chroma */</span>\n`;
-      h += fmtSec(np, 'grey', 'hex');
+      let h = `<span class="cmt">/* Brand Tokens — vibrant (Hex) */</span>\n:root {\n`;
+      h += fmtSec(brand, 'brand', 'hex');
+      h += `\n  <span class="cmt">/* Background Tokens — ${pct}% chroma (Hex) */</span>\n`;
+      h += fmtSec(bg, 'bg', 'hex');
       h += `}`; hexBlock.innerHTML = btn2 + h;
     }
 
@@ -607,20 +607,18 @@ function renderTable(tbodyId, palette) {
       document.getElementById('oklchInfo').innerHTML =
         `OKLCH: <span>L=${bL.toFixed(4)}</span>  <span>C=${bC.toFixed(4)}</span>  <span>H=${bH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${sat}%${satLabel}</span>`;
 
-      const vibrant = generatePalette(hex, 1.0);
-      const slated = generatePalette(hex, 0.5);
-      const neutral = generatePalette(hex, 0.0);
+      const brand   = generatePalette(hex, 1.0);
+      const bg      = generatePalette(hex, chromaScale);
+      const neutral = generatePalette(hex, 0.0);  // for page chrome
+      const slated  = generatePalette(hex, 0.5);  // for theme text + surface text
 
-      const c500 = vibrant.find(r => r.step === 500);
+      const c500brand = brand.find(r => r.step === 500);
 
-      updateTheme(vibrant, slated, neutral);
-      renderTable('table-vibrant', vibrant);
-      renderTable('table-slated', slated);
-      renderTable('table-neutral', neutral);
-      renderSurfaces('surfaces-vibrant', vibrant, slated, c500);
-      renderSurfaces('surfaces-slated', slated, slated, c500);
-      renderSurfaces('surfaces-neutral', neutral, neutral, c500);
-      renderCodeBlocks(vibrant, slated, neutral);
+      updateTheme(brand, slated, neutral);
+      renderTable('table-brand', brand);
+      renderTable('table-bg', bg);
+      renderSurfaces('surfaces-demo', bg, slated, c500brand);
+      renderCodeBlocks(brand, bg);
       document.getElementById('output').classList.add('visible');
     }
 
@@ -643,14 +641,12 @@ function renderTable(tbodyId, palette) {
       }
     });
 
-    // Variant tabs
-    document.querySelectorAll('.vtab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.vtab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.vpanel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelector(`.vpanel[data-vtab="${btn.dataset.vtab}"]`).classList.add('active');
-      });
+    // Chroma slider
+    document.getElementById('chromaSlider').addEventListener('input', e => {
+      chromaScale = e.target.value / 100;
+      document.getElementById('chromaValue').textContent = e.target.value + '%';
+      document.getElementById('chromaDescValue').textContent = e.target.value + '%';
+      generate();
     });
 
     // Code format tabs
