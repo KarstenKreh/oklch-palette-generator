@@ -312,6 +312,40 @@
 
     #output { display: none; }
     #output.visible { display: block; }
+
+    /* ── Mobile ───────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      body { padding: 1.25rem 1rem; }
+      h1 { font-size: 1.3rem; }
+
+      /* Seed Colors / Share */
+      .seed-colors-header { margin-bottom: 0.5rem; }
+
+      /* Color inputs: stack vertically */
+      .color-inputs-container { grid-template-columns: 1fr; }
+      .color-input-col:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border-hi); }
+      .color-input-col { padding: 0.75rem 1rem; }
+      .input-info { font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* Mode switch: full width */
+      .controls-right { width: 100%; }
+      .mode-switch { width: 100%; }
+      .mode-option { flex: 1; text-align: center; }
+
+      /* Tabs: smaller padding, allow wrap */
+      .tab-bar { flex-wrap: wrap; }
+      .tab-btn { padding: 0.4rem 0.75rem; font-size: 0.7rem; }
+
+      /* Tables: horizontal scroll */
+      .tab-content { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 520px; }
+
+      /* Surface demo: reduce SVG height */
+      [style*="height:130px"] { height: 90px !important; }
+
+      /* Semantic info: allow wrap */
+      .semantic-info { flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
