@@ -1236,8 +1236,22 @@ function renderTable(tbodyId, palette, showHC = false) {
       }
     }
 
+    function copyToClipboard(text, onSuccess) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(onSuccess);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        onSuccess();
+      }
+    }
     function copyValue(el) {
-      navigator.clipboard.writeText(el.dataset.value).then(() => {
+      copyToClipboard(el.dataset.value, () => {
         showToast('Copied: ' + el.dataset.value);
         el.classList.add('copied');
         setTimeout(() => el.classList.remove('copied'), 1200);
@@ -1247,7 +1261,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       const block = document.getElementById(id);
       const text = block.innerText.replace(/^Copy\n?/, '').trim();
       const btn = block.querySelector('.copy-block-btn');
-      navigator.clipboard.writeText(text).then(() => {
+      copyToClipboard(text, () => {
         showToast('Block copied!');
         btn.textContent = 'Copied!'; btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
