@@ -795,13 +795,13 @@
       return accentPalettes.map(entry => {
         const a = {}; entry.palette.forEach(r => a[r.step] = r);
         const as = {}; (entry.slatedPalette || entry.palette).forEach(r => as[r.step] = r);
-        let bgColor, borderColor, textColor;
-        if (panelType === 'light')    { bgColor = as[100].hex; borderColor = a[600].hex; textColor = a[600].hex; }
-        else if (panelType === 'dark') { bgColor = as[850].hex; borderColor = a[400].hex; textColor = a[400].hex; }
-        else if (panelType === 'light-hc') { bgColor = '#ffffff'; borderColor = a[600].hex; textColor = a[600].hex; }
-        else                          { bgColor = '#000000'; borderColor = a[300].hex; textColor = a[300].hex; }
+        let bgColor, borderColor, textColor, dotColor;
+        if (panelType === 'light')         { bgColor = as[100].hex; borderColor = as[300].hex; textColor = a[600].hex; dotColor = a[500].hex; }
+        else if (panelType === 'dark')     { bgColor = as[850].hex; borderColor = as[700].hex; textColor = a[300].hex; dotColor = a[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = as[200].hex; textColor = a[700].hex; dotColor = a[500].hex; }
+        else                               { bgColor = '#000000';   borderColor = as[800].hex; textColor = a[200].hex; dotColor = a[300].hex; }
         return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
-          <div class="accent-mini-card-dot" style="background:${borderColor}"></div>
+          <div class="accent-mini-card-dot" style="background:${dotColor}"></div>
           ${entry.name}
         </div>`;
       }).join('');
@@ -948,13 +948,13 @@ function renderTable(tbodyId, palette, showHC = false) {
           ${buildAccentBtns(accentPalettes, panelType)}
         </div>`;
       const buildErrorMiniCard = (panelType) => {
-        let bgColor, borderColor, textColor;
-        if (panelType === 'light')    { bgColor = es[100].hex; borderColor = e[600].hex;  textColor = e[600].hex; }
-        else if (panelType === 'dark') { bgColor = es[850].hex; borderColor = e[400].hex;  textColor = e[400].hex; }
-        else if (panelType === 'light-hc') { bgColor = '#ffffff'; borderColor = e[600].hex; textColor = e[600].hex; }
-        else                          { bgColor = '#000000'; borderColor = e[300].hex;  textColor = e[300].hex; }
+        let bgColor, borderColor, textColor, dotColor;
+        if (panelType === 'light')         { bgColor = es[100].hex; borderColor = es[300].hex; textColor = e[600].hex; dotColor = e[500].hex; }
+        else if (panelType === 'dark')     { bgColor = es[850].hex; borderColor = es[700].hex; textColor = e[300].hex; dotColor = e[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = es[200].hex; textColor = e[700].hex; dotColor = e[500].hex; }
+        else                               { bgColor = '#000000';   borderColor = es[800].hex; textColor = e[200].hex; dotColor = e[300].hex; }
         return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
-          <div class="accent-mini-card-dot" style="background:${borderColor}"></div>Error
+          <div class="accent-mini-card-dot" style="background:${dotColor}"></div>Error
         </div>`;
       };
 
