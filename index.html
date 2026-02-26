@@ -1161,12 +1161,47 @@ function renderTable(tbodyId, palette, showHC = false) {
         ['sidebar-ring',                 'surface', 600],
       ]);
 
-      let accentNote = '';
-      if (accentPalettes.length > 0) {
-        const names = accentPalettes.map(e => `--color-${e.cssName}-{step}`).join(', ');
-        accentNote = `\n<span class="cmt">/* Extra Accent Primitives available:\n   ${names} */</span>`;
-      }
-      return `<span class="cmt">/* Semantic Tokens — shadcn/ui compatible */</span>\n` + root + '\n' + dark + accentNote;
+      let accentBlocks = '';
+      accentPalettes.forEach(entry => {
+        const n = entry.cssName;
+        const accentRoot = block(`:root`, [
+          [null,                           null, `${entry.name} — light`],
+          [`${n}`,                         n, 600],
+          [`${n}-foreground`,              n, 50],
+          [null,                           null, 'Secondary'],
+          [`${n}-secondary`,               n, 200],
+          [`${n}-secondary-foreground`,    n, 900],
+          [null,                           null, 'Muted / Subtle'],
+          [`${n}-muted`,                   `${n}-surface`, 75],
+          [`${n}-muted-foreground`,        `${n}-surface`, 700],
+          [`${n}-subtle`,                  n, 100],
+          [`${n}-subtle-foreground`,       n, 950],
+          [null,                           null, 'Border / Input / Ring'],
+          [`${n}-border`,                  `${n}-surface`, 300],
+          [`${n}-input`,                   `${n}-surface`, 300],
+          [`${n}-ring`,                    `${n}-surface`, 400],
+        ]);
+        const accentDark = block(`.dark`, [
+          [null,                           null, `${entry.name} — dark`],
+          [`${n}`,                         n, 400],
+          [`${n}-foreground`,              n, 975],
+          [null,                           null, 'Secondary'],
+          [`${n}-secondary`,               n, 800],
+          [`${n}-secondary-foreground`,    n, 100],
+          [null,                           null, 'Muted / Subtle'],
+          [`${n}-muted`,                   `${n}-surface`, 825],
+          [`${n}-muted-foreground`,        `${n}-surface`, 300],
+          [`${n}-subtle`,                  n, 800],
+          [`${n}-subtle-foreground`,       n, 50],
+          [null,                           null, 'Border / Input / Ring'],
+          [`${n}-border`,                  `${n}-surface`, 700],
+          [`${n}-input`,                   `${n}-surface`, 700],
+          [`${n}-ring`,                    `${n}-surface`, 600],
+        ]);
+        accentBlocks += `\n<span class="cmt">/* ${entry.name} Accent — semantic tokens */</span>\n` + accentRoot + '\n' + accentDark;
+      });
+
+      return `<span class="cmt">/* Semantic Tokens — shadcn/ui compatible */</span>\n` + root + '\n' + dark + accentBlocks;
     }
 
     function fmtSec(palette, prefix, mode) {
