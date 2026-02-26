@@ -139,13 +139,24 @@
     }
     .seed-colors-title { font-size: 1.15rem; color: var(--text-hi); font-weight: 600; }
     .share-btn {
-      position: fixed; top: 1rem; right: 1.5rem; z-index: 50;
       font-size: 0.8rem; padding: 0.45rem 1.1rem; border-radius: 6px;
       border: 1px solid var(--accent); background: var(--accent-bg);
       color: var(--accent-text); cursor: pointer; font-family: inherit; font-weight: 600;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
     .share-btn:hover { filter: brightness(1.15); }
+    .add-accent-btn {
+      font-size: 0.7rem; padding: 0.3rem 0.75rem; border-radius: 5px;
+      border: 1px solid var(--accent); background: var(--accent-bg);
+      color: var(--accent-text); cursor: pointer; font-family: inherit; font-weight: 600;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .add-accent-btn:hover { filter: brightness(1.15); }
+    .add-accent-btn:disabled { opacity: 0.4; cursor: default; filter: none; }
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
     input[type=range] {
       flex: 1; -webkit-appearance: none; appearance: none;
       height: 8px; border-radius: 4px;
@@ -408,14 +419,16 @@
 </head>
 <body>
 
-  <h1>OKLCH Theme Generator</h1>
+  <div class="page-header">
+    <h1>OKLCH Theme Generator</h1>
+    <button class="share-btn" onclick="copyShareLink()">Share Theme</button>
+  </div>
   <p class="subtitle">
     Define <strong>Brand</strong>, <strong>Surface</strong> and <strong>Error</strong> seed colors &rarr; generates perceptually uniform <strong>Primitive Token</strong> scales in the OKLCH color space, maps them to ready-to-use <strong>Semantic Tokens</strong> (shadcn/ui compatible), and previews your theme across Light, Dark and High Contrast modes.
   </p>
 
   <div class="seed-colors-header">
     <span class="seed-colors-title">Seed Colors</span>
-    <button class="share-btn" onclick="copyShareLink()">Share Theme</button>
   </div>
   <div class="color-inputs-container">
     <!-- Brand -->
@@ -457,7 +470,7 @@
   </div>
   <div class="accent-inputs-header">
     <span class="seed-colors-title" style="font-size:0.95rem">Additional Accents</span>
-    <button class="share-btn" id="addAccentBtn" onclick="addAccent()">+ Add Accent</button>
+    <button class="add-accent-btn" id="addAccentBtn" onclick="addAccent()">+ Add Accent</button>
   </div>
   <div id="accentInputsContainer"></div>
   <div class="controls-right">
