@@ -185,11 +185,11 @@
     }
     .surface-card { border-radius: 12px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
     .surface-card p { font-size: 0.65rem; opacity: 0.85; }
-    .surface-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .surface-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.65rem; }
     .surface-btn {
       display: inline-block; padding: 0.5rem 1.1rem; border-radius: 5px;
       font-size: 0.65rem; font-weight: 600; border: none; cursor: default;
-      margin-top: 0.65rem; font-family: inherit; letter-spacing: 0.02em;
+      font-family: inherit; letter-spacing: 0.02em;
     }
 
     /* ── SVG Panel Animation ──────────────────────────────── */
@@ -425,7 +425,6 @@
         <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
         <input type="text" id="hexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
       </div>
-      <div class="input-info" id="oklchInfo"></div>
     </div>
     <!-- Surface -->
     <div class="color-input-col">
@@ -439,7 +438,6 @@
         <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
         <input type="text" id="bgHexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
       </div>
-      <div class="input-info" id="bgOklchInfo"></div>
     </div>
     <!-- Error -->
     <div class="color-input-col">
@@ -453,7 +451,6 @@
         <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
         <input type="text" id="errorHexInput" value="CC3333" placeholder="CC3333" maxlength="7" spellcheck="false">
       </div>
-      <div class="input-info" id="errorOklchInfo"></div>
     </div>
   </div>
   <div class="accent-inputs-header">
@@ -688,15 +685,28 @@
       const addBtn = document.getElementById('addAccentBtn');
       if (addBtn) addBtn.disabled = extraAccents.length >= 3;
 
+      if (extraAccents.length === 0) {
+        container.className = '';
+        container.style.cssText = 'display:none';
+        container.innerHTML = '';
+        return;
+      }
+
+      container.className = 'color-inputs-container';
+      container.style.cssText = `grid-template-columns: repeat(${extraAccents.length}, 1fr); margin-top: 0.5rem`;
+
       container.innerHTML = extraAccents.map((a, i) => `
-        <div class="accent-row" data-idx="${i}">
-          <div class="accent-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
-          <input type="color" id="accentPicker${i}" value="${a.hex}" style="position:absolute;opacity:0;width:0;height:0">
-          <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
-          <input type="text" class="accent-hex-input" id="accentHex${i}" value="${a.hex.replace('#','')}" maxlength="6" spellcheck="false">
-          <span style="color:var(--text-dim);font-size:0.75rem;padding:0 0.1rem">|</span>
-          <input type="text" class="accent-name-input" id="accentName${i}" value="${a.name}" placeholder="Name" maxlength="20">
-          <button class="accent-delete-btn" onclick="removeAccent(${i})">Remove</button>
+        <div class="color-input-col">
+          <div class="color-col-header">
+            <input type="text" class="accent-name-input" id="accentName${i}" value="${a.name}" placeholder="Name" maxlength="20">
+            <button class="accent-delete-btn" onclick="removeAccent(${i})">✕</button>
+          </div>
+          <div class="color-input-wrapper">
+            <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
+            <input type="color" id="accentPicker${i}" value="${a.hex}" style="position:absolute;opacity:0;width:0;height:0">
+            <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+            <input type="text" class="accent-hex-input" id="accentHex${i}" value="${a.hex.replace('#','')}" maxlength="6" spellcheck="false">
+          </div>
         </div>`).join('');
 
       extraAccents.forEach((a, i) => {
@@ -784,16 +794,12 @@
       if (!accentPalettes || accentPalettes.length === 0) return '';
       return accentPalettes.map(entry => {
         const a = {}; entry.palette.forEach(r => a[r.step] = r);
+        const as = {}; (entry.slatedPalette || entry.palette).forEach(r => as[r.step] = r);
         let bgColor, borderColor, textColor;
-        if (panelType === 'light') {
-          bgColor = a[100].hex; borderColor = a[600].hex; textColor = a[600].hex;
-        } else if (panelType === 'dark') {
-          bgColor = a[850].hex; borderColor = a[400].hex; textColor = a[400].hex;
-        } else if (panelType === 'light-hc') {
-          bgColor = '#ffffff'; borderColor = a[600].hex; textColor = a[600].hex;
-        } else {
-          bgColor = '#000000'; borderColor = a[300].hex; textColor = a[300].hex;
-        }
+        if (panelType === 'light')    { bgColor = as[100].hex; borderColor = a[600].hex; textColor = a[600].hex; }
+        else if (panelType === 'dark') { bgColor = as[850].hex; borderColor = a[400].hex; textColor = a[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff'; borderColor = a[600].hex; textColor = a[600].hex; }
+        else                          { bgColor = '#000000'; borderColor = a[300].hex; textColor = a[300].hex; }
         return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
           <div class="accent-mini-card-dot" style="background:${borderColor}"></div>
           ${entry.name}
@@ -922,15 +928,18 @@ function renderTable(tbodyId, palette, showHC = false) {
       </svg>`;
     }
 
-    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, errorSwatch, brandPalette, accentPalettes) {
+    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, brandPalette, accentPalettes, errorPalette, errorSlatedPalette) {
       accentPalettes = accentPalettes || [];
       const s = {}; palette.forEach(r => s[r.step] = r);
       const n = {}; neutral.forEach(r => n[r.step] = r);
       const v = {}; brandPalette.forEach(r => v[r.step] = r);
+      const e = {}; errorPalette.forEach(r => e[r.step] = r);
+      const es = {}; errorSlatedPalette.forEach(r => es[r.step] = r);
       const btnBg  = accentSwatch.hex;
       const btnFg  = accentSwatch.L < 0.55 ? '#fff' : '#111';
-      const errBg  = errorSwatch.hex;
-      const errFg  = errorSwatch.L < 0.55 ? '#fff' : '#111';
+      const errSwatch500 = e[500];
+      const errBg  = errSwatch500.hex;
+      const errFg  = errSwatch500.L < 0.55 ? '#fff' : '#111';
       const textLight = s[850].hex;
       const textDark  = s[75].hex;
       const makeBtns = (panelType) => `<div class="surface-btns">
@@ -938,6 +947,16 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-btn" style="background:${errBg};color:${errFg}">Error</div>
           ${buildAccentBtns(accentPalettes, panelType)}
         </div>`;
+      const buildErrorMiniCard = (panelType) => {
+        let bgColor, borderColor, textColor;
+        if (panelType === 'light')    { bgColor = es[100].hex; borderColor = e[600].hex;  textColor = e[600].hex; }
+        else if (panelType === 'dark') { bgColor = es[850].hex; borderColor = e[400].hex;  textColor = e[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff'; borderColor = e[600].hex; textColor = e[600].hex; }
+        else                          { bgColor = '#000000'; borderColor = e[300].hex;  textColor = e[300].hex; }
+        return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
+          <div class="accent-mini-card-dot" style="background:${borderColor}"></div>Error
+        </div>`;
+      };
 
       const lightVars = `--svg-bg:${s[200].hex};--svg-srf-1:${s[75].hex};--svg-srf-2:${s[300].hex};--svg-srf-3:${s[200].hex};--svg-srf-line:${s[400].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[300].hex};--svg-brand-2:${v[400].hex};--svg-brand-3:${v[500].hex};--svg-brand-4:${v[600].hex}`;
       const darkVars  = `--svg-bg:${s[700].hex};--svg-srf-1:${s[500].hex};--svg-srf-2:${s[600].hex};--svg-srf-3:${s[500].hex};--svg-srf-line:${s[400].hex};--svg-bristle:#fdfcfb;--svg-brand-1:${v[300].hex};--svg-brand-2:${v[400].hex};--svg-brand-3:${v[500].hex};--svg-brand-4:${v[600].hex}`;
@@ -952,6 +971,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
           ${makeBtns('light')}
+          ${buildErrorMiniCard('light')}
           ${buildAccentMiniCards(accentPalettes, 'light')}
         </div>
         <div class="surface-panel" style="background:${s[875].hex};color:${textDark};${darkVars}">
@@ -961,6 +981,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
           ${makeBtns('dark')}
+          ${buildErrorMiniCard('dark')}
           ${buildAccentMiniCards(accentPalettes, 'dark')}
         </div>
         <div class="surface-panel" style="background:${n[75].hex};color:#000000;${lhcVars}">
@@ -970,6 +991,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${n[25].hex}"><p><strong>Elevated (n25)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[50].hex}"><p><strong>Active (n50)</strong> on BG (n75)</p></div>
           ${makeBtns('light-hc')}
+          ${buildErrorMiniCard('light-hc')}
           ${buildAccentMiniCards(accentPalettes, 'light-hc')}
         </div>
         <div class="surface-panel" style="background:#000000;color:#ffffff;${dhcVars}">
@@ -979,6 +1001,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${n[950].hex}"><p><strong>Elevated (n950)</strong> on BG (#000)</p></div>
           <div class="surface-card" style="background:${n[925].hex}"><p><strong>Active (n925)</strong> on BG (#000)</p></div>
           ${makeBtns('dark-hc')}
+          ${buildErrorMiniCard('dark-hc')}
           ${buildAccentMiniCards(accentPalettes, 'dark-hc')}
         </div>`;
     }
@@ -1005,6 +1028,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       o += cmt('Neutral') + fmtSec(neutralExt, 'neutral', 'css');
       accentPalettes.forEach(entry => {
         o += cmt(entry.name) + fmtSec(entry.palette, entry.cssName, 'css');
+        o += cmt(`${entry.name} Surface — ${pct}% chroma`) + fmtSec(entry.slatedPalette, entry.cssName + '-surface', 'css');
       });
       o += `}`; oklchBlock.innerHTML = btn1 + o;
 
@@ -1019,6 +1043,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       h += cmt('Neutral') + fmtSec(neutralExt, 'neutral', 'hex');
       accentPalettes.forEach(entry => {
         h += cmt(entry.name) + fmtSec(entry.palette, entry.cssName, 'hex');
+        h += cmt(`${entry.name} Surface — ${pct}% chroma`) + fmtSec(entry.slatedPalette, entry.cssName + '-surface', 'hex');
       });
       h += `}`; hexBlock.innerHTML = btn2 + h;
 
@@ -1213,12 +1238,6 @@ function renderTable(tbodyId, palette, showHC = false) {
       document.getElementById('swatchPreview').style.background = hex;
       document.getElementById('colorPicker').value = hex;
 
-      const inputMaxC = maxChromaInGamut(bL, bH);
-      const sat = inputMaxC > 0.001 ? (bC / inputMaxC * 100).toFixed(0) : 0;
-      const satLabel = sat < 5 ? ' (neutral)' : sat < 30 ? ' (muted)' : '';
-      document.getElementById('oklchInfo').innerHTML =
-        `OKLCH: <span>L=${bL.toFixed(4)}</span>  <span>C=${bC.toFixed(4)}</span>  <span>H=${bH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${sat}%${satLabel}</span>`;
-
       // Surface auto-match: mirror primary
       if (bgAutoMatch) {
         bgColorHex = hex;
@@ -1227,13 +1246,6 @@ function renderTable(tbodyId, palette, showHC = false) {
         document.getElementById('bgColorPicker').value = hex;
       }
 
-      // Background OKLCH info
-      const [bgL, bgC, bgH] = hexToOklch(bgColorHex);
-      const bgMaxC = maxChromaInGamut(bgL, bgH);
-      const bgSat = bgMaxC > 0.001 ? (bgC / bgMaxC * 100).toFixed(0) : 0;
-      const bgSatLabel = bgSat < 5 ? ' (neutral)' : bgSat < 30 ? ' (muted)' : '';
-      document.getElementById('bgOklchInfo').innerHTML =
-        `OKLCH: <span>L=${bgL.toFixed(4)}</span>  <span>C=${bgC.toFixed(4)}</span>  <span>H=${bgH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${bgSat}%${bgSatLabel}</span>`;
       document.getElementById('bgColorNote').textContent =
         bgColorHex.toLowerCase() !== hex.toLowerCase() ? ` · ${bgColorHex}` : '';
 
@@ -1244,12 +1256,6 @@ function renderTable(tbodyId, palette, showHC = false) {
         document.getElementById('errorSwatchPreview').style.background = errorColorHex;
         document.getElementById('errorColorPicker').value = errorColorHex;
       }
-      const [eL, eC, eH] = hexToOklch(errorColorHex);
-      const eMaxC = maxChromaInGamut(eL, eH);
-      const eSat = eMaxC > 0.001 ? (eC / eMaxC * 100).toFixed(0) : 0;
-      const eSatLabel = eSat < 5 ? ' (neutral)' : eSat < 30 ? ' (muted)' : '';
-      document.getElementById('errorOklchInfo').innerHTML =
-        `OKLCH: <span>L=${eL.toFixed(4)}</span>  <span>C=${eC.toFixed(4)}</span>  <span>H=${eH.toFixed(2)}&deg;</span>  <span style="color:#999">Sat: ${eSat}%${eSatLabel}</span>`;
 
       const brand        = generatePalette(hex, 1.0);
       const bg           = generatePalette(bgColorHex, chromaScale);
@@ -1260,7 +1266,9 @@ function renderTable(tbodyId, palette, showHC = false) {
 
       const accentPalettes = extraAccents
         .map(a => /^#[0-9a-fA-F]{6}$/.test(a.hex)
-          ? { name: a.name, hex: a.hex, cssName: accentCssName(a.name), palette: generatePalette(a.hex, 1.0) }
+          ? { name: a.name, hex: a.hex, cssName: accentCssName(a.name),
+              palette: generatePalette(a.hex, 1.0),
+              slatedPalette: generatePalette(a.hex, chromaScale) }
           : null)
         .filter(Boolean);
 
@@ -1281,7 +1289,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       renderTable('table-error', error);
       renderTable('table-neutral', neutralExtended, true);
       renderAccentTabs(accentPalettes);
-      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, c500error, brand, accentPalettes);
+      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, brand, accentPalettes, error, errorSlated);
       renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null, accentPalettes);
       document.getElementById('output').classList.add('visible');
       history.replaceState(null, '', '#' + encodeState());
