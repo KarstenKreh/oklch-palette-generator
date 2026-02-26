@@ -44,7 +44,7 @@
     /* ── Input area ───────────────────────────────────────── */
     .color-input-wrapper {
       display: flex; align-items: center; gap: 0.5rem;
-      background: var(--bg-surface); border: 1px solid var(--border);
+      background: var(--bg-surface); border: 1px solid var(--border-hi);
       border-radius: 6px; padding: 0.5rem 0.75rem;
       transition: background-color 0.35s ease, border-color 0.35s ease;
     }
@@ -67,8 +67,8 @@
     .color-inputs-container {
       display: grid; grid-template-columns: 1fr 1fr 1fr;
       border: 1px solid var(--border-hi); border-radius: 8px; overflow: hidden;
-      margin-bottom: 1.25rem;
-      transition: border-color 0.35s ease;
+      margin-bottom: 1.25rem; background: var(--bg-surface);
+      transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .color-input-col {
       display: flex; flex-direction: column; gap: 0.3rem;
@@ -176,7 +176,7 @@
     }
     @media (max-width: 900px)  { .surface-demo { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 500px)  { .surface-demo { grid-template-columns: 1fr; } }
-    .surface-panel { border-radius: 8px; padding: 1.1rem; }
+    .surface-panel { border-radius: 20px; padding: 1.1rem; }
     .surface-panel h3 { font-size: 0.8rem; margin-bottom: 0.6rem; font-weight: 600; }
     .surface-panel .mode-tag {
       font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -236,7 +236,7 @@
     tr:hover td { background: rgba(255,255,255,0.025); }
     .color-dot {
       width: 24px; height: 24px; border-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.08); display: inline-block; vertical-align: middle;
+      border: 1px solid rgba(255,255,255,0.22); display: inline-block; vertical-align: middle;
     }
     .zone-tag {
       font-size: 0.55rem; padding: 1px 6px; border-radius: 3px;
@@ -309,6 +309,14 @@
     }
     .tab-content.active { display: block; }
     .tab-content > table { margin-bottom: 0; }
+
+    .section-card {
+      background: var(--bg-surface); border: 1px solid var(--border-hi);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem;
+      transition: background-color 0.35s ease, border-color 0.35s ease;
+    }
+    .section-card .section-title { margin-top: 0; }
+    .section-card > .tab-group { margin-bottom: 0 !important; }
 
     #output { display: none; }
     #output.visible { display: block; }
@@ -433,6 +441,7 @@
     <div class="surface-demo" id="surfaces-demo"></div>
 
     <!-- ── Brand / Background Tokens ──────────────────────── -->
+    <div class="section-card">
     <span class="chroma-title" style="display:block;margin-bottom:0.75rem">Primitive Tokens</span>
     <div class="tab-group" style="margin-bottom:2rem">
       <div class="tab-bar">
@@ -466,8 +475,10 @@
         </table>
       </div>
     </div>
+    </div>
 
     <!-- ── Code blocks (always visible) ───────────────────── -->
+    <div class="section-card">
     <h2 class="section-title">Export</h2>
     <p class="section-desc">Click the button in the top-right corner to copy the entire block</p>
     <div class="tab-group">
@@ -489,6 +500,7 @@
         </div>
         <div class="code-block code-block-semantic" id="code-semantic"><button class="copy-block-btn" onclick="copyBlock('code-semantic')">Copy</button></div>
       </div>
+    </div>
     </div>
   </div>
 
