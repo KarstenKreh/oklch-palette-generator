@@ -65,17 +65,25 @@
     #colorPicker, #bgColorPicker, #errorColorPicker { position: absolute; opacity: 0; width: 0; height: 0; }
 
     /* ── Color inputs container ────────────────────────────── */
-    .color-inputs-container {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
+    .color-pair-groups-row {
+      display: flex; gap: 0.75rem; align-items: stretch;
+      margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .color-pair-group {
+      display: flex; flex-direction: column; flex: 1; min-width: 140px;
       border: 1px solid var(--border-hi); border-radius: 8px; overflow: hidden;
-      margin-bottom: 1.25rem; background: var(--bg-surface);
+      background: var(--bg-surface);
       transition: background-color 0.35s ease, border-color 0.35s ease;
     }
     .color-input-col {
       display: flex; flex-direction: column; gap: 0.3rem;
       padding: 1rem 1.25rem;
     }
-    .color-input-col:not(:last-child) { border-right: 1px solid var(--border-hi); }
+    .color-input-col:not(:last-child) { border-bottom: 1px solid var(--border-hi); }
+    .color-surface-auto {
+      opacity: 0.65; font-size: 0.6rem; font-weight: 400;
+      text-transform: none; letter-spacing: 0; color: var(--text-faint);
+    }
     .color-col-label {
       font-size: 0.65rem; color: var(--text-dim); font-weight: 600;
       text-transform: uppercase; letter-spacing: 0.07em;
@@ -315,6 +323,16 @@
     }
     .tab-btn:hover { color: var(--text-mid); background: rgba(255,255,255,0.02); }
     .tab-btn.active { color: #fff; background: var(--bg-surface); border-color: var(--border); }
+    .sub-tab-bar { display: flex; gap: 0.3rem; margin-bottom: 0.85rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+    .sub-tab-btn {
+      font-size: 0.65rem; padding: 0.2rem 0.65rem; border-radius: 4px;
+      border: 1px solid var(--border); background: transparent; color: var(--text-dim);
+      cursor: pointer; font-family: inherit; font-weight: 600; transition: background 0.12s, color 0.12s;
+    }
+    .sub-tab-btn:hover { color: var(--text-mid); }
+    .sub-tab-btn.active { background: rgba(255,255,255,0.08); color: #fff; border-color: var(--border-hi); }
+    .sub-tab-content { display: none; }
+    .sub-tab-content.active { display: block; }
     .tab-content {
       display: none; border: 1px solid var(--border); border-radius: 0 5px 5px 5px;
       padding: 1.5rem; background: var(--bg-surface);
@@ -342,9 +360,9 @@
       /* Seed Colors / Share */
       .seed-colors-header { margin-bottom: 0.5rem; }
 
-      /* Color inputs: stack vertically */
-      .color-inputs-container { grid-template-columns: 1fr; }
-      .color-input-col:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border-hi); }
+      /* Color inputs: stack cards vertically on mobile */
+      .color-pair-groups-row { flex-direction: column; gap: 0.5rem; }
+      .color-pair-group { min-width: 0; }
       .color-input-col { padding: 0.75rem 1rem; }
       .input-info { font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -430,41 +448,58 @@
   <div class="seed-colors-header">
     <span class="seed-colors-title">Seed Colors</span>
   </div>
-  <div class="color-inputs-container">
-    <!-- Brand -->
-    <div class="color-input-col">
-      <span class="color-col-label">Brand</span>
-      <div class="color-input-wrapper">
-        <div class="color-preview-swatch" id="swatchPreview" style="background:#335A7F" onclick="document.getElementById('colorPicker').click()"></div>
-        <input type="color" id="colorPicker" value="#335A7F">
-        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
-        <input type="text" id="hexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+  <div class="color-pair-groups-row">
+    <!-- Brand pair: Brand action + Surface -->
+    <div class="color-pair-group">
+      <div class="color-input-col">
+        <div class="color-col-header">
+          <span class="color-col-label">Brand</span>
+          <button class="auto-btn" id="brandPinBtn" onclick="toggleBrandPin()">Pin</button>
+        </div>
+        <div class="color-input-wrapper">
+          <div class="color-preview-swatch" id="swatchPreview" style="background:#335A7F" onclick="document.getElementById('colorPicker').click()"></div>
+          <input type="color" id="colorPicker" value="#335A7F">
+          <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+          <input type="text" id="hexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+        </div>
+      </div>
+      <div class="color-input-col">
+        <div class="color-col-header">
+          <span class="color-col-label">Surface</span>
+          <button class="auto-btn active" id="bgAutoBtn" onclick="toggleBgAutoMatch()">Auto</button>
+        </div>
+        <div class="color-input-wrapper">
+          <div class="color-preview-swatch" id="bgSwatchPreview" style="background:#335A7F" onclick="document.getElementById('bgColorPicker').click()"></div>
+          <input type="color" id="bgColorPicker" value="#335A7F">
+          <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+          <input type="text" id="bgHexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
+        </div>
       </div>
     </div>
-    <!-- Surface -->
-    <div class="color-input-col">
-      <div class="color-col-header">
-        <span class="color-col-label">Surface</span>
-        <button class="auto-btn active" id="bgAutoBtn" onclick="toggleBgAutoMatch()">Auto</button>
+    <!-- Error pair -->
+    <div class="color-pair-group">
+      <div class="color-input-col">
+        <div class="color-col-header">
+          <span class="color-col-label">Error</span>
+          <div style="display:flex;gap:0.25rem">
+            <button class="auto-btn active" id="errorAutoBtn" onclick="toggleErrorAutoMatch()">Auto</button>
+            <button class="auto-btn" id="errorPinBtn" onclick="toggleErrorPin()">Pin</button>
+          </div>
+        </div>
+        <div class="color-input-wrapper">
+          <div class="color-preview-swatch" id="errorSwatchPreview" style="background:#CC3333" onclick="document.getElementById('errorColorPicker').click()"></div>
+          <input type="color" id="errorColorPicker" value="#CC3333">
+          <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+          <input type="text" id="errorHexInput" value="CC3333" placeholder="CC3333" maxlength="7" spellcheck="false">
+        </div>
       </div>
-      <div class="color-input-wrapper">
-        <div class="color-preview-swatch" id="bgSwatchPreview" style="background:#335A7F" onclick="document.getElementById('bgColorPicker').click()"></div>
-        <input type="color" id="bgColorPicker" value="#335A7F">
-        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
-        <input type="text" id="bgHexInput" value="335A7F" placeholder="335A7F" maxlength="7" spellcheck="false">
-      </div>
-    </div>
-    <!-- Error -->
-    <div class="color-input-col">
-      <div class="color-col-header">
-        <span class="color-col-label">Error</span>
-        <button class="auto-btn active" id="errorAutoBtn" onclick="toggleErrorAutoMatch()">Auto</button>
-      </div>
-      <div class="color-input-wrapper">
-        <div class="color-preview-swatch" id="errorSwatchPreview" style="background:#CC3333" onclick="document.getElementById('errorColorPicker').click()"></div>
-        <input type="color" id="errorColorPicker" value="#CC3333">
-        <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
-        <input type="text" id="errorHexInput" value="CC3333" placeholder="CC3333" maxlength="7" spellcheck="false">
+      <div class="color-input-col">
+        <span class="color-col-label">Surface <span class="color-surface-auto">auto</span></span>
+        <div class="color-input-wrapper">
+          <div class="color-preview-swatch" id="errorSurfacePreview" style="background:var(--bg-surface)"></div>
+          <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+          <span id="errorSurfaceHex" style="font-size:1.1rem;font-family:'Cascadia Code','Fira Code',monospace;color:var(--text-dim)">—</span>
+        </div>
       </div>
     </div>
   </div>
@@ -511,28 +546,49 @@
     <div class="tab-group" id="primitiveTabGroup" style="margin-bottom:2rem">
       <div class="tab-bar" id="primitiveTabBar">
         <button class="tab-btn active" data-tab="brand">Brand</button>
-        <button class="tab-btn" data-tab="bg">Surface</button>
         <button class="tab-btn" data-tab="error">Error</button>
+        <!-- accent top-level tabs injected here by JS (before neutral) -->
         <button class="tab-btn" data-tab="neutral">Neutral</button>
       </div>
+      <!-- Brand: Vibrant + Surface sub-tabs -->
       <div class="tab-content active" data-tab="brand">
-        <p class="section-desc">Full chroma &mdash; accent colors, buttons, links</p>
-        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-          <tbody id="table-brand"></tbody>
-        </table>
+        <div class="sub-tab-bar">
+          <button class="sub-tab-btn active" data-subtab="brand-color">Action</button>
+          <button class="sub-tab-btn" data-subtab="brand-surface">Surface</button>
+        </div>
+        <div class="sub-tab-content active" data-subtab="brand-color">
+          <p class="section-desc">Full chroma &mdash; buttons, switches, checkboxes, interactive elements</p>
+          <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+            <tbody id="table-brand"></tbody>
+          </table>
+        </div>
+        <div class="sub-tab-content" data-subtab="brand-surface">
+          <p class="section-desc">Surfaces &middot; containers &mdash; <span id="chromaDescValue">25%</span> chroma<span id="bgColorNote"></span></p>
+          <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+            <tbody id="table-bg"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="tab-content" data-tab="bg">
-        <p class="section-desc">Surfaces &middot; containers &mdash; <span id="chromaDescValue">25%</span> chroma<span id="bgColorNote"></span></p>
-        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-          <tbody id="table-bg"></tbody>
-        </table>
-      </div>
+      <!-- Error: Vibrant + Surface sub-tabs -->
       <div class="tab-content" data-tab="error">
-        <p class="section-desc">Error / destructive states &mdash; full chroma</p>
-        <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-          <tbody id="table-error"></tbody>
-        </table>
+        <div class="sub-tab-bar">
+          <button class="sub-tab-btn active" data-subtab="error-color">Action</button>
+          <button class="sub-tab-btn" data-subtab="error-surface">Surface</button>
+        </div>
+        <div class="sub-tab-content active" data-subtab="error-color">
+          <p class="section-desc">Full chroma &mdash; destructive actions, alerts, validation states</p>
+          <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+            <tbody id="table-error"></tbody>
+          </table>
+        </div>
+        <div class="sub-tab-content" data-subtab="error-surface">
+          <p class="section-desc">Error surface palette &mdash; <span id="errorSurfaceChromaVal">25%</span> chroma</p>
+          <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
+            <tbody id="table-error-surface"></tbody>
+          </table>
+        </div>
       </div>
+      <!-- Neutral (no sub-tabs) -->
       <div class="tab-content" data-tab="neutral">
         <p class="section-desc">0% chroma &mdash; High Contrast surfaces &middot; #fff and #000 included</p>
         <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
@@ -665,7 +721,9 @@
     let bgAutoMatch = true;
     let errorColorHex = '#CC3333'; // placeholder, overwritten on first generate if auto
     let errorAutoMatch = true;
-    let extraAccents = []; // Array of { name: string, hex: string } — max 3
+    let extraAccents = []; // Array of { name: string, hex: string, pin: boolean } — max 3
+    let brandPin = false;
+    let errorPin = false;
 
     function computeAutoErrorHex(primaryHex) {
       const [pL, pC, pH] = hexToOklch(primaryHex);
@@ -707,20 +765,33 @@
         return;
       }
 
-      container.className = 'color-inputs-container';
-      container.style.cssText = `grid-template-columns: repeat(${extraAccents.length}, 1fr); margin-top: 0.5rem`;
+      container.className = 'color-pair-groups-row';
+      container.style.cssText = '';
 
       container.innerHTML = extraAccents.map((a, i) => `
-        <div class="color-input-col">
-          <div class="color-col-header">
-            <input type="text" class="accent-name-input" id="accentName${i}" value="${a.name}" placeholder="Name" maxlength="20">
-            <button class="accent-delete-btn" onclick="removeAccent(${i})">✕</button>
+        <div class="color-pair-group">
+          <div class="color-input-col">
+            <div class="color-col-header">
+              <input type="text" class="accent-name-input" id="accentName${i}" value="${a.name}" placeholder="Name" maxlength="20">
+              <div style="display:flex;gap:0.25rem">
+                <button class="auto-btn${a.pin ? ' active' : ''}" id="accentPin${i}" onclick="toggleAccentPin(${i})">Pin</button>
+                <button class="accent-delete-btn" onclick="removeAccent(${i})">✕</button>
+              </div>
+            </div>
+            <div class="color-input-wrapper">
+              <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
+              <input type="color" id="accentPicker${i}" value="${a.hex}" style="position:absolute;opacity:0;width:0;height:0">
+              <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+              <input type="text" class="accent-hex-input" id="accentHex${i}" value="${a.hex.replace('#','')}" maxlength="6" spellcheck="false">
+            </div>
           </div>
-          <div class="color-input-wrapper">
-            <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
-            <input type="color" id="accentPicker${i}" value="${a.hex}" style="position:absolute;opacity:0;width:0;height:0">
-            <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
-            <input type="text" class="accent-hex-input" id="accentHex${i}" value="${a.hex.replace('#','')}" maxlength="6" spellcheck="false">
+          <div class="color-input-col">
+            <span class="color-col-label">Surface <span class="color-surface-auto">auto</span></span>
+            <div class="color-input-wrapper">
+              <div class="color-preview-swatch" id="accentSurfaceSwatch${i}" style="background:var(--bg-surface)"></div>
+              <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
+              <span id="accentSurfaceHex${i}" style="font-size:1.1rem;font-family:'Cascadia Code','Fira Code',monospace;color:var(--text-dim)">—</span>
+            </div>
           </div>
         </div>`).join('');
 
@@ -755,9 +826,26 @@
       });
     }
 
+    function toggleBrandPin() {
+      brandPin = !brandPin;
+      document.getElementById('brandPinBtn').classList.toggle('active', brandPin);
+      generate();
+    }
+    function toggleErrorPin() {
+      errorPin = !errorPin;
+      document.getElementById('errorPinBtn').classList.toggle('active', errorPin);
+      generate();
+    }
+    function toggleAccentPin(i) {
+      extraAccents[i].pin = !extraAccents[i].pin;
+      const btn = document.getElementById('accentPin' + i);
+      if (btn) btn.classList.toggle('active', extraAccents[i].pin);
+      generate();
+    }
+
     function addAccent() {
       if (extraAccents.length >= 3) return;
-      extraAccents.push({ name: 'Accent ' + (extraAccents.length + 1), hex: '#7C3AED' });
+      extraAccents.push({ name: 'Accent ' + (extraAccents.length + 1), hex: '#7C3AED', pin: false });
       renderAccentInputs();
       generate();
     }
@@ -774,24 +862,40 @@
       if (!group || !tabBar) return;
       // Remove existing dynamic accent tabs
       group.querySelectorAll('[data-tab^="accent-"]').forEach(el => el.remove());
-      // Add new ones
+      // Insert before Neutral (always last)
+      const neutralBtn     = tabBar.querySelector('[data-tab="neutral"]');
+      const neutralContent = group.querySelector('.tab-content[data-tab="neutral"]');
+      const pct  = Math.round(chromaScale * 100);
+      const thead = `<thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>`;
+
       accentPalettes.forEach((entry, i) => {
         const tabId = 'accent-' + i;
+
         const btn = document.createElement('button');
         btn.className = 'tab-btn';
         btn.dataset.tab = tabId;
         btn.textContent = entry.name;
-        tabBar.appendChild(btn);
+        tabBar.insertBefore(btn, neutralBtn);
 
         const content = document.createElement('div');
         content.className = 'tab-content';
         content.dataset.tab = tabId;
-        content.innerHTML = `<p class="section-desc">Full chroma &mdash; ${entry.name} accent scale</p>
-          <table><thead><tr><th>Step</th><th>Color</th><th>Hex</th><th>OKLCH</th><th>L</th><th>C</th><th>Zone</th></tr></thead>
-            <tbody id="table-accent-${i}"></tbody>
-          </table>`;
-        group.appendChild(content);
+        content.innerHTML = `
+          <div class="sub-tab-bar">
+            <button class="sub-tab-btn active" data-subtab="${tabId}-color">Action</button>
+            <button class="sub-tab-btn" data-subtab="${tabId}-surface">Surface</button>
+          </div>
+          <div class="sub-tab-content active" data-subtab="${tabId}-color">
+            <p class="section-desc">Full chroma &mdash; ${entry.name} accent scale</p>
+            <table>${thead}<tbody id="table-accent-${i}"></tbody></table>
+          </div>
+          <div class="sub-tab-content" data-subtab="${tabId}-surface">
+            <p class="section-desc">${entry.name} surface palette &mdash; ${pct}% chroma</p>
+            <table>${thead}<tbody id="table-accent-surface-${i}"></tbody></table>
+          </div>`;
+        group.insertBefore(content, neutralContent);
         renderTable('table-accent-' + i, entry.palette);
+        renderTable('table-accent-surface-' + i, entry.slatedPalette || entry.palette);
       });
     }
 
@@ -811,10 +915,10 @@
         const a = {}; entry.palette.forEach(r => a[r.step] = r);
         const as = {}; (entry.slatedPalette || entry.palette).forEach(r => as[r.step] = r);
         let bgColor, borderColor, textColor, dotColor;
-        if (panelType === 'light')         { bgColor = as[100].hex; borderColor = as[300].hex; textColor = a[600].hex; dotColor = a[500].hex; }
-        else if (panelType === 'dark')     { bgColor = as[850].hex; borderColor = as[700].hex; textColor = a[300].hex; dotColor = a[400].hex; }
-        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = as[200].hex; textColor = a[700].hex; dotColor = a[500].hex; }
-        else                               { bgColor = '#000000';   borderColor = as[800].hex; textColor = a[200].hex; dotColor = a[300].hex; }
+        if (panelType === 'light')         { bgColor = as[100].hex; borderColor = as[300].hex; textColor = as[800].hex; dotColor = entry.pin ? entry.hex : a[600].hex; }
+        else if (panelType === 'dark')     { bgColor = as[850].hex; borderColor = as[700].hex; textColor = as[100].hex; dotColor = entry.pin ? entry.hex : a[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = as[200].hex; textColor = as[900].hex; dotColor = entry.pin ? entry.hex : a[700].hex; }
+        else                               { bgColor = '#000000';   borderColor = as[800].hex; textColor = as[75].hex;  dotColor = entry.pin ? entry.hex : a[300].hex; }
         return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
           <div class="accent-mini-card-dot" style="background:${dotColor}"></div>
           ${entry.name}
@@ -943,7 +1047,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       </svg>`;
     }
 
-    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, brandPalette, accentPalettes, errorPalette, errorSlatedPalette) {
+    function renderSurfaces(containerId, palette, slatedPalette, neutral, accentSwatch, brandPalette, accentPalettes, errorPalette, errorSlatedPalette, errorSwatchOverride) {
       accentPalettes = accentPalettes || [];
       const s = {}; palette.forEach(r => s[r.step] = r);
       const n = {}; neutral.forEach(r => n[r.step] = r);
@@ -952,9 +1056,9 @@ function renderTable(tbodyId, palette, showHC = false) {
       const es = {}; errorSlatedPalette.forEach(r => es[r.step] = r);
       const btnBg  = accentSwatch.hex;
       const btnFg  = accentSwatch.L < 0.55 ? '#fff' : '#111';
-      const errSwatch500 = e[500];
-      const errBg  = errSwatch500.hex;
-      const errFg  = errSwatch500.L < 0.55 ? '#fff' : '#111';
+      const errSwatch = errorSwatchOverride || e[500];
+      const errBg  = errSwatch.hex;
+      const errFg  = errSwatch.L < 0.55 ? '#fff' : '#111';
       const textLight = s[850].hex;
       const textDark  = s[75].hex;
       const makeBtns = () => `<div class="surface-btns">
@@ -963,10 +1067,10 @@ function renderTable(tbodyId, palette, showHC = false) {
         </div>`;
       const buildErrorMiniCard = (panelType) => {
         let bgColor, borderColor, textColor, dotColor;
-        if (panelType === 'light')         { bgColor = es[100].hex; borderColor = es[300].hex; textColor = e[600].hex; dotColor = e[500].hex; }
-        else if (panelType === 'dark')     { bgColor = es[850].hex; borderColor = es[700].hex; textColor = e[300].hex; dotColor = e[400].hex; }
-        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = es[200].hex; textColor = e[700].hex; dotColor = e[500].hex; }
-        else                               { bgColor = '#000000';   borderColor = es[800].hex; textColor = e[200].hex; dotColor = e[300].hex; }
+        if (panelType === 'light')         { bgColor = es[100].hex; borderColor = es[300].hex; textColor = es[800].hex; dotColor = e[600].hex; }
+        else if (panelType === 'dark')     { bgColor = es[850].hex; borderColor = es[700].hex; textColor = es[100].hex; dotColor = e[400].hex; }
+        else if (panelType === 'light-hc') { bgColor = '#ffffff';   borderColor = es[200].hex; textColor = es[900].hex; dotColor = e[700].hex; }
+        else                               { bgColor = '#000000';   borderColor = es[800].hex; textColor = es[75].hex;  dotColor = e[300].hex; }
         return `<div class="accent-mini-card" style="background:${bgColor};border-color:${borderColor};color:${textColor}">
           <div class="accent-mini-card-dot" style="background:${dotColor}"></div>Error
         </div>`;
@@ -1317,13 +1421,21 @@ function renderTable(tbodyId, palette, showHC = false) {
         .map(a => /^#[0-9a-fA-F]{6}$/.test(a.hex)
           ? { name: a.name, hex: a.hex, cssName: accentCssName(a.name),
               palette: generatePalette(a.hex, 1.0),
-              slatedPalette: generatePalette(a.hex, chromaScale) }
+              slatedPalette: generatePalette(a.hex, chromaScale),
+              pin: !!a.pin }
           : null)
         .filter(Boolean);
 
-      const c500brand = brand.find(r => r.step === 500);
-      const c500error = error.find(r => r.step === 500);
+      const c500brand   = brand.find(r => r.step === 500);
       const c500neutral = neutral.find(r => r.step === 500);
+
+      // Pin overrides: use exact input hex when "Pin" is active
+      const brandSwatch = brandPin
+        ? { hex, L: hexToOklch(hex)[0] }
+        : c500brand;
+      const errorSwatchOverride = errorPin
+        ? { hex: errorColorHex, L: hexToOklch(errorColorHex)[0] }
+        : null;
       document.getElementById('chromaSlider').style.background =
         `linear-gradient(to right, ${c500neutral.hex}, ${c500brand.hex})`;
       const neutralExtended = [
@@ -1332,13 +1444,33 @@ function renderTable(tbodyId, palette, showHC = false) {
         { step: 1000, L: 0, C: 0, H: 0, hex: '#000000', css: 'oklch(0 0 0)' }
       ];
 
+      // Update surface preview swatches (auto-derived, read-only)
+      const esSwatch = errorSlated.find(r => r.step === 200);
+      if (esSwatch) {
+        const el = document.getElementById('errorSurfacePreview');
+        if (el) el.style.background = esSwatch.hex;
+        const hx = document.getElementById('errorSurfaceHex');
+        if (hx) hx.textContent = esSwatch.hex.replace('#', '');
+      }
+
       updateTheme(brand, slated, neutral);
       renderTable('table-brand', brand);
       renderTable('table-bg', bg);
       renderTable('table-error', error);
+      renderTable('table-error-surface', errorSlated);
       renderTable('table-neutral', neutralExtended, true);
       renderAccentTabs(accentPalettes);
-      renderSurfaces('surfaces-demo', bg, slated, neutral, c500brand, brand, accentPalettes, error, errorSlated);
+      // Update accent surface preview swatches
+      accentPalettes.forEach((entry, i) => {
+        const s = entry.slatedPalette.find(r => r.step === 200);
+        if (s) {
+          const sw = document.getElementById('accentSurfaceSwatch' + i);
+          if (sw) sw.style.background = s.hex;
+          const hx = document.getElementById('accentSurfaceHex' + i);
+          if (hx) hx.textContent = s.hex.replace('#', '');
+        }
+      });
+      renderSurfaces('surfaces-demo', bg, slated, neutral, brandSwatch, brand, accentPalettes, error, errorSlated, errorSwatchOverride);
       renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null, accentPalettes);
       document.getElementById('output').classList.add('visible');
       history.replaceState(null, '', '#' + encodeState());
@@ -1417,6 +1549,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       chromaScale = e.target.value / 100;
       document.getElementById('chromaInput').value = e.target.value + '%';
       document.getElementById('chromaDescValue').textContent = e.target.value + '%';
+      document.getElementById('errorSurfaceChromaVal').textContent = e.target.value + '%';
       debouncedGenerate();
     });
     document.getElementById('chromaInput').addEventListener('keydown', e => {
@@ -1428,19 +1561,33 @@ function renderTable(tbodyId, palette, showHC = false) {
       document.getElementById('chromaSlider').value = val;
       e.target.value = val + '%';
       document.getElementById('chromaDescValue').textContent = val + '%';
+      document.getElementById('errorSurfaceChromaVal').textContent = val + '%';
       generate();
     });
 
-    // Tabs (scoped per .tab-group) — delegated to support dynamic accent tabs
+    // Tabs — delegated, handles both top-level and nested sub-tabs
     document.addEventListener('click', e => {
+      // Sub-tabs (checked first — more specific selector)
+      const subBtn = e.target.closest('.sub-tab-btn');
+      if (subBtn) {
+        const panel = subBtn.closest('.tab-content');
+        if (!panel) return;
+        panel.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+        subBtn.classList.add('active');
+        const subtab = subBtn.dataset.subtab;
+        panel.querySelectorAll('.sub-tab-content').forEach(c =>
+          c.classList.toggle('active', c.dataset.subtab === subtab));
+        return;
+      }
+      // Top-level tabs
       const btn = e.target.closest('.tab-btn');
       if (!btn) return;
       const group = btn.closest('.tab-group');
       if (!group) return;
       group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      group.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      group.querySelectorAll(':scope > .tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
-      const target = group.querySelector(`.tab-content[data-tab="${btn.dataset.tab}"]`);
+      const target = group.querySelector(`:scope > .tab-content[data-tab="${btn.dataset.tab}"]`);
       if (target) target.classList.add('active');
     });
 
@@ -1452,9 +1599,9 @@ function renderTable(tbodyId, palette, showHC = false) {
       const bg    = bgColorHex.replace('#','');
       const err   = errorColorHex.replace('#','');
       const chroma = Math.round(chromaScale * 100);
-      let hash = `${brand},${bg},${bgAutoMatch?1:0},${err},${errorAutoMatch?1:0},${chroma},${currentMode}`;
+      let hash = `${brand},${bg},${bgAutoMatch?1:0},${err},${errorAutoMatch?1:0},${chroma},${currentMode},${brandPin?1:0},${errorPin?1:0}`;
       extraAccents.forEach(a => {
-        hash += `!${encodeURIComponent(a.name)}:${a.hex.replace('#','')}`;
+        hash += `!${encodeURIComponent(a.name)}:${a.hex.replace('#','')}:${a.pin?1:0}`;
       });
       return hash;
     }
@@ -1498,16 +1645,25 @@ function renderTable(tbodyId, palette, showHC = false) {
         document.querySelectorAll('.mode-option').forEach(btn =>
           btn.classList.toggle('active', btn.dataset.mode === mode));
       }
-      // Restore extra accents from !name:hex segments
+      // Restore brandPin / errorPin (parts 8 & 9, default false for old URLs)
+      brandPin = p[7] === '1';
+      errorPin = p[8] === '1';
+      document.getElementById('brandPinBtn')?.classList.toggle('active', brandPin);
+      document.getElementById('errorPinBtn')?.classList.toggle('active', errorPin);
+
+      // Restore extra accents from !name:hex[:pin] segments
       extraAccents = [];
       for (let i = 1; i < segments.length; i++) {
-        const colonIdx = segments[i].lastIndexOf(':');
-        if (colonIdx === -1) continue;
-        const rawName = segments[i].substring(0, colonIdx);
-        const rawHex  = segments[i].substring(colonIdx + 1);
+        const firstColon = segments[i].indexOf(':');
+        if (firstColon === -1) continue;
+        const rawName = segments[i].substring(0, firstColon);
+        const rest    = segments[i].substring(firstColon + 1);
+        const restParts = rest.split(':');
+        const rawHex  = restParts[0];
+        const pin     = restParts[1] === '1';
         const name = decodeURIComponent(rawName) || ('Accent ' + i);
         if (/^[0-9a-fA-F]{6}$/.test(rawHex)) {
-          extraAccents.push({ name, hex: '#' + rawHex.toUpperCase() });
+          extraAccents.push({ name, hex: '#' + rawHex.toUpperCase(), pin });
         }
       }
       renderAccentInputs();
