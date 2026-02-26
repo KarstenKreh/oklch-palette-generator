@@ -139,7 +139,8 @@
     }
     .seed-colors-title { font-size: 1.15rem; color: var(--text-hi); font-weight: 600; }
     .share-btn {
-      font-size: 0.7rem; padding: 0.3rem 0.75rem; border-radius: 5px;
+      position: fixed; top: 1rem; right: 1.5rem; z-index: 50;
+      font-size: 0.8rem; padding: 0.45rem 1.1rem; border-radius: 6px;
       border: 1px solid var(--accent); background: var(--accent-bg);
       color: var(--accent-text); cursor: pointer; font-family: inherit; font-weight: 600;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -380,11 +381,12 @@
       width: 7ch; outline: none;
     }
     .accent-name-input {
-      background: transparent; color: var(--text-hi);
-      font-size: 0.85rem; font-family: 'Segoe UI', system-ui, sans-serif;
-      width: 10ch; outline: none; border: none; border-bottom: 1px solid var(--border);
+      background: transparent; border: none; outline: none;
+      font-size: 0.65rem; color: var(--text-dim); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      font-family: 'Segoe UI', system-ui, sans-serif; width: 100%;
     }
-    .accent-name-input:focus { border-bottom-color: var(--accent); }
+    .accent-name-input:focus { color: var(--accent-text); }
     .accent-delete-btn {
       margin-left: auto; font-size: 0.65rem; padding: 0.2rem 0.5rem;
       border-radius: 3px; border: 1px solid var(--border);
@@ -699,6 +701,7 @@
         <div class="color-input-col">
           <div class="color-col-header">
             <input type="text" class="accent-name-input" id="accentName${i}" value="${a.name}" placeholder="Name" maxlength="20">
+            <button class="accent-delete-btn" onclick="removeAccent(${i})">✕</button>
           </div>
           <div class="color-input-wrapper">
             <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
@@ -941,10 +944,9 @@ function renderTable(tbodyId, palette, showHC = false) {
       const errFg  = errSwatch500.L < 0.55 ? '#fff' : '#111';
       const textLight = s[850].hex;
       const textDark  = s[75].hex;
-      const makeBtns = (panelType) => `<div class="surface-btns">
+      const makeBtns = () => `<div class="surface-btns">
           <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Primary</div>
           <div class="surface-btn" style="background:${errBg};color:${errFg}">Error</div>
-          ${buildAccentBtns(accentPalettes, panelType)}
         </div>`;
       const buildErrorMiniCard = (panelType) => {
         let bgColor, borderColor, textColor, dotColor;
@@ -969,7 +971,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
-          ${makeBtns('light')}
+          ${makeBtns()}
           ${buildErrorMiniCard('light')}
           ${buildAccentMiniCards(accentPalettes, 'light')}
         </div>
@@ -979,7 +981,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${s[800].hex}"><p><strong>Card (800)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
           <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
-          ${makeBtns('dark')}
+          ${makeBtns()}
           ${buildErrorMiniCard('dark')}
           ${buildAccentMiniCards(accentPalettes, 'dark')}
         </div>
@@ -989,7 +991,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:#ffffff"><p><strong>Card (#fff)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[25].hex}"><p><strong>Elevated (n25)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[50].hex}"><p><strong>Active (n50)</strong> on BG (n75)</p></div>
-          ${makeBtns('light-hc')}
+          ${makeBtns()}
           ${buildErrorMiniCard('light-hc')}
           ${buildAccentMiniCards(accentPalettes, 'light-hc')}
         </div>
@@ -999,7 +1001,7 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${n[975].hex}"><p><strong>Card (n975)</strong> on BG (#000)</p></div>
           <div class="surface-card" style="background:${n[950].hex}"><p><strong>Elevated (n950)</strong> on BG (#000)</p></div>
           <div class="surface-card" style="background:${n[925].hex}"><p><strong>Active (n925)</strong> on BG (#000)</p></div>
-          ${makeBtns('dark-hc')}
+          ${makeBtns()}
           ${buildErrorMiniCard('dark-hc')}
           ${buildAccentMiniCards(accentPalettes, 'dark-hc')}
         </div>`;
