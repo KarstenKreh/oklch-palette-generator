@@ -201,7 +201,7 @@
     .surface-panel h3 { font-size: 0.8rem; margin-bottom: 0.6rem; font-weight: 600; }
     .surface-panel .mode-tag {
       font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em;
-      opacity: 0.5; margin-bottom: 0.15rem;
+      opacity: 0.7; margin-bottom: 0.15rem;
     }
     .surface-card { border-radius: 12px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
     .surface-card p { font-size: 0.65rem; opacity: 0.85; }
@@ -708,6 +708,15 @@
       }
       return lo;
     }
+    function relativeLuminance(hex) {
+      const [r, g, b] = hexToRgb(hex);
+      return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+    }
+    function contrastRatio(hex1, hex2) {
+      const l1 = relativeLuminance(hex1);
+      const l2 = relativeLuminance(hex2);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
 
     // ================================================================
     //  Palette Generation
@@ -808,6 +817,12 @@
           swatch.style.background = hex;
           generate();
         });
+        hexInp.addEventListener('paste', e => {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text').replace(/#/g, '').trim().slice(0, 6);
+          e.target.value = text;
+          e.target.dispatchEvent(new Event('input', { bubbles: true }));
+        });
         hexInp.addEventListener('input', e => {
           const cleaned = e.target.value.replace(/#/g, '');
           if (cleaned !== e.target.value) e.target.value = cleaned;
@@ -904,7 +919,7 @@
       return accentPalettes.map(entry => {
         const a = {}; entry.palette.forEach(r => a[r.step] = r);
         const btnSwatch = (panelType === 'light' || panelType === 'light-hc') ? a[600] : a[400];
-        const fg = btnSwatch.L < 0.55 ? '#fff' : '#111';
+        const fg = contrastRatio('#FFFFFF', btnSwatch.hex) >= 4.5 ? '#fff' : '#111';
         return `<div class="surface-btn" style="background:${btnSwatch.hex};color:${fg}">${entry.name}</div>`;
       }).join('');
     }
@@ -1055,16 +1070,33 @@ function renderTable(tbodyId, palette, showHC = false) {
       const e = {}; errorPalette.forEach(r => e[r.step] = r);
       const es = {}; errorSlatedPalette.forEach(r => es[r.step] = r);
       const btnBg  = accentSwatch.hex;
-      const btnFg  = accentSwatch.L < 0.55 ? '#fff' : '#111';
+      const btnFg  = contrastRatio('#FFFFFF', accentSwatch.hex) >= 4.5 ? '#fff' : '#111';
       const errSwatch = errorSwatchOverride || e[500];
       const errBg  = errSwatch.hex;
-      const errFg  = errSwatch.L < 0.55 ? '#fff' : '#111';
+      const errFg  = contrastRatio('#FFFFFF', errSwatch.hex) >= 4.5 ? '#fff' : '#111';
+      const secLightBg = v[200].hex;
+      const secLightFg = contrastRatio('#FFFFFF', v[200].hex) >= 4.5 ? '#fff' : '#111';
+      const secDarkBg  = v[700].hex;
+      const secDarkFg  = contrastRatio('#FFFFFF', v[700].hex) >= 4.5 ? '#fff' : '#111';
       const textLight = s[850].hex;
       const textDark  = s[75].hex;
-      const makeBtns = () => `<div class="surface-btns">
+      const makeBtns = (panelType) => {
+        const secBg = (panelType === 'dark' || panelType === 'dark-hc') ? secDarkBg : secLightBg;
+        const secFg = (panelType === 'dark' || panelType === 'dark-hc') ? secDarkFg : secLightFg;
+        return `<div class="surface-btns">
           <div class="surface-btn" style="background:${btnBg};color:${btnFg}">Primary</div>
+          <div class="surface-btn" style="background:${secBg};color:${secFg}">Secondary</div>
           <div class="surface-btn" style="background:${errBg};color:${errFg}">Error</div>
         </div>`;
+      };
+      const buildMutedCard = (panelType) => {
+        let bgColor, fgColor, label;
+        if (panelType === 'light')         { bgColor = s[75].hex;  fgColor = s[700].hex; label = 'Muted (75)'; }
+        else if (panelType === 'dark')     { bgColor = s[825].hex; fgColor = s[300].hex; label = 'Muted (825)'; }
+        else if (panelType === 'light-hc') { bgColor = n[75].hex;  fgColor = n[700].hex; label = 'Muted (n75)'; }
+        else                               { bgColor = n[850].hex; fgColor = n[300].hex; label = 'Muted (n850)'; }
+        return `<div class="surface-card" style="background:${bgColor};color:${fgColor}"><p><strong>${label}</strong> — muted token</p></div>`;
+      };
       const buildErrorMiniCard = (panelType) => {
         let bgColor, borderColor, textColor, dotColor;
         if (panelType === 'light')         { bgColor = es[100].hex; borderColor = es[300].hex; textColor = es[800].hex; dotColor = e[600].hex; }
@@ -1088,17 +1120,19 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:${s[25].hex}"><p><strong>Card (25)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[50].hex}"><p><strong>Elevated (50)</strong> on BG (100)</p></div>
           <div class="surface-card" style="background:${s[75].hex}"><p><strong>Active (75)</strong> on BG (100)</p></div>
-          ${makeBtns()}
+          ${buildMutedCard('light')}
+          ${makeBtns('light')}
           ${buildErrorMiniCard('light')}
           ${buildAccentMiniCards(accentPalettes, 'light')}
         </div>
-        <div class="surface-panel" style="background:${s[875].hex};color:${textDark};${darkVars}">
+        <div class="surface-panel" style="background:${s[800].hex};color:${textDark};${darkVars}">
           <div class="mode-tag">Dark</div><h3>Surfaces (800&ndash;875)</h3>
           ${buildPanelSvg(1)}
-          <div class="surface-card" style="background:${s[800].hex}"><p><strong>Card (800)</strong> on BG (875)</p></div>
-          <div class="surface-card" style="background:${s[825].hex}"><p><strong>Elevated (825)</strong> on BG (875)</p></div>
-          <div class="surface-card" style="background:${s[850].hex}"><p><strong>Active (850)</strong> on BG (875)</p></div>
-          ${makeBtns()}
+          <div class="surface-card" style="background:${s[875].hex}"><p><strong>Card (875)</strong> on BG (800)</p></div>
+          <div class="surface-card" style="background:${s[850].hex}"><p><strong>Elevated (850)</strong> on BG (800)</p></div>
+          <div class="surface-card" style="background:${s[825].hex}"><p><strong>Active (825)</strong> on BG (800)</p></div>
+          ${buildMutedCard('dark')}
+          ${makeBtns('dark')}
           ${buildErrorMiniCard('dark')}
           ${buildAccentMiniCards(accentPalettes, 'dark')}
         </div>
@@ -1108,23 +1142,25 @@ function renderTable(tbodyId, palette, showHC = false) {
           <div class="surface-card" style="background:#ffffff"><p><strong>Card (#fff)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[25].hex}"><p><strong>Elevated (n25)</strong> on BG (n75)</p></div>
           <div class="surface-card" style="background:${n[50].hex}"><p><strong>Active (n50)</strong> on BG (n75)</p></div>
-          ${makeBtns()}
+          ${buildMutedCard('light-hc')}
+          ${makeBtns('light-hc')}
           ${buildErrorMiniCard('light-hc')}
           ${buildAccentMiniCards(accentPalettes, 'light-hc')}
         </div>
-        <div class="surface-panel" style="background:#000000;color:#ffffff;${dhcVars}">
+        <div class="surface-panel" style="background:${n[925].hex};color:#ffffff;${dhcVars}">
           <div class="mode-tag">Dark &middot; High Contrast</div><h3>Neutral Surfaces</h3>
           ${buildPanelSvg(3)}
-          <div class="surface-card" style="background:${n[975].hex}"><p><strong>Card (n975)</strong> on BG (#000)</p></div>
-          <div class="surface-card" style="background:${n[950].hex}"><p><strong>Elevated (n950)</strong> on BG (#000)</p></div>
-          <div class="surface-card" style="background:${n[925].hex}"><p><strong>Active (n925)</strong> on BG (#000)</p></div>
-          ${makeBtns()}
+          <div class="surface-card" style="background:#000000"><p><strong>Card (#000)</strong> on BG (n925)</p></div>
+          <div class="surface-card" style="background:${n[975].hex}"><p><strong>Elevated (n975)</strong> on BG (n925)</p></div>
+          <div class="surface-card" style="background:${n[950].hex}"><p><strong>Active (n950)</strong> on BG (n925)</p></div>
+          ${buildMutedCard('dark-hc')}
+          ${makeBtns('dark-hc')}
           ${buildErrorMiniCard('dark-hc')}
           ${buildAccentMiniCards(accentPalettes, 'dark-hc')}
         </div>`;
     }
 
-    function renderCodeBlocks(brand, bg, error, errorSlated, neutral, customBgHex = null, accentPalettes = []) {
+    function renderCodeBlocks(brand, bg, error, errorSlated, neutral, customBgHex = null, accentPalettes = [], brandPinActive = false, pinnedBrandHex = null, errorPinActive = false, pinnedErrorHex = null) {
       const pct = Math.round(chromaScale * 100);
       const bgLabel = customBgHex ? `${pct}% chroma — base ${customBgHex}` : `${pct}% chroma`;
       const neutralExt = [
@@ -1168,22 +1204,53 @@ function renderTable(tbodyId, palette, showHC = false) {
       // ── Semantic ──
       const semBlock = document.getElementById('code-semantic');
       const btn3 = semBlock.querySelector('.copy-block-btn').outerHTML;
-      semBlock.innerHTML = btn3 + renderSemantic(accentPalettes);
+      semBlock.innerHTML = btn3 + renderSemantic(accentPalettes, { brandPin: brandPinActive, pinnedBrandHex, errorPin: errorPinActive, pinnedErrorHex }, brand, error, errorSlated);
     }
 
-    function renderSemantic(accentPalettes = []) {
+    function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [], errPal = [], errSurfPal = []) {
+      const { brandPin: bPin, pinnedBrandHex: bHex, errorPin: ePin, pinnedErrorHex: eHex } = pinOpts;
       const prop = name => `  <span class="prop">--${name}</span>`;
       const ref  = (prefix, step) => `<span class="val">var(--color-${prefix}-${step})</span>`;
+      const val  = v => `<span class="val">${v}</span>`;
       const line = (name, prefix, step) => `${prop(name)}: ${ref(prefix, step)};\n`;
       const cmt  = t => `  <span class="cmt">/* ${t} */</span>\n`;
+      const hexToCss = hex => { const [L,C,H] = hexToOklch(hex); return `oklch(${L.toFixed(4)} ${C.toFixed(4)} ${H.toFixed(2)})`; };
+      const palMap = arr => Object.fromEntries(arr.map(r => [r.step, r]));
+      const fgDirect = (bgHex, pMap, ls, ds, pfx) => { const lightHex = pMap[ls]?.hex; const step = (lightHex && contrastRatio(lightHex, bgHex) >= 4.5) ? ls : ds; return pMap[step]?.css || `var(--color-${pfx}-${step})`; };
+      const fgStep = (bgHex, pMap, ls, ds) => { const lightHex = pMap[ls]?.hex; return (lightHex && contrastRatio(lightHex, bgHex) >= 4.5) ? ls : ds; };
+      const brandMap   = palMap(brandPal);
+      const errMap     = palMap(errPal);
+      const errSurfMap = palMap(errSurfPal);
 
       const block = (sel, rows) => {
         let o = `${sel} {\n`;
         rows.forEach(([name, prefix, step]) => {
-          o += prefix === null ? cmt(step) : line(name, prefix, step);
+          if (prefix === null) o += cmt(step);
+          else if (prefix === '#direct') o += `${prop(name)}: ${val(step)};\n`;
+          else o += line(name, prefix, step);
         });
         return o + `}\n`;
       };
+
+      // Brand pin helpers
+      const bCss  = bPin && bHex ? hexToCss(bHex) : null;
+      const bFgCss = bPin && bHex ? fgDirect(bHex, brandMap, 50, 975, 'brand') : null;
+      const primaryLight   = bPin && bHex ? ['primary',                      '#direct', bCss]   : ['primary',                      'brand', 600];
+      const primaryFgLight = bPin && bHex ? ['primary-foreground',            '#direct', bFgCss] : ['primary-foreground',            'brand', fgStep(brandMap[600]?.hex, brandMap, 50, 975)];
+      const primaryDark    = bPin && bHex ? ['primary',                      '#direct', bCss]   : ['primary',                      'brand', 400];
+      const primaryFgDark  = bPin && bHex ? ['primary-foreground',            '#direct', bFgCss] : ['primary-foreground',            'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975)];
+      const sbPrimLight    = bPin && bHex ? ['sidebar-primary',              '#direct', bCss]   : ['sidebar-primary',              'brand', 600];
+      const sbPrimFgLight  = bPin && bHex ? ['sidebar-primary-foreground',   '#direct', bFgCss] : ['sidebar-primary-foreground',   'brand', fgStep(brandMap[600]?.hex, brandMap, 50, 975)];
+      const sbPrimDark     = bPin && bHex ? ['sidebar-primary',              '#direct', bCss]   : ['sidebar-primary',              'brand', 400];
+      const sbPrimFgDark   = bPin && bHex ? ['sidebar-primary-foreground',   '#direct', bFgCss] : ['sidebar-primary-foreground',   'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975)];
+
+      // Error pin helpers
+      const eCss  = ePin && eHex ? hexToCss(eHex) : null;
+      const eFgCss = ePin && eHex ? fgDirect(eHex, errSurfMap, 100, 900, 'error-surface') : null;
+      const destLight   = ePin && eHex ? ['destructive',            '#direct', eCss]   : ['destructive',            'error', 600];
+      const destFgLight = ePin && eHex ? ['destructive-foreground', '#direct', eFgCss] : ['destructive-foreground', 'error-surface', fgStep(errMap[600]?.hex, errSurfMap, 100, 900)];
+      const destDark    = ePin && eHex ? ['destructive',            '#direct', eCss]   : ['destructive',            'error', 400];
+      const destFgDark  = ePin && eHex ? ['destructive-foreground', '#direct', eFgCss] : ['destructive-foreground', 'error-surface', fgStep(errMap[400]?.hex, errSurfMap, 100, 900)];
 
       const root = block(':root', [
         [null,    null,             'Base'],
@@ -1196,20 +1263,20 @@ function renderTable(tbodyId, palette, showHC = false) {
         ['popover',                 'surface', 25],
         ['popover-foreground',      'surface', 975],
         [null,    null,             'Primary'],
-        ['primary',                 'brand',   600],
-        ['primary-foreground',      'brand',   50],
+        primaryLight,
+        primaryFgLight,
         [null,    null,             'Secondary — softened brand'],
         ['secondary',               'brand',   200],
-        ['secondary-foreground',    'brand',   900],
+        ['secondary-foreground',    'brand',   fgStep(brandMap[200]?.hex, brandMap, 100, 900)],
         [null,    null,             'Muted'],
         ['muted',                   'surface', 75],
         ['muted-foreground',        'surface', 700],
         [null,    null,             'Accent'],
         ['accent',                  'brand',   100],
-        ['accent-foreground',       'brand',   950],
+        ['accent-foreground',       'brand',   fgStep(brandMap[100]?.hex, brandMap, 50, 950)],
         [null,    null,             'Destructive'],
-        ['destructive',             'error',   600],
-        ['destructive-foreground',  'error-surface', 100],
+        destLight,
+        destFgLight,
         [null,    null,             'Border / Input / Ring'],
         ['border',                  'surface', 400],
         ['input',                   'surface', 300],
@@ -1217,17 +1284,17 @@ function renderTable(tbodyId, palette, showHC = false) {
         [null,    null,             'Sidebar'],
         ['sidebar',                      'surface', 25],
         ['sidebar-foreground',           'surface', 975],
-        ['sidebar-primary',              'brand',   600],
-        ['sidebar-primary-foreground',   'brand',   50],
+        sbPrimLight,
+        sbPrimFgLight,
         ['sidebar-accent',               'brand',   100],
-        ['sidebar-accent-foreground',    'brand',   950],
+        ['sidebar-accent-foreground',    'brand',   fgStep(brandMap[100]?.hex, brandMap, 50, 950)],
         ['sidebar-border',               'surface', 400],
         ['sidebar-ring',                 'surface', 400],
       ]);
 
       const dark = block('.dark', [
         [null,    null,             'Base'],
-        ['background',              'surface', 850],
+        ['background',              'surface', 800],
         ['foreground',              'surface', 25],
         [null,    null,             'Card'],
         ['card',                    'surface', 875],
@@ -1236,20 +1303,20 @@ function renderTable(tbodyId, palette, showHC = false) {
         ['popover',                 'surface', 875],
         ['popover-foreground',      'surface', 25],
         [null,    null,             'Primary'],
-        ['primary',                 'brand',   400],
-        ['primary-foreground',      'brand',   975],
+        primaryDark,
+        primaryFgDark,
         [null,    null,             'Secondary — softened brand'],
         ['secondary',               'brand',   800],
-        ['secondary-foreground',    'brand',   100],
+        ['secondary-foreground',    'brand',   fgStep(brandMap[800]?.hex, brandMap, 100, 900)],
         [null,    null,             'Muted'],
-        ['muted',                   'surface', 825],
+        ['muted',                   'surface', 850],
         ['muted-foreground',        'surface', 300],
         [null,    null,             'Accent'],
         ['accent',                  'brand',   800],
-        ['accent-foreground',       'brand',   50],
+        ['accent-foreground',       'brand',   fgStep(brandMap[800]?.hex, brandMap, 50, 950)],
         [null,    null,             'Destructive'],
-        ['destructive',             'error',   400],
-        ['destructive-foreground',  'error-surface', 900],
+        destDark,
+        destFgDark,
         [null,    null,             'Border / Input / Ring'],
         ['border',                  'surface', 600],
         ['input',                   'surface', 700],
@@ -1257,10 +1324,10 @@ function renderTable(tbodyId, palette, showHC = false) {
         [null,    null,             'Sidebar'],
         ['sidebar',                      'surface', 875],
         ['sidebar-foreground',           'surface', 25],
-        ['sidebar-primary',              'brand',   400],
-        ['sidebar-primary-foreground',   'brand',   975],
+        sbPrimDark,
+        sbPrimFgDark,
         ['sidebar-accent',               'brand',   800],
-        ['sidebar-accent-foreground',    'brand',   50],
+        ['sidebar-accent-foreground',    'brand',   fgStep(brandMap[800]?.hex, brandMap, 50, 950)],
         ['sidebar-border',               'surface', 600],
         ['sidebar-ring',                 'surface', 600],
       ]);
@@ -1268,16 +1335,34 @@ function renderTable(tbodyId, palette, showHC = false) {
       let accentBlocks = '';
       accentPalettes.forEach(entry => {
         const n = entry.cssName;
+        const aPin  = !!entry.pin;
+        const aHex  = entry.hex;
+        const aCss  = aPin ? hexToCss(aHex) : null;
+        const aMap  = palMap(entry.palette || []);
+        const aFgCss = aPin ? fgDirect(aHex, aMap, 50, 975, n) : null;
+        const aLight  = aPin ? [`${n}`, '#direct', aCss]   : [`${n}`, n, 600];
+        const aFgL    = aPin ? [`${n}-foreground`, '#direct', aFgCss] : [`${n}-foreground`, n, fgStep(aMap[600]?.hex, aMap, 50, 975)];
+        const aDark   = aPin ? [`${n}`, '#direct', aCss]   : [`${n}`, n, 400];
+        const aFgD    = aPin ? [`${n}-foreground`, '#direct', aFgCss] : [`${n}-foreground`, n, fgStep(aMap[400]?.hex, aMap, 50, 975)];
         const accentRoot = block(`:root`, [
           [null,                           null, `${entry.name} — light`],
-          [`${n}`,                         n, 600],
-          [`${n}-foreground`,              n, 50],
+          aLight,
+          aFgL,
+          [null,                           null, 'Background / Card / Popover'],
+          [`${n}-background`,              `${n}-surface`, 50],
+          [`${n}-background-foreground`,   `${n}-surface`, 975],
+          [`${n}-card`,                    `${n}-surface`, 25],
+          [`${n}-card-foreground`,         `${n}-surface`, 975],
+          [`${n}-popover`,                 `${n}-surface`, 25],
+          [`${n}-popover-foreground`,      `${n}-surface`, 975],
           [null,                           null, 'Secondary'],
           [`${n}-secondary`,               n, 200],
           [`${n}-secondary-foreground`,    n, 900],
-          [null,                           null, 'Muted / Subtle'],
+          [null,                           null, 'Muted / Subtle / Accent'],
           [`${n}-muted`,                   `${n}-surface`, 75],
           [`${n}-muted-foreground`,        `${n}-surface`, 700],
+          [`${n}-accent`,                  n, 100],
+          [`${n}-accent-foreground`,       n, 950],
           [`${n}-subtle`,                  n, 100],
           [`${n}-subtle-foreground`,       n, 950],
           [null,                           null, 'Border / Input / Ring'],
@@ -1287,14 +1372,23 @@ function renderTable(tbodyId, palette, showHC = false) {
         ]);
         const accentDark = block(`.dark`, [
           [null,                           null, `${entry.name} — dark`],
-          [`${n}`,                         n, 400],
-          [`${n}-foreground`,              n, 975],
+          aDark,
+          aFgD,
+          [null,                           null, 'Background / Card / Popover'],
+          [`${n}-background`,              `${n}-surface`, 800],
+          [`${n}-background-foreground`,   `${n}-surface`, 25],
+          [`${n}-card`,                    `${n}-surface`, 875],
+          [`${n}-card-foreground`,         `${n}-surface`, 25],
+          [`${n}-popover`,                 `${n}-surface`, 875],
+          [`${n}-popover-foreground`,      `${n}-surface`, 25],
           [null,                           null, 'Secondary'],
           [`${n}-secondary`,               n, 800],
           [`${n}-secondary-foreground`,    n, 100],
-          [null,                           null, 'Muted / Subtle'],
-          [`${n}-muted`,                   `${n}-surface`, 825],
+          [null,                           null, 'Muted / Subtle / Accent'],
+          [`${n}-muted`,                   `${n}-surface`, 850],
           [`${n}-muted-foreground`,        `${n}-surface`, 300],
+          [`${n}-accent`,                  n, 800],
+          [`${n}-accent-foreground`,       n, 50],
           [`${n}-subtle`,                  n, 800],
           [`${n}-subtle-foreground`,       n, 50],
           [null,                           null, 'Border / Input / Ring'],
@@ -1415,7 +1509,7 @@ function renderTable(tbodyId, palette, showHC = false) {
       const error        = generatePalette(errorColorHex, 1.0);
       const errorSlated  = generatePalette(errorColorHex, chromaScale);
       const neutral      = generatePalette(bgColorHex, 0.0);
-      const slated       = generatePalette(bgColorHex, 0.5);
+      const slated       = generatePalette(bgColorHex, chromaScale);
 
       const accentPalettes = extraAccents
         .map(a => /^#[0-9a-fA-F]{6}$/.test(a.hex)
@@ -1471,7 +1565,7 @@ function renderTable(tbodyId, palette, showHC = false) {
         }
       });
       renderSurfaces('surfaces-demo', bg, slated, neutral, brandSwatch, brand, accentPalettes, error, errorSlated, errorSwatchOverride);
-      renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null, accentPalettes);
+      renderCodeBlocks(brand, bg, error, errorSlated, neutral, bgColorHex.toLowerCase() !== hex.toLowerCase() ? bgColorHex : null, accentPalettes, brandPin, hex, errorPin, errorColorHex);
       document.getElementById('output').classList.add('visible');
       history.replaceState(null, '', '#' + encodeState());
       document.getElementById('favicon').href =
@@ -1487,6 +1581,12 @@ function renderTable(tbodyId, palette, showHC = false) {
       generate();
     });
     document.getElementById('hexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.getElementById('hexInput').addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/#/g, '').trim().slice(0, 6);
+      e.target.value = text;
+      e.target.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     document.getElementById('hexInput').addEventListener('input', e => {
       const cleaned = e.target.value.replace(/#/g, '');
       if (cleaned !== e.target.value) e.target.value = cleaned;
@@ -1507,6 +1607,12 @@ function renderTable(tbodyId, palette, showHC = false) {
       generate();
     });
     document.getElementById('bgHexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.getElementById('bgHexInput').addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/#/g, '').trim().slice(0, 6);
+      e.target.value = text;
+      e.target.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     document.getElementById('bgHexInput').addEventListener('input', e => {
       const cleaned = e.target.value.replace(/#/g, '');
       if (cleaned !== e.target.value) e.target.value = cleaned;
@@ -1530,6 +1636,12 @@ function renderTable(tbodyId, palette, showHC = false) {
       generate();
     });
     document.getElementById('errorHexInput').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+    document.getElementById('errorHexInput').addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/#/g, '').trim().slice(0, 6);
+      e.target.value = text;
+      e.target.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     document.getElementById('errorHexInput').addEventListener('input', e => {
       const cleaned = e.target.value.replace(/#/g, '');
       if (cleaned !== e.target.value) e.target.value = cleaned;
