@@ -3,5 +3,20 @@ services:
     build: .
     container_name: oklch-palette
     restart: unless-stopped
-    ports:
-      - "8080:80"
+    labels:
+      - "traefik.enable=true"
+      # HTTPS
+      - "traefik.http.routers.oklch.rule=Host(`standby.design`) || Host(`www.standby.design`)"
+      - "traefik.http.routers.oklch.entrypoints=websecure"
+      - "traefik.http.routers.oklch.tls.certresolver=letsencrypt"
+      # HTTP → HTTPS redirect
+      - "traefik.http.routers.oklch-http.rule=Host(`standby.design`) || Host(`www.standby.design`)"
+      - "traefik.http.routers.oklch-http.entrypoints=web"
+      - "traefik.http.routers.oklch-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+    networks:
+      - traefik_web
+
+networks:
+  traefik_web:
+    external: true

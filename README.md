@@ -1,6 +1,37 @@
-# OKLCH Tonal Palette Generator
+# standby.design
 
-Ein interaktiver, client-seitiger Palette-Generator im **OKLCH-Farbraum** — keine Dependencies, kein Build-Step, einfach `index.html` öffnen.
+Multi-Tool-Hub unter **standby.design** — kleine Tools für Designer und Entwickler. Kein Framework, kein Build-Step, reines HTML/CSS/JS.
+
+## Struktur
+
+```
+/
+├── index.html        # Hub-Seite (standby.design)
+├── color/
+│   └── index.html    # OKLCH Palette Generator (standby.design/color)
+├── Dockerfile
+├── nginx.conf
+├── docker-compose.yml
+└── deploy.sh
+```
+
+## Deployment (Hetzner + Docker + nginx)
+
+```bash
+./deploy.sh
+```
+
+Setzt voraus: SSH-Key unter `C:/Local Data/Repositories/SSH Keys/hetzner_ed25519`.
+
+## DNS (Namecheap)
+
+A-Record für `standby.design` und `www.standby.design` → `46.225.131.97`
+
+---
+
+# OKLCH Tonal Palette Generator (`/color`)
+
+Ein interaktiver, client-seitiger Palette-Generator im **OKLCH-Farbraum** — keine Dependencies, kein Build-Step.
 
 ## Features
 
