@@ -26,7 +26,6 @@ export function applyStateFromHash() {
   const [brand, bg, bgAuto, err, errAuto, chroma, mode] = p;
   if (/^[0-9a-fA-F]{6}$/.test(brand)) {
     document.getElementById('hexInput').value = brand.toUpperCase();
-    document.getElementById('colorPicker').value = '#' + brand;
     document.getElementById('swatchPreview').style.background = '#' + brand;
   }
   state.bgAutoMatch = bgAuto === '1';
@@ -34,7 +33,6 @@ export function applyStateFromHash() {
   if (/^[0-9a-fA-F]{6}$/.test(bg)) {
     state.bgColorHex = '#' + bg.toUpperCase();
     document.getElementById('bgHexInput').value = bg.toUpperCase();
-    document.getElementById('bgColorPicker').value = '#' + bg;
     document.getElementById('bgSwatchPreview').style.background = '#' + bg;
   }
   state.errorAutoMatch = errAuto === '1';
@@ -42,7 +40,6 @@ export function applyStateFromHash() {
   if (/^[0-9a-fA-F]{6}$/.test(err)) {
     state.errorColorHex = '#' + err.toUpperCase();
     document.getElementById('errorHexInput').value = err.toUpperCase();
-    document.getElementById('errorColorPicker').value = '#' + err;
     document.getElementById('errorSwatchPreview').style.background = '#' + err;
   }
   const chromaVal = parseInt(chroma);

@@ -3,6 +3,7 @@
 // ================================================================
 
 import { state, regenerate } from './state.js';
+import { openColorPicker } from './color-picker.js';
 
 export function toggleBgAutoMatch() {
   state.bgAutoMatch = !state.bgAutoMatch;
@@ -74,8 +75,7 @@ export function renderAccentInputs() {
           </div>
         </div>
         <div class="color-input-wrapper">
-          <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}" onclick="document.getElementById('accentPicker${i}').click()"></div>
-          <input type="color" id="accentPicker${i}" value="${a.hex}" style="position:absolute;opacity:0;width:0;height:0">
+          <div class="color-preview-swatch" id="accentSwatch${i}" style="background:${a.hex}"></div>
           <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>
           <input type="text" class="accent-hex-input" id="accentHex${i}" value="${a.hex.replace('#','')}" maxlength="6" spellcheck="false">
         </div>
@@ -91,17 +91,17 @@ export function renderAccentInputs() {
     </div>`).join('');
 
   state.extraAccents.forEach((a, i) => {
-    const picker  = document.getElementById('accentPicker' + i);
     const hexInp  = document.getElementById('accentHex' + i);
     const nameInp = document.getElementById('accentName' + i);
     const swatch  = document.getElementById('accentSwatch' + i);
 
-    picker.addEventListener('input', e => {
-      const hex = e.target.value.toUpperCase();
-      state.extraAccents[i].hex = hex;
-      hexInp.value = hex.replace('#', '');
-      swatch.style.background = hex;
-      regenerate();
+    swatch.addEventListener('click', () => {
+      openColorPicker(swatch, state.extraAccents[i].hex, newHex => {
+        state.extraAccents[i].hex = newHex;
+        hexInp.value = newHex.replace('#', '');
+        swatch.style.background = newHex;
+        regenerate();
+      });
     });
     hexInp.addEventListener('paste', e => {
       e.preventDefault();
@@ -115,7 +115,6 @@ export function renderAccentInputs() {
       if (/^[0-9a-fA-F]{6}$/.test(cleaned)) {
         state.extraAccents[i].hex = '#' + cleaned.toUpperCase();
         swatch.style.background = state.extraAccents[i].hex;
-        picker.value = state.extraAccents[i].hex;
         regenerate();
       }
     });

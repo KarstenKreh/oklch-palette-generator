@@ -38,14 +38,12 @@ function generate() {
   const [bL, bC, bH] = hexToOklch(hex);
 
   document.getElementById('swatchPreview').style.background = hex;
-  document.getElementById('colorPicker').value = hex;
 
   // Surface auto-match: mirror primary
   if (state.bgAutoMatch) {
     state.bgColorHex = hex;
     document.getElementById('bgHexInput').value = raw.toUpperCase();
     document.getElementById('bgSwatchPreview').style.background = hex;
-    document.getElementById('bgColorPicker').value = hex;
   }
 
   document.getElementById('bgColorNote').textContent =
@@ -56,7 +54,6 @@ function generate() {
     state.errorColorHex = computeAutoErrorHex(hex);
     document.getElementById('errorHexInput').value = state.errorColorHex.replace('#', '');
     document.getElementById('errorSwatchPreview').style.background = state.errorColorHex;
-    document.getElementById('errorColorPicker').value = state.errorColorHex;
   }
 
   const brand        = generatePalette(hex, 1.0);
