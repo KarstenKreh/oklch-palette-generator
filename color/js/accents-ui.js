@@ -81,7 +81,10 @@ export function renderAccentInputs() {
         </div>
       </div>
       <div class="color-input-col">
-        <span class="color-col-label">Surface <span class="color-surface-auto">auto</span></span>
+        <div class="color-col-header">
+          <span class="color-col-label">Surface</span>
+          <span class="color-surface-auto">auto</span>
+        </div>
         <div class="color-input-wrapper">
           <div class="color-preview-swatch" id="accentSurfaceSwatch${i}" style="background:var(--bg-surface)"></div>
           <span style="color:var(--text-faint);font-size:1.1rem;font-family:monospace">#</span>

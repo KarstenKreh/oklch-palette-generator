@@ -38,14 +38,14 @@ h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; color: #fff; }
 .color-input-wrapper {
   display: flex; align-items: center; gap: 0.5rem;
   background: var(--bg-surface); border: 1px solid var(--border-hi);
-  border-radius: 6px; padding: 0.5rem 0.75rem;
+  border-radius: 6px; padding: 0.4rem 0.5rem;
   transition: background-color 0.35s ease, border-color 0.35s ease;
 }
 .color-input-wrapper:focus-within {
   border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .color-preview-swatch {
-  width: 36px; height: 36px; border-radius: 5px;
+  width: 28px; height: 28px; border-radius: 4px;
   border: 2px solid rgba(255,255,255,0.1); cursor: pointer; flex-shrink: 0;
 }
 #hexInput, #bgHexInput, #errorHexInput {
@@ -67,8 +67,8 @@ h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; color: #fff; }
   transition: background-color 0.35s ease, border-color 0.35s ease;
 }
 .color-input-col {
-  display: flex; flex-direction: column; gap: 0.3rem;
-  padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 0.6rem 0.75rem;
 }
 .color-input-col:not(:last-child) { border-bottom: 1px solid var(--border-hi); }
 .color-surface-auto {
@@ -77,7 +77,7 @@ h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; color: #fff; }
 }
 .color-col-label {
   font-size: 0.65rem; color: var(--text-dim); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.07em;
+  letter-spacing: 0.02em;
 }
 .color-col-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .auto-btn {
@@ -191,7 +191,7 @@ input[type=range]::-moz-range-thumb {
   grid-template-columns: 1fr !important;
   gap: 1rem;
 }
-@media (max-width: 900px)  { .surface-demo { grid-template-columns: 1fr 1fr; } .main-layout { grid-template-columns: 1fr; } }
+@media (max-width: 900px)  { .surface-demo { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 500px)  { .surface-demo { grid-template-columns: 1fr; } }
 .surface-panel { border-radius: 20px; padding: 1.1rem; }
 .surface-panel h3 { font-size: 0.8rem; margin-bottom: 0.6rem; font-weight: 600; }
@@ -199,9 +199,9 @@ input[type=range]::-moz-range-thumb {
   font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em;
   opacity: 0.7; margin-bottom: 0.15rem;
 }
-.surface-card { border-radius: 12px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
+.surface-card { border-radius: 6px; padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; }
 .surface-card p { font-size: 0.65rem; opacity: 0.85; }
-.surface-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.65rem; }
+.surface-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.65rem; margin-bottom: 0.35rem; }
 .surface-btn {
   display: inline-block; padding: 0.5rem 1.1rem; border-radius: 5px;
   font-size: 0.65rem; font-weight: 600; border: none; cursor: default;
@@ -273,7 +273,8 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 
 /* ── Semantic tab distinction ─────────────────────────── */
 .semantic-info {
-  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0;
+  padding: 0.75rem 1.25rem;
 }
 .semantic-badge {
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
@@ -300,12 +301,18 @@ tr:hover td { background: rgba(255,255,255,0.025); }
   font-size: 0.7rem; line-height: 1.6; overflow-x: auto; white-space: pre;
   color: var(--text-info); margin-bottom: 1rem; position: relative;
   transition: background-color 0.35s ease, border-color 0.35s ease;
+  max-height: 60vh; overflow-y: auto;
+}
+.tab-content > .code-block {
+  margin-bottom: 0; border: none; border-radius: 0 0 5px 5px;
 }
 .copy-block-btn {
-  position: absolute; top: 0.6rem; right: 0.6rem;
+  position: sticky; top: 0.6rem; float: right; z-index: 2;
+  margin-top: 0; margin-right: 0;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
   color: var(--text-info); font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 4px;
   cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .copy-block-btn:hover { background: rgba(255,255,255,0.1); color: #ccc; }
 .copy-block-btn.copied { background: rgba(80,200,120,0.15); color: #6fc; border-color: rgba(80,200,120,0.3); }
@@ -334,6 +341,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
   padding: 1.5rem; background: var(--bg-surface);
   transition: background-color 0.35s ease, border-color 0.35s ease;
 }
+.tab-content:has(> .code-block) { padding: 0; background: transparent; }
 .tab-content.active { display: block; }
 .tab-content > table { margin-bottom: 0; }
 
@@ -351,7 +359,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 /* ── Two-column layout ─────────────────────────────────── */
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   align-items: start;
   margin-bottom: 2rem;
@@ -360,6 +368,11 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .controls-col {
   position: sticky;
   top: 2rem;
+}
+
+@media (max-width: 1100px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .controls-col { position: static; }
 }
 
 /* In controls column: pairs stack vertically, but each pair is horizontal */
@@ -385,24 +398,56 @@ tr:hover td { background: rgba(255,255,255,0.025); }
   display: block;
 }
 
-/* Preview column: horizontal panel layout */
+/* Preview column: panel layout with top (2-col) and bottom (full-width) */
 .preview-col .surface-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.surface-panel-top {
   display: grid;
-  grid-template-columns: 140px 1fr;
-  grid-template-rows: auto;
-  gap: 0 1rem;
+  grid-template-columns: 120px 1fr;
+  gap: 0 0.75rem;
   align-items: start;
 }
 
-.preview-col .surface-panel-left {
+.surface-panel-left {
   display: flex;
   flex-direction: column;
 }
 
-.preview-col .surface-panel-right {
+.surface-panel-right {
   display: flex;
   flex-direction: column;
 }
+
+.surface-panel-bottom {
+  display: flex;
+  flex-direction: column;
+}
+
+.surface-divider-row {
+  display: flex; gap: 0.75rem; margin-top: 0.75rem;
+}
+.surface-divider {
+  flex: 1;
+  border-top: 1px solid;
+  padding-top: 0.2rem;
+  font-size: 0.5rem;
+  font-weight: 600;
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+}
+
+/* ── Scrollbars ───────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
 /* ── Mobile ───────────────────────────────────────────── */
 @media (max-width: 600px) {
@@ -469,10 +514,10 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .accent-name-input {
   background: transparent; border: none; outline: none;
   font-size: 0.65rem; color: var(--text-dim); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.07em;
+  letter-spacing: 0.02em; cursor: pointer;
   font-family: 'Segoe UI', system-ui, sans-serif; width: 100%;
 }
-.accent-name-input:focus { color: var(--accent-text); }
+.accent-name-input:focus { cursor: text; color: var(--accent-text); }
 .accent-delete-btn {
   margin-left: auto; font-size: 0.65rem; padding: 0.2rem 0.5rem;
   border-radius: 3px; border: 1px solid var(--border);
@@ -489,6 +534,31 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 }
 .accent-mini-card-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ── Shadow Preview ─────────────────────────────────── */
+.surface-shadow-card {
+  border-radius: 8px; padding: 1.5rem 0.75rem; margin-top: 1rem;
+}
+.surface-shadow-row {
+  display: flex; justify-content: space-around; align-items: center;
+}
+.surface-shadow-circle {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.surface-shadow-circle span {
+  font-size: 0.5rem; font-weight: 600; opacity: 0.5;
+}
+
+
+/* ── Accent Badges row ─────────────────────────────── */
+.surface-accent-badges {
+  display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 1rem;
+}
+.surface-accent-badges .accent-mini-card {
+  margin-top: 0; flex: 1; min-width: 0; justify-content: center;
+  padding: 0.3rem 0.5rem; font-size: 0.55rem;
 }
 
 /* ── Color Picker Popup ──────────────────────────────── */

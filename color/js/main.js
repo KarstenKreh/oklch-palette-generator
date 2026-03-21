@@ -75,6 +75,10 @@ function generate() {
   const c500brand   = brand.find(r => r.step === 500);
   const c500neutral = neutral.find(r => r.step === 500);
 
+  // Update surface swatches to show the actual surface-50 (= --background) color
+  const bg50 = bg.find(r => r.step === 50);
+  if (bg50) document.getElementById('bgSwatchPreview').style.background = bg50.hex;
+
   // Pin overrides: use exact input hex when "Pin" is active
   const brandSwatch = state.brandPin
     ? { hex, L: hexToOklch(hex)[0] }
@@ -91,7 +95,7 @@ function generate() {
   ];
 
   // Update surface preview swatches (auto-derived, read-only)
-  const esSwatch = errorSlated.find(r => r.step === 200);
+  const esSwatch = errorSlated.find(r => r.step === 50);
   if (esSwatch) {
     const el = document.getElementById('errorSurfacePreview');
     if (el) el.style.background = esSwatch.hex;
@@ -108,7 +112,7 @@ function generate() {
   renderAccentTabs(accentPalettes);
   // Update accent surface preview swatches
   accentPalettes.forEach((entry, i) => {
-    const s = entry.slatedPalette.find(r => r.step === 200);
+    const s = entry.slatedPalette.find(r => r.step === 50);
     if (s) {
       const sw = document.getElementById('accentSurfaceSwatch' + i);
       if (sw) sw.style.background = s.hex;

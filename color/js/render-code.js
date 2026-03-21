@@ -5,36 +5,12 @@
 import { hexToOklch, contrastRatio } from './color-math.js';
 import { state } from './state.js';
 
+import { generateShadowValues } from './shadows.js';
+
 function generateShadowTokens(bgHex, isDark) {
-  const PHI = 1.618033988749895;
-  const SQRT_PHI = Math.sqrt(PHI);
-  const [bgL, , surfaceHue] = hexToOklch(bgHex);
-
-  const shadowL = isDark ? 0.02 : 0.05;
-  const shadowC = isDark ? 0.005 : 0.01;
-  const H = surfaceHue.toFixed(2);
-
-  const alphaMultiplier = 0.12 / (bgL + 0.1);
-
-  const levels = [
-    { name: 'xs', factor: 1 / PHI },
-    { name: 'sm', factor: 1 / SQRT_PHI },
-    { name: 'md', factor: 1 },
-    { name: 'lg', factor: SQRT_PHI },
-    { name: 'xl', factor: PHI },
-  ];
-
-  return levels.map(({ name, factor }) => {
-    const oY = factor;
-    const a1 = (0.06 * factor * alphaMultiplier).toFixed(3);
-    const a2 = (0.04 * factor * alphaMultiplier).toFixed(3);
-    const b1 = (factor * 0.6).toFixed(3);
-    const b2 = (factor * 2.0).toFixed(3);
-    const shadow =
-      `0 ${(oY * 0.4).toFixed(3)}rem ${b1}rem oklch(${shadowL} ${shadowC} ${H} / ${a1}), ` +
-      `0 ${oY.toFixed(3)}rem ${b2}rem oklch(${shadowL} ${shadowC} ${H} / ${a2})`;
-    return [`shadow-${name}`, '#direct', shadow];
-  });
+  return generateShadowValues(bgHex, isDark).map(({ name, shadow }) =>
+    [`shadow-${name}`, '#direct', shadow]
+  );
 }
 
 export function fmtSec(palette, prefix, mode) {
@@ -116,8 +92,8 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
     primaryLight,
     primaryFgLight,
     [null,    null,             'Secondary — softened brand'],
-    ['secondary',               'brand',   300],
-    ['secondary-foreground',    'brand',   fgStep(brandMap[300]?.hex, brandMap, 100, 900)],
+    ['secondary',               'brand',   200],
+    ['secondary-foreground',    'brand',   fgStep(brandMap[200]?.hex, brandMap, 100, 900)],
     [null,    null,             'Muted'],
     ['muted',                   'surface', 75],
     ['muted-foreground',        'surface', 700],
@@ -127,6 +103,9 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
     [null,    null,             'Destructive'],
     destLight,
     destFgLight,
+    ['destructive-subtle',              'error',         100],
+    ['destructive-subtle-foreground',   'error',         950],
+    ['destructive-border',              'error-surface', 300],
     [null,    null,             'Border / Input / Ring'],
     ['border',                  'surface', 300],
     ['border-muted',            'surface', 200],
@@ -159,8 +138,8 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
     primaryDark,
     primaryFgDark,
     [null,    null,             'Secondary — softened brand'],
-    ['secondary',               'brand',   700],
-    ['secondary-foreground',    'brand',   fgStep(brandMap[700]?.hex, brandMap, 100, 900)],
+    ['secondary',               'brand',   800],
+    ['secondary-foreground',    'brand',   fgStep(brandMap[800]?.hex, brandMap, 100, 900)],
     [null,    null,             'Muted'],
     ['muted',                   'surface', 850],
     ['muted-foreground',        'surface', 300],
@@ -170,6 +149,9 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
     [null,    null,             'Destructive'],
     destDark,
     destFgDark,
+    ['destructive-subtle',              'error',         800],
+    ['destructive-subtle-foreground',   'error',         50],
+    ['destructive-border',              'error-surface', 700],
     [null,    null,             'Border / Input / Ring'],
     ['border',                  'surface', 600],
     ['border-muted',            'surface', 700],
@@ -212,7 +194,7 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
       [`${n}-popover`,                 `${n}-surface`, 25],
       [`${n}-popover-foreground`,      `${n}-surface`, 975],
       [null,                           null, 'Secondary'],
-      [`${n}-secondary`,               n, 300],
+      [`${n}-secondary`,               n, 200],
       [`${n}-secondary-foreground`,    n, 900],
       [null,                           null, 'Muted / Subtle / Accent'],
       [`${n}-muted`,                   `${n}-surface`, 75],
@@ -239,7 +221,7 @@ export function renderSemantic(accentPalettes = [], pinOpts = {}, brandPal = [],
       [`${n}-popover`,                 `${n}-surface`, 800],
       [`${n}-popover-foreground`,      `${n}-surface`, 25],
       [null,                           null, 'Secondary'],
-      [`${n}-secondary`,               n, 700],
+      [`${n}-secondary`,               n, 800],
       [`${n}-secondary-foreground`,    n, 100],
       [null,                           null, 'Muted / Subtle / Accent'],
       [`${n}-muted`,                   `${n}-surface`, 850],
