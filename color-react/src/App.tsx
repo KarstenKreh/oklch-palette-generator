@@ -23,7 +23,9 @@ function App() {
   useFavicon(brandHex);
 
   const handleShare = useCallback(() => {
-    const url = window.location.origin + window.location.pathname + '#' + encodeState(store);
+    const name = store.themeName?.trim();
+    const query = name ? `?t=${encodeURIComponent(name)}` : '';
+    const url = window.location.origin + window.location.pathname + query + '#' + encodeState(store);
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
   }, [store]);
 

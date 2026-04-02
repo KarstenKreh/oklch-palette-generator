@@ -5,8 +5,10 @@ RUN npm ci
 COPY color-react/ ./
 RUN npm run build
 
-FROM nginx:alpine
-COPY index.html /usr/share/nginx/html/index.html
-COPY --from=build /app/dist /usr/share/nginx/html/color/
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM node:20-alpine
+WORKDIR /app
+COPY index.html /app/public/index.html
+COPY --from=build /app/dist /app/public/color/
+COPY og-server.js /app/og-server.js
 EXPOSE 80
+CMD ["node", "og-server.js"]
