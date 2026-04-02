@@ -5,10 +5,8 @@ RUN npm ci
 COPY color-react/ ./
 RUN npm run build
 
-# Generate OG image from SVG
-RUN npm install sharp --no-save
-COPY generate-og-image.js /tmp/generate-og-image.js
-RUN node -e " \
+# Generate OG image: SVG → PNG (messengers don't support SVG)
+RUN npm install sharp --no-save && node -e " \
   const sharp = require('sharp'); \
   const fs = require('fs'); \
   const svg = fs.readFileSync('/app/public/og-image.svg'); \
