@@ -5,6 +5,16 @@ RUN npm ci
 COPY color-react/ ./
 RUN npm run build
 
+# Generate OG image from SVG
+RUN npm install sharp --no-save
+COPY generate-og-image.js /tmp/generate-og-image.js
+RUN node -e " \
+  const sharp = require('sharp'); \
+  const fs = require('fs'); \
+  const svg = fs.readFileSync('/app/public/og-image.svg'); \
+  sharp(svg).resize(1200, 630).png().toFile('/app/dist/og-image.png').then(() => console.log('OG image generated')); \
+"
+
 FROM node:20-alpine
 WORKDIR /app
 COPY index.html /app/public/index.html
