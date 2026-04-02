@@ -51,7 +51,9 @@ export function SeedColors() {
   } = usePalette();
 
   const surface50Hex = surface.find((e) => e.step === 50)?.hex;
+  const surface500Hex = surface.find((e) => e.step === 500)?.hex;
   const errorSurface50Hex = errorSurface.find((e) => e.step === 50)?.hex;
+  const errorSurface500Hex = errorSurface.find((e) => e.step === 500)?.hex;
 
   const handleBrandHexChange = useCallback(
     (hex: string) => setBrandHex(`#${hex}`),
@@ -147,7 +149,7 @@ export function SeedColors() {
               value={brandDisplay}
               onChange={handleBrandHexChange}
               swatchColor={brandHex}
-              resultSwatchColor={surface50Hex}
+              previewSwatches={[surface500Hex, surface50Hex].filter(Boolean) as string[]}
               readOnly
               readOnlyHex={surface50Hex?.replace('#', '')}
             />
@@ -156,7 +158,7 @@ export function SeedColors() {
               value={bgDisplay}
               onChange={handleBgHexChange}
               swatchColor={effectiveBgHex}
-              resultSwatchColor={surface50Hex}
+              previewSwatches={[surface500Hex, surface50Hex].filter(Boolean) as string[]}
             />
           )}
         </div>
@@ -220,7 +222,7 @@ export function SeedColors() {
             value={effectiveErrorHex.replace('#', '')}
             onChange={handleErrorHexChange}
             swatchColor={effectiveErrorHex}
-            resultSwatchColor={errorSurface50Hex}
+            previewSwatches={[errorSurface500Hex, errorSurface50Hex].filter(Boolean) as string[]}
             readOnly
             readOnlyHex={errorSurface50Hex?.replace('#', '')}
           />

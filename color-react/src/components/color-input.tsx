@@ -9,7 +9,8 @@ interface ColorInputProps {
   value: string;
   onChange: (hex: string) => void;
   swatchColor: string;
-  resultSwatchColor?: string;
+  /** Additional preview swatches (e.g. surface-500, surface-50) */
+  previewSwatches?: string[];
   readOnly?: boolean;
   readOnlyHex?: string;
 }
@@ -18,7 +19,7 @@ export function ColorInput({
   value,
   onChange,
   swatchColor,
-  resultSwatchColor,
+  previewSwatches,
   readOnly,
   readOnlyHex,
 }: ColorInputProps) {
@@ -50,30 +51,39 @@ export function ColorInput({
     [onChange],
   );
 
+  const swatchBtn = (color: string, key?: string) => (
+    <div
+      key={key}
+      className="w-7 h-7 shrink-0"
+      style={{ backgroundColor: color }}
+    />
+  );
+
   return (
-    <div className="flex items-center gap-2">
-      {/* Primary swatch — opens color picker */}
+    <div className="flex h-7 items-center gap-2">
+      {/* Swatches — grouped, no gap, rounded container */}
       {readOnly ? (
-        <div
-          className="size-7 shrink-0 rounded border border-border"
-          style={{ backgroundColor: swatchColor }}
-        />
+        <div className="flex items-center overflow-hidden rounded-md border border-border">
+          {swatchBtn(swatchColor)}
+          {previewSwatches?.map((color, i) => swatchBtn(color, `ps-${i}`))}
+        </div>
       ) : (
         <ColorPicker value={swatchColor} onChange={handlePickerChange}>
-          <button
-            className="size-7 shrink-0 rounded border border-border cursor-pointer hover:ring-2 hover:ring-ring transition-shadow"
-            style={{ backgroundColor: swatchColor }}
-          />
+          <div className="flex items-center overflow-hidden rounded-md border border-border cursor-pointer hover:ring-2 hover:ring-ring transition-shadow">
+            {swatchBtn(swatchColor)}
+            {previewSwatches?.map((color, i) => swatchBtn(color, `ps-${i}`))}
+          </div>
         </ColorPicker>
       )}
 
-      {readOnly ? (
-        <span className="text-sm font-mono text-muted-foreground select-none pointer-events-none cursor-default">
-          #{readOnlyHex ?? value}
-        </span>
-      ) : (
-        <div className="flex items-center gap-0.5">
-          <span className="text-sm text-muted-foreground select-none">#</span>
+      {/* Hex display */}
+      <div className="flex items-center gap-0.5 min-w-0">
+        <span className="text-xs text-muted-foreground select-none">#</span>
+        {readOnly ? (
+          <span className="h-7 leading-7 w-[7.5ch] font-mono text-xs text-muted-foreground select-none pointer-events-none">
+            {readOnlyHex ?? value}
+          </span>
+        ) : (
           <Input
             value={value}
             onChange={handleChange}
@@ -82,21 +92,13 @@ export function ColorInput({
             spellCheck={false}
             autoComplete="off"
             className={cn(
-              'h-7 w-[7.5ch] font-mono text-xs uppercase',
+              'h-7 w-[7.5ch] font-mono !text-xs uppercase',
               'border-none bg-transparent! px-0 shadow-none',
               'focus-visible:ring-0 focus-visible:border-transparent',
             )}
           />
-        </div>
-      )}
-
-      {/* Result swatch (optional) */}
-      {resultSwatchColor && (
-        <div
-          className="size-5 shrink-0 rounded border border-border"
-          style={{ backgroundColor: resultSwatchColor }}
-        />
-      )}
+        )}
+      </div>
     </div>
   );
 }

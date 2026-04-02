@@ -22,6 +22,9 @@ export function AccentInputs() {
         const surface50Hex = palette?.slatedPalette.find(
           (e) => e.step === 50,
         )?.hex;
+        const surface500Hex = palette?.slatedPalette.find(
+          (e) => e.step === 500,
+        )?.hex;
 
         return (
           <AccentRow
@@ -31,6 +34,7 @@ export function AccentInputs() {
             hex={accent.hex}
             pin={accent.pin}
             surface50Hex={surface50Hex}
+            surface500Hex={surface500Hex}
             onRemove={removeAccent}
             onUpdate={updateAccent}
             onTogglePin={toggleAccentPin}
@@ -57,6 +61,7 @@ interface AccentRowProps {
   hex: string;
   pin: boolean;
   surface50Hex?: string;
+  surface500Hex?: string;
   onRemove: (index: number) => void;
   onUpdate: (index: number, updates: { name?: string; hex?: string }) => void;
   onTogglePin: (index: number) => void;
@@ -68,6 +73,7 @@ function AccentRow({
   hex,
   pin,
   surface50Hex,
+  surface500Hex,
   onRemove,
   onUpdate,
   onTogglePin,
@@ -164,7 +170,7 @@ function AccentRow({
           value={displayHex}
           onChange={handleHexChange}
           swatchColor={hex}
-          resultSwatchColor={surface50Hex}
+          previewSwatches={[surface500Hex, surface50Hex].filter(Boolean) as string[]}
           readOnly
           readOnlyHex={surface50Hex?.replace('#', '')}
         />
