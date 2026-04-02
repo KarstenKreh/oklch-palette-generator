@@ -24,7 +24,11 @@ function App() {
 
   const handleShare = useCallback(() => {
     const name = store.themeName?.trim();
-    const query = name ? `?t=${encodeURIComponent(name)}` : '';
+    const color = store.brandHex.replace('#', '');
+    const params = new URLSearchParams();
+    if (name) params.set('t', name);
+    params.set('c', color);
+    const query = params.toString() ? `?${params.toString()}` : '';
     const url = window.location.origin + window.location.pathname + query + '#' + encodeState(store);
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
   }, [store]);
