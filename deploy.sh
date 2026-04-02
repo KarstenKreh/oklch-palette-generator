@@ -11,7 +11,7 @@ ssh -i "$SSH_KEY" "$SERVER" 'docker network inspect traefik_web >/dev/null 2>&1 
 
 echo "==> Deploying OKLCH Palette Generator..."
 ssh -i "$SSH_KEY" "$SERVER" "mkdir -p $REMOTE_DIR/color-react"
-scp -i "$SSH_KEY" index.html docker-compose.yml Dockerfile nginx.conf "$SERVER:$REMOTE_DIR/"
+scp -i "$SSH_KEY" index.html docker-compose.yml Dockerfile nginx.conf og-server.js "$SERVER:$REMOTE_DIR/"
 
 # Upload color-react source (tar to exclude node_modules/dist, unpack on server)
 echo "==> Uploading color-react source..."
