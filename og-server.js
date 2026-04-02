@@ -39,7 +39,7 @@ function injectOgTags(html, themeName) {
   );
 
   const title = `${safeName} — OKLCH Theme Generator`;
-  const description = `I created "${safeName}" with the OKLCH Theme Generator on standby.design — perceptually uniform color palettes for shadcn/ui apps.`;
+  const description = `${safeName} — a color theme created with the OKLCH Theme Generator on standby.design. Perceptually uniform palettes, semantic tokens, shadows, and dark mode — ready to paste into any shadcn/ui app.`;
 
   html = html.replace(
     /<meta property="og:title" content="[^"]*"/,
