@@ -17,6 +17,10 @@ scp -i "$SSH_KEY" index.html docker-compose.yml Dockerfile nginx.conf og-server.
 echo "==> Uploading color-react source..."
 tar cf - --exclude='node_modules' --exclude='dist' --exclude='.git' color-react/ | ssh -i "$SSH_KEY" "$SERVER" "cd $REMOTE_DIR && rm -rf color-react && tar xf -"
 
+# Upload type-react source (tar to exclude node_modules/dist, unpack on server)
+echo "==> Uploading type-react source..."
+tar cf - --exclude='node_modules' --exclude='dist' --exclude='.git' type-react/ | ssh -i "$SSH_KEY" "$SERVER" "cd $REMOTE_DIR && rm -rf type-react && tar xf -"
+
 echo "==> Docker-Container bauen und starten..."
 ssh -i "$SSH_KEY" "$SERVER" "cd $REMOTE_DIR && docker compose up -d --build"
 

@@ -11,6 +11,7 @@ const path = require('path');
 const PORT = 80;
 const STATIC_ROOT = '/app/public';
 const COLOR_INDEX = path.join(STATIC_ROOT, 'color', 'index.html');
+const TYPE_INDEX = path.join(STATIC_ROOT, 'type', 'index.html');
 const ROOT_INDEX = path.join(STATIC_ROOT, 'index.html');
 
 const MIME_TYPES = {
@@ -31,6 +32,13 @@ try {
   colorHtmlTemplate = fs.readFileSync(COLOR_INDEX, 'utf-8');
 } catch (e) {
   console.error('Could not read color index.html:', e.message);
+}
+
+let typeHtmlTemplate = '';
+try {
+  typeHtmlTemplate = fs.readFileSync(TYPE_INDEX, 'utf-8');
+} catch (e) {
+  console.error('Could not read type index.html:', e.message);
 }
 
 const HEX_RE = /^[0-9a-fA-F]{6}$/;
@@ -136,6 +144,13 @@ const server = http.createServer((req, res) => {
   if ((pathname === '/color' || pathname.startsWith('/color/')) && !path.extname(pathname)) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(colorHtmlTemplate || 'Not found');
+    return;
+  }
+
+  // /type SPA fallback — any /type/* path without a file extension serves index.html
+  if ((pathname === '/type' || pathname.startsWith('/type/')) && !path.extname(pathname)) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(typeHtmlTemplate || 'Not found');
     return;
   }
 
