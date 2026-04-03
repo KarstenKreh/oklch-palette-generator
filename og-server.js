@@ -94,9 +94,47 @@ function injectOgTags(html, themeName, brandHex) {
   return html;
 }
 
+// Cache Fontshare catalog in memory (refreshed on restart)
+let fontshareCache = null;
+let fontshareFetchPromise = null;
+
+function fetchFontshare() {
+  if (fontshareFetchPromise) return fontshareFetchPromise;
+  fontshareFetchPromise = new Promise((resolve) => {
+    const https = require('https');
+    https.get('https://api.fontshare.com/v2/fonts', (apiRes) => {
+      const chunks = [];
+      apiRes.on('data', (c) => chunks.push(c));
+      apiRes.on('end', () => {
+        fontshareCache = Buffer.concat(chunks);
+        resolve(fontshareCache);
+      });
+    }).on('error', () => {
+      resolve(fontshareCache || Buffer.from('{"fonts":[]}'));
+    });
+  });
+  return fontshareFetchPromise;
+}
+
+// Pre-fetch on startup
+fetchFontshare();
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
+
+  // Fontshare catalog proxy (avoids CORS)
+  if (pathname === '/api/fonts') {
+    fetchFontshare().then((data) => {
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+      });
+      res.end(data);
+    });
+    return;
+  }
 
   // Dynamic OG image endpoint: /color/og-image?c=HEX → 1200x630 PNG
   if (pathname === '/color/og-image') {

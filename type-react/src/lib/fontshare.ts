@@ -81,7 +81,11 @@ interface FontshareApiResponse {
 export function fetchFontCatalog(): Promise<FontEntry[]> {
   if (fetchPromise) return fetchPromise;
 
-  fetchPromise = fetch('https://api.fontshare.com/v2/fonts')
+  const apiUrl = import.meta.env.DEV
+    ? 'https://api.fontshare.com/v2/fonts'
+    : '/api/fonts';
+
+  fetchPromise = fetch(apiUrl)
     .then((r) => r.json())
     .then((data: FontshareApiResponse) => {
       const entries: FontEntry[] = data.fonts.map((f) => {
