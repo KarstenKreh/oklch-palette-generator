@@ -4,6 +4,8 @@
  * Fetches the full font list from the Fontshare API (~100 fonts).
  * Falls back to a small static seed so the UI is never empty.
  * Fonts are loaded on-demand via the Fontshare CSS API.
+ *
+ * Mono fonts use system font stacks (no external loading needed).
  */
 
 export interface FontEntry {
@@ -11,14 +13,24 @@ export interface FontEntry {
   name: string;
   category: 'sans' | 'serif' | 'mono' | 'display';
   fallback: string;
+  /** True for system fonts that need no external loading */
+  isSystem?: boolean;
 }
 
-// ── Mono fonts (not on Fontshare — always included) ─────────────
+// ── Mono fonts (system stacks — no external service) ────────────
 
 const MONO_FONTS: FontEntry[] = [
-  { slug: 'jet-brains-mono', name: 'JetBrains Mono', category: 'mono', fallback: 'monospace' },
-  { slug: 'fira-code', name: 'Fira Code', category: 'mono', fallback: 'monospace' },
+  { slug: 'system-mono', name: 'System Default', category: 'mono', fallback: 'monospace', isSystem: true },
+  { slug: 'consolas', name: 'Consolas', category: 'mono', fallback: 'monospace', isSystem: true },
+  { slug: 'sf-mono', name: 'SF Mono', category: 'mono', fallback: 'monospace', isSystem: true },
 ];
+
+// System mono stacks — mapped by slug
+const SYSTEM_MONO_STACKS: Record<string, string> = {
+  'system-mono': "ui-monospace, 'Cascadia Code', Consolas, 'SF Mono', Menlo, 'DejaVu Sans Mono', monospace",
+  'consolas': "Consolas, 'Cascadia Code', 'DejaVu Sans Mono', monospace",
+  'sf-mono': "'SF Mono', Menlo, 'DejaVu Sans Mono', monospace",
+};
 
 // ── Minimal seed catalog (used until API responds) ──────────────
 
@@ -81,7 +93,7 @@ export function fetchFontCatalog(): Promise<FontEntry[]> {
           fallback: FALLBACK_MAP[cat],
         };
       });
-      // Sort alphabetically, then append mono fonts (not on Fontshare)
+      // Sort alphabetically, then append system mono fonts
       entries.sort((a, b) => a.name.localeCompare(b.name));
       catalog = [...entries, ...MONO_FONTS];
       rebuildMap();
@@ -117,6 +129,10 @@ export function getFontEntry(slug: string): FontEntry | undefined {
 }
 
 export function fontFamily(slug: string): string {
+  // System mono fonts have their own stacks
+  const monoStack = SYSTEM_MONO_STACKS[slug];
+  if (monoStack) return monoStack;
+
   const entry = catalogMap.get(slug);
   if (!entry) return 'sans-serif';
   return `'${entry.name}', ${entry.fallback}`;
@@ -125,41 +141,27 @@ export function fontFamily(slug: string): string {
 // ── URL builders ────────────────────────────────────────────────
 
 export function buildFontshareUrl(slugs: string[]): string {
-  const unique = [...new Set(slugs.filter(Boolean))];
+  // Filter out system fonts — they don't need loading
+  const unique = [...new Set(slugs.filter((s) => !SYSTEM_MONO_STACKS[s] && s))];
   if (unique.length === 0) return '';
   const params = unique.map((s) => `f[]=${s}@1,2`).join('&');
   return `https://api.fontshare.com/v2/css?${params}&display=swap`;
 }
 
 export function buildFontshareEmbed(slugs: string[]): string {
-  const lines: string[] = [];
-
-  // Fontshare fonts
-  const fontshareSlugs = slugs.filter((s) => !GOOGLE_FONT_SLUGS[s]);
-  const fontshareUrl = buildFontshareUrl(fontshareSlugs);
-  if (fontshareUrl) lines.push(`<link href="${fontshareUrl}" rel="stylesheet">`);
-
-  // Google Fonts (mono)
-  const googleSlugs = slugs.filter((s) => GOOGLE_FONT_SLUGS[s]);
-  if (googleSlugs.length) {
-    const families = googleSlugs.map((s) => `family=${GOOGLE_FONT_SLUGS[s]}:wght@300;400;500;600;700`).join('&');
-    lines.push(`<link href="https://fonts.googleapis.com/css2?${families}&display=swap" rel="stylesheet">`);
-  }
-
-  return lines.join('\n');
+  const url = buildFontshareUrl(slugs);
+  if (!url) return '';
+  return `<link href="${url}" rel="stylesheet">`;
 }
 
 // ── On-demand font loading ──────────────────────────────────────
 
 const loadedSlugs = new Set<string>();
 
-// Mono fonts are not on Fontshare — load from Google Fonts
-const GOOGLE_FONT_SLUGS: Record<string, string> = {
-  'jet-brains-mono': 'JetBrains+Mono',
-  'fira-code': 'Fira+Code',
-};
-
 export function loadFont(slug: string): void {
+  // System fonts need no loading
+  if (SYSTEM_MONO_STACKS[slug]) return;
+
   if (loadedSlugs.has(slug)) return;
   loadedSlugs.add(slug);
 
@@ -169,14 +171,7 @@ export function loadFont(slug: string): void {
   const link = document.createElement('link');
   link.id = linkId;
   link.rel = 'stylesheet';
-
-  const googleName = GOOGLE_FONT_SLUGS[slug];
-  if (googleName) {
-    link.href = `https://fonts.googleapis.com/css2?family=${googleName}:wght@300;400;500;600;700&display=swap`;
-  } else {
-    link.href = `https://api.fontshare.com/v2/css?f[]=${slug}@1,2&display=swap`;
-  }
-
+  link.href = `https://api.fontshare.com/v2/css?f[]=${slug}@1,2&display=swap`;
   document.head.appendChild(link);
 }
 

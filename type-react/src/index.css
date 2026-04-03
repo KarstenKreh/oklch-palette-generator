@@ -25,6 +25,9 @@ body {
   --text-body-l: clamp(1.5525rem, 0.1424vw + 1.5191rem, 1.69rem);
   --text-body-m: clamp(1.246rem, 0.0559vw + 1.2329rem, 1.3rem);
   --text-body-s: 1rem;
+  --text-body-s--line-height: 1.5;
+  --text-caption: 0.7692rem;
+  --text-caption--line-height: 1.4;
 
   --leading-h1: 1.1;
   --leading-h2: 1.15;
@@ -35,6 +38,7 @@ body {
   --leading-body-l: 1.5;
   --leading-body-m: 1.5;
   --leading-body-s: 1.5;
+  --leading-caption: 1.4;
 
   --tracking-h1: -0.03em;
   --tracking-h2: -0.02em;
@@ -45,6 +49,7 @@ body {
   --tracking-body-l: 0em;
   --tracking-body-m: 0em;
   --tracking-body-s: 0.01em;
+  --tracking-caption: 0.01em;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -162,6 +167,7 @@ body {
     @apply bg-background text-foreground;
   }
 
+
   /* Scrollbar styling */
   * {
     scrollbar-width: thin;
@@ -192,3 +198,5 @@ body {
     -moz-appearance: textfield;
   }
 }
+
+

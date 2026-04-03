@@ -57,7 +57,7 @@ function App() {
         <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
           Choose a <strong>Scale Mode</strong> (Golden Ratio, Traditional, or
           Custom) and <strong>Fontshare Fonts</strong> &rarr; generates fluid{' '}
-          <code className="text-[11px]">clamp()</code> values, previews your
+          <code className="text-caption">clamp()</code> values, previews your
           typographic hierarchy, and exports production-ready CSS or Tailwind
           tokens.
         </p>
@@ -75,18 +75,18 @@ function App() {
         {/* Scale Diagram + Table */}
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,220px)_minmax(0,1fr)] gap-6 mb-6">
           <div className="hidden xl:block bg-card border border-border rounded-lg p-4">
-            <h2 className="text-base font-semibold mb-3">Scale</h2>
+            <h2 className="text-body-s font-semibold mb-3">Scale</h2>
             <ScaleDiagram />
           </div>
           <div className="bg-card border border-border rounded-lg p-4">
-            <h2 className="text-base font-semibold mb-3">Values</h2>
+            <h2 className="text-body-s font-semibold mb-3">Values</h2>
             <ScaleTable />
           </div>
         </div>
 
         {/* Spacing */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <h2 className="text-base font-semibold mb-3">Spacing scale</h2>
+          <h2 className="text-body-s font-semibold mb-3">Spacing scale</h2>
           <SpacingTable />
         </div>
 

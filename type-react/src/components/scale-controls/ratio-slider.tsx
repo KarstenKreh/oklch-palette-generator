@@ -54,7 +54,7 @@ export function RatioSlider({
     <div className="space-y-2">
       {/* Row: Input — Select */}
       <div className="flex flex-wrap items-center justify-end gap-1.5">
-        <span className="text-xs text-muted-foreground mr-auto">Scale ratio</span>
+        <span className="text-caption text-muted-foreground mr-auto">Scale ratio</span>
         <div className="flex items-center gap-1.5">
           <Input
             type="number"
@@ -63,13 +63,13 @@ export function RatioSlider({
             step={0.001}
             value={value}
             onChange={handleInput}
-            className="h-7 text-xs font-mono w-[4.5rem] text-right px-1.5 rounded-sm"
+            className="h-7 text-caption font-mono w-[4.5rem] text-right px-1.5 rounded-sm"
           />
           <Select
             value={matchedPreset?.value.toString() ?? ''}
             onValueChange={handlePreset}
           >
-            <SelectTrigger className="h-7 text-xs w-32 px-2 gap-1 rounded-sm">
+            <SelectTrigger className="h-7 text-caption w-32 px-2 gap-1 rounded-sm">
               <span className="truncate">
                 {matchedPreset ? matchedPreset.name : '—'}
               </span>
@@ -79,7 +79,7 @@ export function RatioSlider({
                 <SelectItem
                   key={p.value}
                   value={p.value.toString()}
-                  className={`text-xs ${p.value === SQRT_PHI ? 'text-primary font-medium' : ''}`}
+                  className={`text-caption ${p.value === SQRT_PHI ? 'text-primary font-medium' : ''}`}
                 >
                   {p.name} ({p.value})
                 </SelectItem>
@@ -106,7 +106,7 @@ export function RatioSlider({
               key={p.label}
               type="button"
               onClick={() => onChange(p.value)}
-              className={`absolute -translate-x-1/2 text-xs font-semibold cursor-pointer transition-colors ${
+              className={`absolute -translate-x-1/2 text-caption font-semibold cursor-pointer transition-colors ${
                 active ? 'text-primary' : 'text-muted-foreground/60 hover:text-muted-foreground'
               }`}
               style={{ left: `${pct}%`, top: '-1.8rem' }}
@@ -126,7 +126,7 @@ function HintWithStory({ hint }: { hint: string }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs leading-snug text-muted-foreground">
+      <p className="text-caption leading-snug text-muted-foreground">
         {hint}{' '}
         <button
           type="button"
@@ -137,7 +137,7 @@ function HintWithStory({ hint }: { hint: string }) {
         </button>
       </p>
       {open && (
-        <div className="text-xs leading-relaxed text-muted-foreground bg-muted/50 rounded-sm p-3 space-y-3">
+        <div className="text-caption leading-relaxed text-muted-foreground bg-muted/50 rounded-sm p-3 space-y-3">
           <p>
             The classical typographic scale — from Nonpareille (6pt) to Imperial (72pt) — was
             established during the Renaissance for metal typesetting. The full scale has 19 sizes,
@@ -145,7 +145,7 @@ function HintWithStory({ hint }: { hint: string }) {
             heading hierarchy, and 8 fine-tuning sizes for body text legibility.
           </p>
           <p>The scale factors between the 11 hierarchical sizes:</p>
-          <div className="grid grid-cols-5 gap-x-3 gap-y-0.5 font-mono text-[10px] text-muted-foreground/80">
+          <div className="grid grid-cols-5 gap-x-3 gap-y-0.5 font-mono text-caption text-muted-foreground/80">
             <span>6→8</span><span className="text-right">1.333</span>
             <span className="col-start-4">8→10</span><span className="text-right">1.250</span>
             <span>10→12</span><span className="text-right">1.200</span>

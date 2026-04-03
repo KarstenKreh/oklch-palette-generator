@@ -14,7 +14,7 @@ export function ModeSwitch({ value, options, onChange }: ModeSwitchProps) {
           key={opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            'px-3 py-1 text-xs font-medium text-center transition-colors cursor-pointer',
+            'px-3 py-1 text-caption font-medium text-center transition-colors cursor-pointer',
             i < options.length - 1 && 'border-r border-border',
             opt.value === value
               ? 'bg-primary text-primary-foreground'

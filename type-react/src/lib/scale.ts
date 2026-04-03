@@ -15,17 +15,18 @@ import { DEFAULT_LINE_HEIGHTS, DEFAULT_LETTER_SPACINGS } from './typography';
 
 export type TypeLevel =
   | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  | 'body-l' | 'body-m' | 'body-s';
+  | 'body-l' | 'body-m' | 'body-s' | 'caption';
 
 export const TYPE_LEVELS: TypeLevel[] = [
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'body-l', 'body-m', 'body-s',
+  'body-l', 'body-m', 'body-s', 'caption',
 ];
 
 export const LEVEL_LABELS: Record<TypeLevel, string> = {
   'h1': 'H1', 'h2': 'H2', 'h3': 'H3',
   'h4': 'H4', 'h5': 'H5', 'h6': 'H6',
   'body-l': 'Body L', 'body-m': 'Body M', 'body-s': 'Body S',
+  'caption': 'Caption',
 };
 
 export interface ComputedLevel {
@@ -54,7 +55,8 @@ const GOLDEN_TABLE: Record<TypeLevel, { min: number; max: number }> = {
   'h6':     { min: 1.0, max: 1.0 },
   'body-l': { min: 1.5, max: 1.7 },
   'body-m': { min: 1.1, max: 1.3 },
-  'body-s': { min: 1.0, max: 1.0 },
+  'body-s':  { min: 1.0, max: 1.0 },
+  'caption': { min: 0.79, max: 0.79 },
 };
 
 export function goldenScale(baseSize: number): ComputedLevel[] {
@@ -107,7 +109,7 @@ export const TRADITIONAL_SIZES: { px: number; name: string }[] = [
 export const DEFAULT_TRADITIONAL: Record<TypeLevel, number> = {
   'h1': 48, 'h2': 36, 'h3': 24,
   'h4': 20, 'h5': 18, 'h6': 16,
-  'body-l': 20, 'body-m': 18, 'body-s': 16,
+  'body-l': 20, 'body-m': 18, 'body-s': 16, 'caption': 12,
 };
 
 /** One step down in TRADITIONAL_SIZES for each default desktop value */
@@ -167,6 +169,7 @@ const LEVEL_STEPS: Record<TypeLevel, number> = {
   'h1': 5, 'h2': 4, 'h3': 3,
   'h4': 2, 'h5': 1, 'h6': 0,
   'body-l': 2, 'body-m': 1, 'body-s': 0,
+  'caption': -1,
 };
 
 export function customScale(

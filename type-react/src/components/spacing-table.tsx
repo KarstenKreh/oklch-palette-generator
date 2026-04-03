@@ -24,13 +24,13 @@ export function SpacingTable() {
       <TableBody>
         {tokens.map((t) => (
           <TableRow key={t.name}>
-            <TableCell className="font-mono text-xs">
+            <TableCell className="font-mono text-caption">
               --space-{t.name}
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {t.multiple}×
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {t.rem}rem
               <span className="ml-1.5 text-muted-foreground/50">
                 {t.px}px

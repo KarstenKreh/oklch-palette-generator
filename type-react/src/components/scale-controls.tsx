@@ -1,17 +1,14 @@
 import { useTypeStore } from '@/store/type-store';
 import { FontSelector } from '@/components/font-selector';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@/lib/scale';
 import type { ScaleMode } from '@/store/type-store';
-import { BaseInput } from './scale-controls/base-input';
-import { RatioSlider } from './scale-controls/ratio-slider';
-import { MobileRatioSlider, MOBILE_MODE_OPTIONS } from './scale-controls/mobile-ratio-slider';
-import { ModeSwitch } from '@/components/mode-switch';
-import type { MobileRatioMode } from '@/store/type-store';
 import { TraditionalAssignments } from './scale-controls/traditional-assignments';
 import { HeadingWeightControls } from './scale-controls/heading-weight-controls';
 import { TypographyDetails } from './scale-controls/typography-details';
+import { RatioSliderV2, HintWithStory } from './scale-controls/ratio-slider-v2';
+import { BaseInputV2 } from './scale-controls/base-input-v2';
+import { MobileRatioSliderV2 } from './scale-controls/mobile-ratio-slider-v2';
 
 export function ScaleControls() {
   const store = useTypeStore();
@@ -20,46 +17,37 @@ export function ScaleControls() {
     <div className="space-y-8">
       {/* Scale Mode */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Scale mode</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Scale mode</h3>
         <Tabs value={store.scaleMode} onValueChange={(v) => store.setScaleMode(v as ScaleMode)}>
           <TabsList className="w-full">
-            <TabsTrigger value="custom" className="text-xs">
+            <TabsTrigger value="custom" className="text-caption">
               Ratio
             </TabsTrigger>
-            <TabsTrigger value="traditional" className="text-xs">
+            <TabsTrigger value="traditional" className="text-caption">
               Traditional
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {/* Mode-specific controls */}
+      {/* Scale controls */}
       {store.scaleMode === 'custom' && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-foreground">Scale</h3>
+          <h3 className="text-body-s font-semibold text-foreground">Scale</h3>
+          <HintWithStory hint="We recommend a ratio around √φ ≈ 1.272 — historical type scales and natural proportions cluster in this range." />
           <div className="border border-border rounded-sm divide-y divide-border">
             {/* Desktop */}
             <div className="p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <BaseInput label="Desktop" value={store.baseSize} onChange={store.setBaseSize} />
-              </div>
-              <RatioSlider
-                hint="We recommend √φ — it scales the perceived area of type by the golden ratio, resulting in a visually harmonious hierarchy."
+              <BaseInputV2 label="Desktop" value={store.baseSize} onChange={store.setBaseSize} />
+              <RatioSliderV2
                 value={store.customRatio}
                 onChange={store.setCustomRatio}
               />
             </div>
             {/* Mobile */}
             <div className="p-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <BaseInput label="Mobile" value={store.mobileBaseSize} onChange={store.setMobileBaseSize} />
-                <ModeSwitch
-                  value={store.mobileRatioMode}
-                  options={MOBILE_MODE_OPTIONS}
-                  onChange={(v) => store.setMobileRatioMode(v as MobileRatioMode)}
-                />
-              </div>
-              <MobileRatioSlider />
+              <BaseInputV2 label="Mobile" value={store.mobileBaseSize} onChange={store.setMobileBaseSize} />
+              <MobileRatioSliderV2 />
             </div>
           </div>
         </div>
@@ -80,7 +68,7 @@ export function ScaleControls() {
 
       {/* Font Selection */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Fonts</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Fonts</h3>
         <FontSelector
           label="Heading"
           value={store.headingFont}

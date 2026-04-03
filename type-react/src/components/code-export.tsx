@@ -69,21 +69,21 @@ export function CodeExport() {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold">Code export</h2>
+        <h2 className="text-body-s font-semibold">Code export</h2>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="css" className="text-xs">
+          <TabsTrigger value="css" className="text-caption">
             CSS Custom Properties
           </TabsTrigger>
-          <TabsTrigger value="tw4" className="text-xs">
+          <TabsTrigger value="tw4" className="text-caption">
             Tailwind v4
           </TabsTrigger>
-          <TabsTrigger value="dt" className="text-xs">
+          <TabsTrigger value="dt" className="text-caption">
             Design Tokens
           </TabsTrigger>
-          <TabsTrigger value="embed" className="text-xs">
+          <TabsTrigger value="embed" className="text-caption">
             Fontshare Embed
           </TabsTrigger>
         </TabsList>
@@ -122,7 +122,7 @@ function CodeBlock({
       >
         <Copy className="h-3.5 w-3.5" />
       </Button>
-      <pre className="bg-background rounded-md p-4 pr-10 overflow-auto max-h-80 text-xs font-mono leading-relaxed whitespace-pre">
+      <pre className="bg-background rounded-md p-4 pr-10 overflow-auto max-h-80 text-caption font-mono leading-relaxed whitespace-pre">
         {code}
       </pre>
     </div>

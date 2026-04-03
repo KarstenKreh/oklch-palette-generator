@@ -144,12 +144,12 @@ export function FontSelector({ label, value, onChange, categories }: FontSelecto
 
   return (
     <div className="space-y-1">
-      <label className="text-xs text-muted-foreground">{label}</label>
+      <label className="text-caption text-muted-foreground">{label}</label>
       <div ref={containerRef} className="relative">
         {/* Input trigger */}
         <div
           className={cn(
-            'flex items-center gap-1 h-7 w-full rounded-sm border border-input bg-transparent px-2 text-xs transition-colors',
+            'flex items-center gap-1 h-7 w-full rounded-sm border border-input bg-transparent px-2 text-caption transition-colors',
             open && 'border-ring ring-2 ring-ring/50',
           )}
         >
@@ -161,7 +161,7 @@ export function FontSelector({ label, value, onChange, categories }: FontSelecto
             onKeyDown={handleKeyDown}
             placeholder={selected?.name ?? 'Select font…'}
             className={cn(
-              'flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-0 text-xs',
+              'flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-0 text-caption',
               !open && selected && 'placeholder:text-foreground',
             )}
             style={
@@ -180,11 +180,11 @@ export function FontSelector({ label, value, onChange, categories }: FontSelecto
             className="absolute z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-md border border-border bg-popover shadow-xl shadow-black/40"
           >
             {filtered.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-muted-foreground">No fonts found</div>
+              <div className="px-3 py-2 text-caption text-muted-foreground">No fonts found</div>
             ) : (
               grouped.map(([category, catFonts]) => (
                 <div key={category}>
-                  <div className="sticky top-0 bg-popover/95 backdrop-blur-sm px-3 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <div className="sticky top-0 bg-popover/95 backdrop-blur-sm px-3 py-1 text-caption font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     {CATEGORY_LABELS[category] ?? category}
                   </div>
                   {catFonts.map((font) => {
@@ -195,7 +195,7 @@ export function FontSelector({ label, value, onChange, categories }: FontSelecto
                         key={font.slug}
                         data-idx={idx}
                         className={cn(
-                          'w-full text-left px-3 py-1.5 text-xs cursor-pointer transition-colors flex items-center justify-between',
+                          'w-full text-left px-3 py-1.5 text-caption cursor-pointer transition-colors flex items-center justify-between',
                           idx === highlightIdx && 'bg-accent text-accent-foreground',
                           isSelected && 'font-semibold',
                         )}

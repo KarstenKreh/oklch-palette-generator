@@ -67,7 +67,7 @@ export const useTypeStore = create<TypeState>((set) => ({
   headingWeight: 500,
   weightCompensation: true,
   bodyFont: 'satoshi',
-  monoFont: 'jet-brains-mono',
+  monoFont: 'system-mono',
 
   lineHeightOverrides: {},
   letterSpacingOverrides: {},
@@ -77,8 +77,14 @@ export const useTypeStore = create<TypeState>((set) => ({
   previewViewport: 1920,
 
   setScaleMode: (mode) => set({ scaleMode: mode }),
-  setBaseSize: (size) => set({ baseSize: size }),
-  setMobileBaseSize: (size) => set({ mobileBaseSize: size }),
+  setBaseSize: (size) => set((s) => ({
+    baseSize: size,
+    mobileBaseSize: Math.min(s.mobileBaseSize, size),
+  })),
+  setMobileBaseSize: (size) => set((s) => ({
+    mobileBaseSize: size,
+    baseSize: Math.max(s.baseSize, size),
+  })),
   setCustomRatio: (ratio) => set({ customRatio: ratio }),
   setMobileRatioMode: (mode) => set({ mobileRatioMode: mode }),
   setMobileRatio: (ratio) => set({ mobileRatio: ratio }),

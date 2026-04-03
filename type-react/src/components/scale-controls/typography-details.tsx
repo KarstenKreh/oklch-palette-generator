@@ -38,7 +38,7 @@ export function TypographyDetails() {
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full cursor-pointer group"
       >
-        <h3 className="text-sm font-semibold text-foreground">Typography details</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Typography details</h3>
         <div className="flex items-center gap-1">
           {hasOverrides && (
             <button
@@ -47,7 +47,7 @@ export function TypographyDetails() {
                 e.stopPropagation();
                 store.resetTypographyDetails();
               }}
-              className="text-[10px] text-muted-foreground hover:text-foreground"
+              className="text-caption text-muted-foreground hover:text-foreground"
             >
               Reset
             </button>
@@ -59,13 +59,13 @@ export function TypographyDetails() {
       {open && (
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-muted-foreground/60 w-12 shrink-0" />
-            <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Leading</span>
-            <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Tracking (em)</span>
+            <span className="text-caption text-muted-foreground/60 w-12 shrink-0" />
+            <span className="text-caption text-muted-foreground/60 flex-1 text-center">Leading</span>
+            <span className="text-caption text-muted-foreground/60 flex-1 text-center">Tracking (em)</span>
           </div>
           {TYPE_LEVELS.map((level) => (
             <div key={level} className="flex items-center gap-1.5">
-              <span className="text-xs w-12 shrink-0 text-muted-foreground">
+              <span className="text-caption w-12 shrink-0 text-muted-foreground">
                 {LEVEL_LABELS[level]}
               </span>
               <Input
@@ -76,7 +76,7 @@ export function TypographyDetails() {
                 value={store.lineHeightOverrides[level] ?? ''}
                 placeholder={DEFAULT_LINE_HEIGHTS[level].toString()}
                 onChange={(e) => handleLineHeight(level, e.target.value)}
-                className="h-7 text-xs font-mono flex-1 text-right px-1.5 rounded-sm"
+                className="h-7 text-caption font-mono flex-1 text-right px-1.5 rounded-sm"
               />
               <Input
                 type="number"
@@ -86,7 +86,7 @@ export function TypographyDetails() {
                 value={store.letterSpacingOverrides[level] ?? ''}
                 placeholder={DEFAULT_LETTER_SPACINGS[level].toString()}
                 onChange={(e) => handleLetterSpacing(level, e.target.value)}
-                className="h-7 text-xs font-mono flex-1 text-right px-1.5 rounded-sm"
+                className="h-7 text-caption font-mono flex-1 text-right px-1.5 rounded-sm"
               />
             </div>
           ))}

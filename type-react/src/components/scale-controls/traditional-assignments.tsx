@@ -30,7 +30,7 @@ export function TraditionalAssignments({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Size assignments</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Size assignments</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -42,14 +42,14 @@ export function TraditionalAssignments({
         </Button>
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="text-[10px] text-muted-foreground/60 w-12 shrink-0" />
-        <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Mobile</span>
-        <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Desktop</span>
+        <span className="text-caption text-muted-foreground/60 w-12 shrink-0" />
+        <span className="text-caption text-muted-foreground/60 flex-1 text-center">Mobile</span>
+        <span className="text-caption text-muted-foreground/60 flex-1 text-center">Desktop</span>
       </div>
       <div className="grid grid-cols-1 gap-1">
         {TYPE_LEVELS.map((level) => (
           <div key={level} className="flex items-center gap-1.5">
-            <span className="text-xs w-12 shrink-0 text-muted-foreground">
+            <span className="text-caption w-12 shrink-0 text-muted-foreground">
               {LEVEL_LABELS[level]}
             </span>
             <SizeSelect
@@ -63,7 +63,7 @@ export function TraditionalAssignments({
           </div>
         ))}
       </div>
-      <p className="text-xs leading-snug text-muted-foreground">
+      <p className="text-caption leading-snug text-muted-foreground">
         Default in most word processors — the classical typographic scale, established in the Renaissance for metal typesetting.
       </p>
     </div>
@@ -82,7 +82,7 @@ function SizeSelect({
       value={value.toString()}
       onValueChange={(v) => onChange(parseFloat(v))}
     >
-      <SelectTrigger className="h-7 text-xs flex-1 px-1.5 rounded-sm min-w-0">
+      <SelectTrigger className="h-7 text-caption flex-1 px-1.5 rounded-sm min-w-0">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -90,7 +90,7 @@ function SizeSelect({
           <SelectItem
             key={s.px}
             value={s.px.toString()}
-            className="text-xs"
+            className="text-caption"
           >
             {s.px}px — {s.name}
           </SelectItem>

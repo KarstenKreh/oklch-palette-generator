@@ -41,40 +41,40 @@ export function ScaleTable() {
             onClick={() => copyValue(l.clampValue)}
             title="Click to copy"
           >
-            <TableCell className="font-medium text-xs">
+            <TableCell className="font-medium text-caption">
               {l.label}
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {l.minRem}rem
               <span className="ml-1.5 text-muted-foreground/50">
                 {Math.round(l.minRem * 16)}px
               </span>
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {l.maxRem}rem
               <span className="ml-1.5 text-muted-foreground/50">
                 {Math.round(l.maxRem * 16)}px
               </span>
             </TableCell>
-            <TableCell className="font-mono text-xs break-all">
+            <TableCell className="font-mono text-caption break-all">
               <span className="flex items-center gap-1.5">
                 {l.clampValue}
                 <Copy className="h-3 w-3 text-muted-foreground/0 group-hover:text-muted-foreground/60 transition-colors shrink-0" />
               </span>
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {l.lineHeight}
             </TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">
+            <TableCell className="font-mono text-caption text-muted-foreground">
               {l.letterSpacing === 0 ? '0' : `${l.letterSpacing}em`}
             </TableCell>
             <TableCell className="text-right">
               {l.isFluid ? (
-                <Badge variant="secondary" className="text-[10px]">
+                <Badge variant="secondary" className="text-caption">
                   fluid
                 </Badge>
               ) : (
-                <Badge variant="outline" className="text-[10px]">
+                <Badge variant="outline" className="text-caption">
                   fixed
                 </Badge>
               )}

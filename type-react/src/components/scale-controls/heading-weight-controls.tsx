@@ -30,14 +30,14 @@ export function HeadingWeightControls() {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-foreground">Heading weight</h3>
+      <h3 className="text-body-s font-semibold text-foreground">Heading weight</h3>
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-caption text-muted-foreground">
             {WEIGHT_LABELS[store.headingWeight] ?? store.headingWeight}
           </span>
-          <span className="text-xs font-mono text-muted-foreground">
+          <span className="text-caption font-mono text-muted-foreground">
             {store.headingWeight}
           </span>
         </div>
@@ -65,17 +65,17 @@ export function HeadingWeightControls() {
             store.weightCompensation ? 'translate-x-3.5' : 'translate-x-0'
           }`} />
         </div>
-        <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+        <span className="text-caption text-muted-foreground group-hover:text-foreground transition-colors">
           Compensate for weight
         </span>
         {store.weightCompensation && correctionPct !== 0 && (
-          <span className="text-[10px] font-mono text-muted-foreground/60 ml-auto">
+          <span className="text-caption font-mono text-muted-foreground/60 ml-auto">
             {correctionPct > 0 ? '+' : ''}{correctionPct}%
           </span>
         )}
       </button>
       {store.weightCompensation && (
-        <p className="text-xs leading-snug text-muted-foreground">
+        <p className="text-caption leading-snug text-muted-foreground">
           Adjusts heading sizes to preserve the perceived area ratio.
           Heavier weights add optical density, so sizes are reduced to compensate.
         </p>

@@ -11,12 +11,13 @@ import {
 import { RATIO_PRESETS } from '@/lib/scale';
 import { snap, RATIO_MIN, RATIO_MAX } from './ratio-slider';
 
-export const MOBILE_MODE_OPTIONS = [
-  { value: 'auto', label: 'Relative' },
-  { value: 'custom', label: 'Custom' },
-];
+const SQRT_PHI = 1.272;
+const SNAP_POINTS = [{ value: SQRT_PHI, label: '√φ' }];
+import { ModeSwitch } from '@/components/mode-switch';
+import { MOBILE_MODE_OPTIONS } from './mobile-ratio-slider';
+import type { MobileRatioMode } from '@/store/type-store';
 
-export function MobileRatioSlider() {
+export function MobileRatioSliderV2() {
   const store = useTypeStore();
 
   const autoRatio =
@@ -28,7 +29,9 @@ export function MobileRatioSlider() {
   // Local string state so the input can be fully cleared
   const storeValue = isAuto ? String(-store.autoShrink) : String(store.mobileRatio);
   const [inputText, setInputText] = useState(storeValue);
-  useEffect(() => { setInputText(storeValue); }, [storeValue]);
+  useEffect(() => {
+    setInputText(storeValue);
+  }, [storeValue]);
 
   const handleSlider = (val: number | readonly number[]) => {
     const raw = Array.isArray(val) ? val[0] : val;
@@ -56,7 +59,6 @@ export function MobileRatioSlider() {
   };
 
   const handleBlur = () => {
-    // Reset to store value on blur if empty or invalid
     const n = parseFloat(inputText);
     if (isNaN(n)) setInputText(storeValue);
   };
@@ -76,9 +78,49 @@ export function MobileRatioSlider() {
 
   return (
     <div className="space-y-2">
-      {/* Row: Label — Input — Preset */}
+      {/* Label row with ModeSwitch */}
+      <div className="flex items-center">
+        <span className="text-caption text-muted-foreground">Scale ratio</span>
+        <div className="ml-auto">
+          <ModeSwitch
+            value={store.mobileRatioMode}
+            options={MOBILE_MODE_OPTIONS}
+            onChange={(v) => store.setMobileRatioMode(v as MobileRatioMode)}
+          />
+        </div>
+      </div>
+
+      {/* Slider with √φ marker */}
+      <div className="relative">
+        <Slider
+          min={RATIO_MIN}
+          max={RATIO_MAX}
+          step={0.001}
+          value={[sliderValue]}
+          onValueChange={handleSlider}
+        />
+        {SNAP_POINTS.map((p) => {
+          const pct = ((p.value - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
+          const distance = Math.abs(sliderValue - p.value);
+          const maxDist = p.value * 0.1;
+          const proximity = Math.max(0, 1 - distance / maxDist);
+          const opacity = 0.3 + proximity * 0.7;
+          return (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => handleSlider(p.value)}
+              className="absolute -translate-x-1/2 text-caption font-semibold cursor-pointer text-primary"
+              style={{ left: `${pct}%`, top: '-1.8rem', opacity }}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Input + Preset select — full width below slider */}
       <div className="flex items-center gap-1.5">
-        <span className="text-caption text-muted-foreground mr-auto">Scale ratio</span>
         <div className="relative">
           <Input
             type="number"
@@ -99,12 +141,12 @@ export function MobileRatioSlider() {
         </div>
         <Select
           value={matchedPreset?.value.toString() ?? ''}
-          onValueChange={(v) => { if (v) handlePreset(v); }}
+          onValueChange={(v) => {
+            if (v) handlePreset(v);
+          }}
         >
-          <SelectTrigger className="h-7 text-caption w-32 px-2 gap-1 rounded-sm">
-            <span className="truncate">
-              {matchedPreset ? matchedPreset.name : '—'}
-            </span>
+          <SelectTrigger className="h-7 text-caption flex-1 px-2 gap-1 rounded-sm">
+            <span className="truncate">{matchedPreset ? matchedPreset.name : '—'}</span>
           </SelectTrigger>
           <SelectContent>
             {RATIO_PRESETS.map((p) => (
@@ -119,15 +161,6 @@ export function MobileRatioSlider() {
           </SelectContent>
         </Select>
       </div>
-
-      {/* Slider */}
-      <Slider
-        min={RATIO_MIN}
-        max={RATIO_MAX}
-        step={0.001}
-        value={[sliderValue]}
-        onValueChange={handleSlider}
-      />
     </div>
   );
 }

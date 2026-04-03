@@ -71,6 +71,7 @@ export function TypePreview() {
     'body-l': "Nobody exists on purpose. Nobody belongs anywhere. We're all going to die. Come watch TV.",
     'body-m': "Wubba lubba dub dub! Sometimes science is more art than science. A lot of people don't get that.",
     'body-s': "To live is to risk it all, otherwise you're just an inert chunk of randomly assembled molecules.",
+    'caption': 'Published Mar 15, 2024 · 4 min read',
   };
 
   return (
@@ -79,8 +80,8 @@ export function TypePreview() {
       <div className="space-y-3 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold shrink-0">Type preview</h3>
-            <Badge variant="secondary" className="text-xs font-mono px-2 py-0.5">
+            <h3 className="text-body-s font-semibold shrink-0">Type preview</h3>
+            <Badge variant="secondary" className="text-caption font-mono px-2 py-0.5">
               {viewportWidth}px
             </Badge>
           </div>
@@ -119,7 +120,7 @@ export function TypePreview() {
           value={previewText}
           onChange={(e) => setPreviewText(e.target.value)}
           placeholder="The quick brown fox..."
-          className="h-9 text-sm rounded-sm"
+          className="h-9 text-caption rounded-sm"
         />
       </div>
 
@@ -135,10 +136,10 @@ export function TypePreview() {
           return (
             <div key={l.level} className="mb-4 last:mb-0">
               <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-[10px] font-mono text-muted-foreground w-12 shrink-0">
+                <span className="text-caption font-mono text-muted-foreground w-12 shrink-0">
                   {l.label}
                 </span>
-                <span className="text-[10px] font-mono text-muted-foreground/60">
+                <span className="text-caption font-mono text-muted-foreground/60">
                   {Math.round(resolvedRem * 1000) / 1000}rem · {Math.round(resolvedRem * 16)}px
                 </span>
               </div>
@@ -166,10 +167,10 @@ export function TypePreview() {
           return (
             <div className="mb-4">
               <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-[10px] font-mono text-muted-foreground w-12 shrink-0">
+                <span className="text-caption font-mono text-muted-foreground w-12 shrink-0">
                   Mono
                 </span>
-                <span className="text-[10px] font-mono text-muted-foreground/60">
+                <span className="text-caption font-mono text-muted-foreground/60">
                   {Math.round(resolvedRem * 1000) / 1000}rem · {Math.round(resolvedRem * 16)}px
                 </span>
               </div>

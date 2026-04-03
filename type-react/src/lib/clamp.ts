@@ -13,15 +13,19 @@ export function generateClamp(
   minVw = 375,
   maxVw = 1920,
 ): string {
-  if (minSize === maxSize) {
-    return `${round(minSize)}rem`;
+  // Guard: swap if min > max (e.g. mobile base larger than desktop base)
+  const lo = Math.min(minSize, maxSize);
+  const hi = Math.max(minSize, maxSize);
+
+  if (lo === hi) {
+    return `${round(lo)}rem`;
   }
 
   const minVwRem = minVw / 16;
   const maxVwRem = maxVw / 16;
 
-  const slope = (maxSize - minSize) / (maxVwRem - minVwRem);
-  const intercept = minSize - slope * minVwRem;
+  const slope = (hi - lo) / (maxVwRem - minVwRem);
+  const intercept = lo - slope * minVwRem;
 
   const slopeVw = round(slope * 100);
   const interceptRem = round(intercept);
@@ -31,6 +35,6 @@ export function generateClamp(
 
   const preferred = `${slopeVw}vw ${sign} ${absIntercept}rem`;
 
-  return `clamp(${round(minSize)}rem, ${preferred}, ${round(maxSize)}rem)`;
+  return `clamp(${round(lo)}rem, ${preferred}, ${round(hi)}rem)`;
 }
 

@@ -7,7 +7,7 @@
  */
 
 import type { TypeLevel } from './scale';
-import { TYPE_LEVELS } from './scale';
+import { TYPE_LEVELS, DEFAULT_TRADITIONAL } from './scale';
 
 export interface UrlState {
   scaleMode: 'golden' | 'traditional' | 'custom';
@@ -67,10 +67,17 @@ export function decodeState(hash: string): UrlState | null {
 
   if (mode === 'traditional' && parts.length >= 16) {
     const assignments = {} as Record<TypeLevel, number>;
-    for (let i = 0; i < TYPE_LEVELS.length; i++) {
+    const levelCount = Math.min(TYPE_LEVELS.length, parts.length - 7);
+    for (let i = 0; i < levelCount; i++) {
       const val = parseFloat(parts[7 + i]);
       if (isNaN(val)) return null;
       assignments[TYPE_LEVELS[i]] = val;
+    }
+    // Fill missing levels with defaults (backward compat for old URLs)
+    for (const level of TYPE_LEVELS) {
+      if (!(level in assignments)) {
+        assignments[level] = DEFAULT_TRADITIONAL[level];
+      }
     }
     state.traditionalAssignments = assignments;
   }

@@ -22,6 +22,7 @@ export const DEFAULT_LINE_HEIGHTS: Record<TypeLevel, number> = {
   'body-l': 1.5,
   'body-m': 1.5,
   'body-s': 1.5,
+  'caption': 1.4,
 };
 
 // ── Default Letter Spacings (em) ──
@@ -36,6 +37,7 @@ export const DEFAULT_LETTER_SPACINGS: Record<TypeLevel, number> = {
   'body-l': 0,
   'body-m': 0,
   'body-s': 0.01,
+  'caption': 0.01,
 };
 
 // ── Apply Typography Details ──

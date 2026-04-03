@@ -16,7 +16,7 @@ export function BaseInput({
 
   return (
     <div className="flex items-center gap-2 w-full">
-      <span className="text-xs font-medium text-foreground/70">{label} base</span>
+      <span className="text-caption font-medium text-foreground/70">{label} base</span>
       <Input
         type="number"
         min={0.5}
@@ -24,9 +24,9 @@ export function BaseInput({
         step={0.0625}
         value={value}
         onChange={handleChange}
-        className="h-7 text-xs font-mono text-right w-16 px-1.5 rounded-sm"
+        className="h-7 text-caption font-mono text-right w-16 px-1.5 rounded-sm"
       />
-      <span className="text-[10px] text-muted-foreground/50 shrink-0 w-8">
+      <span className="text-caption text-muted-foreground/50 shrink-0 w-8">
         {Math.round(value * 16)}px
       </span>
     </div>

@@ -10,7 +10,7 @@ export function ScaleDiagram() {
         const pct = (l.maxRem / maxRem) * 100;
         return (
           <div key={l.level} className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-muted-foreground w-12 shrink-0 text-right">
+            <span className="text-caption font-mono text-muted-foreground w-12 shrink-0 text-right">
               {l.label}
             </span>
             <div className="flex-1 h-4 relative">
@@ -20,7 +20,7 @@ export function ScaleDiagram() {
                 }`}
                 style={{ width: `${pct}%` }}
               />
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] font-mono text-muted-foreground/60">
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-caption font-mono text-muted-foreground/60">
                 {l.maxRem}rem
               </span>
             </div>
