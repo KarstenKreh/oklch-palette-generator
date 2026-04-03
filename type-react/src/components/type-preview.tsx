@@ -12,6 +12,7 @@ const VW_MAX = 1920;
 const VW_MARKERS = [
   { value: 375, icon: Smartphone, label: 'Mobile' },
   { value: 768, icon: Tablet, label: 'Tablet' },
+  { value: 1024, icon: Tablet, label: 'Tablet landscape' },
   { value: 1920, icon: Monitor, label: 'Desktop' },
 ];
 
