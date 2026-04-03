@@ -13,6 +13,7 @@ import type { TypeLevel, ComputedLevel } from './scale';
 // ── Default Line Heights ──
 
 export const DEFAULT_LINE_HEIGHTS: Record<TypeLevel, number> = {
+  'display': 1.05,
   'h1': 1.1,
   'h2': 1.15,
   'h3': 1.2,
@@ -28,6 +29,7 @@ export const DEFAULT_LINE_HEIGHTS: Record<TypeLevel, number> = {
 // ── Default Letter Spacings (em) ──
 
 export const DEFAULT_LETTER_SPACINGS: Record<TypeLevel, number> = {
+  'display': -0.04,
   'h1': -0.03,
   'h2': -0.02,
   'h3': -0.01,

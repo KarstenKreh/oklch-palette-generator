@@ -8,7 +8,7 @@
 ### OKLCH Palette Generator
 - URL: https://standby.design/color
 - Purpose: Generate perceptually uniform color palettes in the OKLCH color space
-- Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON), Fontshare embed code
+- Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON)
 - Features: Primitive & semantic tokens, shadow generation, light/dark/high-contrast modes, shadcn/ui compatible
 - Use case: Designers and developers building accessible, perceptually uniform color systems for web apps
 
@@ -21,26 +21,33 @@
 
 ## How to use the generated code
 
-Both tools export production-ready code in four formats:
+Both tools export production-ready code. Copy and paste into your project:
 
 1. **CSS Custom Properties** — Copy into any global CSS file. Framework-agnostic. Works everywhere.
-   Example: `var(--text-h1)`, `var(--color-brand-500)`, `var(--space-md)`
+   - Color example: `var(--color-brand-500)`, `var(--color-surface-100)`, `var(--shadow-md)`
+   - Type example: `var(--text-h1)`, `var(--leading-h3)`, `var(--space-md)`
 
 2. **Tailwind v4** — Paste into your `@theme` block in Tailwind CSS v4.
-   Maps tokens to Tailwind utilities like `text-h1`, `bg-brand-500`, `gap-md`.
+   - Color example: `bg-brand-500`, `text-surface-900`, `shadow-md`
+   - Type example: `text-h1`, `tracking-h3`, `gap-md`
 
 3. **Design Tokens (JSON)** — W3C Design Tokens Community Group format with `$type` and `$value`.
    Import into Figma, Style Dictionary, or any token pipeline.
 
-4. **Fontshare Embed** — `<link>` tag to load the selected fonts from Fontshare CDN.
+4. **Fontshare Embed** (Type tool only) — `<link>` tag to load the selected fonts from Fontshare CDN.
 
-## Recommended ratio
+## Design philosophy
 
-The Type Scale Generator defaults to a ratio near sqrt(phi) ~ 1.272. Historical type scales (Renaissance to modern) and natural proportions cluster around this value. It is a recommendation, not a strict rule — values in the range of roughly 1.2 to 1.35 produce harmonious typographic hierarchies.
+### Color: Why OKLCH?
+OKLCH is a perceptually uniform color space — equal numeric steps produce equal visual steps. This means a palette generated in OKLCH looks consistently balanced across hues, unlike HSL where e.g. yellow and blue at the same lightness appear wildly different. The tool generates primitive tokens (raw shades) and semantic tokens (background, foreground, border, etc.) that map to shadcn/ui conventions.
+
+### Type: Why √φ?
+The Type Scale Generator defaults to a ratio near √φ ≈ 1.272. Historical type scales (Renaissance to modern) and natural proportions cluster around this value. It is a recommendation, not a strict rule — values in the range of roughly 1.2 to 1.35 produce harmonious typographic hierarchies. The tool generates fluid sizes via CSS clamp() that interpolate smoothly between mobile and desktop viewports.
 
 ## Technical details
 
 - Color space: OKLCH (perceptually uniform lightness, chroma, hue)
-- Typography: fluid sizing via CSS clamp() with viewport-based interpolation
+- Color tokens: primitive scales (25–950), semantic mappings, shadow values with color-matched opacity
+- Typography: fluid sizing via CSS clamp() with viewport-based interpolation between mobile and desktop
 - Spacing: derived from the typographic scale for visual consistency
-- All values are unitless rem-based and respect user font-size preferences
+- All values are rem-based and respect user font-size preferences

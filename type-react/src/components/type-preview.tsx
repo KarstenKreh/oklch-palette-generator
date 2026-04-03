@@ -63,6 +63,7 @@ export function TypePreview() {
   const matchedMarker = VW_MARKERS.find((m) => m.value === viewportWidth);
 
   const defaultTexts: Record<string, string> = {
+    display: 'Hero',
     h1: 'Main Headline',
     h2: 'Section Title',
     h3: 'Subsection',

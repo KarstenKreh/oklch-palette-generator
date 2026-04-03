@@ -14,15 +14,18 @@ import { DEFAULT_LINE_HEIGHTS, DEFAULT_LETTER_SPACINGS } from './typography';
 // ── Types ──
 
 export type TypeLevel =
+  | 'display'
   | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   | 'body-l' | 'body-m' | 'body-s' | 'caption';
 
 export const TYPE_LEVELS: TypeLevel[] = [
+  'display',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'body-l', 'body-m', 'body-s', 'caption',
 ];
 
 export const LEVEL_LABELS: Record<TypeLevel, string> = {
+  'display': 'Display',
   'h1': 'H1', 'h2': 'H2', 'h3': 'H3',
   'h4': 'H4', 'h5': 'H5', 'h6': 'H6',
   'body-l': 'Body L', 'body-m': 'Body M', 'body-s': 'Body S',
@@ -47,6 +50,7 @@ export interface ComputedLevel {
 // Derived from sqrt(phi) ≈ 1.272, rounded to practical values.
 // Min = Mobile (<810px), Max = Wide (>1920px)
 const GOLDEN_TABLE: Record<TypeLevel, { min: number; max: number }> = {
+  'display': { min: 3.0, max: 4.7 },
   'h1':     { min: 2.4, max: 3.7 },
   'h2':     { min: 2.2, max: 2.9 },
   'h3':     { min: 1.8, max: 2.2 },
@@ -73,7 +77,7 @@ export function goldenScale(baseSize: number): ComputedLevel[] {
       maxRem: max,
       clampValue: isFluid ? generateClamp(min, max) : `${min}rem`,
       isFluid,
-      isHeading: level.startsWith('h'),
+      isHeading: level === 'display' || level.startsWith('h'),
       lineHeight: DEFAULT_LINE_HEIGHTS[level],
       letterSpacing: DEFAULT_LETTER_SPACINGS[level],
     };
@@ -107,7 +111,7 @@ export const TRADITIONAL_SIZES: { px: number; name: string }[] = [
 ];
 
 export const DEFAULT_TRADITIONAL: Record<TypeLevel, number> = {
-  'h1': 48, 'h2': 36, 'h3': 24,
+  'display': 72, 'h1': 48, 'h2': 36, 'h3': 24,
   'h4': 20, 'h5': 18, 'h6': 16,
   'body-l': 20, 'body-m': 18, 'body-s': 16, 'caption': 12,
 };
@@ -142,7 +146,7 @@ export function traditionalScale(
       maxRem,
       clampValue: isFluid ? generateClamp(minRem, maxRem) : `${maxRem}rem`,
       isFluid,
-      isHeading: level.startsWith('h'),
+      isHeading: level === 'display' || level.startsWith('h'),
       lineHeight: DEFAULT_LINE_HEIGHTS[level],
       letterSpacing: DEFAULT_LETTER_SPACINGS[level],
     };
@@ -164,9 +168,9 @@ export const RATIO_PRESETS: { name: string; value: number }[] = [
   { name: 'Golden Ratio', value: 1.618 },
 ];
 
-// Step mapping: H6/Body-S = 0, H1 = 5
+// Step mapping: H6/Body-S = 0, H1 = 5, Display = 6
 const LEVEL_STEPS: Record<TypeLevel, number> = {
-  'h1': 5, 'h2': 4, 'h3': 3,
+  'display': 6, 'h1': 5, 'h2': 4, 'h3': 3,
   'h4': 2, 'h5': 1, 'h6': 0,
   'body-l': 2, 'body-m': 1, 'body-s': 0,
   'caption': -1,
@@ -191,7 +195,7 @@ export function customScale(
       maxRem: max,
       clampValue: isFluid ? generateClamp(min, max) : `${min}rem`,
       isFluid,
-      isHeading: level.startsWith('h'),
+      isHeading: level === 'display' || level.startsWith('h'),
       lineHeight: DEFAULT_LINE_HEIGHTS[level],
       letterSpacing: DEFAULT_LETTER_SPACINGS[level],
     };

@@ -37,7 +37,11 @@ export function computeSpacingTokens(
   const baselineUnit = bodyM.maxRem * bodyM.lineHeight * multiplier;
 
   return SPACING_STEPS.map((step) => {
-    const rem = round(baselineUnit * step.multiple);
+    const raw = baselineUnit * step.multiple;
+    // Round to clean values: 0.25rem grid for small, 0.5rem for larger
+    const rem = raw < 1 ? Math.round(raw * 4) / 4
+              : raw < 4 ? Math.round(raw * 2) / 2
+              : Math.round(raw);
     return {
       name: step.name,
       multiple: step.multiple,
