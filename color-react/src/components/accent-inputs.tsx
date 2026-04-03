@@ -109,7 +109,7 @@ function AccentRow({
       {/* Header: name + delete */}
       <div className="flex items-center justify-between gap-2 group/header">
         <div className="inline-flex items-center gap-1 min-w-0">
-          <div className="inline-grid text-sm font-semibold">
+          <div className="inline-grid text-body-s font-semibold">
             <span className="invisible whitespace-pre col-start-1 row-start-1 min-w-3">{name}</span>
             <input
               ref={nameRef}
@@ -139,7 +139,7 @@ function AccentRow({
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         {/* Label row */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-caption font-medium text-muted-foreground">
             Action
           </span>
           <Toggle
@@ -154,10 +154,10 @@ function AccentRow({
           </Toggle>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-caption font-medium text-muted-foreground">
             Surface
           </span>
-          <span className="text-[0.65rem] text-muted-foreground">auto</span>
+          <span className="text-caption text-muted-foreground">auto</span>
         </div>
 
         {/* Input row */}

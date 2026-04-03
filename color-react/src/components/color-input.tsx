@@ -78,9 +78,9 @@ export function ColorInput({
 
       {/* Hex display */}
       <div className="flex items-center gap-0.5 min-w-0">
-        <span className="text-xs text-muted-foreground select-none">#</span>
+        <span className="text-caption text-muted-foreground select-none">#</span>
         {readOnly ? (
-          <span className="h-7 leading-7 w-[7.5ch] font-mono text-xs text-muted-foreground select-none pointer-events-none">
+          <span className="h-7 leading-7 w-[7.5ch] font-mono text-caption text-muted-foreground select-none pointer-events-none">
             {readOnlyHex ?? value}
           </span>
         ) : (
@@ -92,7 +92,7 @@ export function ColorInput({
             spellCheck={false}
             autoComplete="off"
             className={cn(
-              'h-7 w-[7.5ch] font-mono !text-xs uppercase',
+              'h-7 w-[7.5ch] font-mono !text-caption uppercase',
               'border-none bg-transparent! px-0 shadow-none',
               'focus-visible:ring-0 focus-visible:border-transparent',
             )}

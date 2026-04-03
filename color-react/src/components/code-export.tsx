@@ -29,9 +29,9 @@ function highlightCss(code: string) {
 function highlightMarkdown(code: string) {
   return code.split('\n').map((line, i) => {
     if (line.startsWith('# '))
-      return <span key={i} className="text-foreground font-bold text-sm">{line}{'\n'}</span>;
+      return <span key={i} className="text-foreground font-bold text-caption">{line}{'\n'}</span>;
     if (line.startsWith('## '))
-      return <span key={i} className="text-foreground font-semibold text-xs">{line}{'\n'}</span>;
+      return <span key={i} className="text-foreground font-semibold text-caption">{line}{'\n'}</span>;
     if (line.startsWith('### '))
       return <span key={i} className="text-muted-foreground font-semibold">{line}{'\n'}</span>;
     if (line.startsWith('|'))
@@ -61,7 +61,7 @@ function CodeBlock({ code, id, highlight = 'css' }: { code: string; id: string; 
       </Button>
       <pre
         id={id}
-        className="bg-black/30 border border-border rounded-lg p-4 pt-12 overflow-x-auto text-xs font-mono leading-relaxed max-h-[600px] overflow-y-auto"
+        className="bg-black/30 border border-border rounded-lg p-4 pt-12 overflow-x-auto text-caption font-mono leading-relaxed max-h-[600px] overflow-y-auto"
       >
         <code>{highlight === 'markdown' ? highlightMarkdown(code) : highlightCss(code)}</code>
       </pre>
@@ -122,8 +122,8 @@ export function CodeExport() {
     <div>
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-base font-semibold mb-0.5">Export</h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 className="text-body-s font-semibold mb-0.5">Export</h2>
+          <p className="text-caption text-muted-foreground">
             Copy individual tabs or use the dropdown to bundle multiple sections
           </p>
         </div>
@@ -138,12 +138,12 @@ export function CodeExport() {
           <PopoverContent align="end" className="w-56 p-3">
             <div className="space-y-3">
               <div>
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Primitives Format</span>
+                <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wider">Primitives Format</span>
                 <div className="flex gap-1 mt-1.5">
                   <Button
                     variant={copyFormat === 'oklch' ? 'default' : 'outline'}
                     size="sm"
-                    className="flex-1 h-7 text-xs"
+                    className="flex-1 h-7 text-caption"
                     onClick={() => setCopyFormat('oklch')}
                   >
                     OKLCH
@@ -151,7 +151,7 @@ export function CodeExport() {
                   <Button
                     variant={copyFormat === 'hex' ? 'default' : 'outline'}
                     size="sm"
-                    className="flex-1 h-7 text-xs"
+                    className="flex-1 h-7 text-caption"
                     onClick={() => setCopyFormat('hex')}
                   >
                     Hex
@@ -160,14 +160,14 @@ export function CodeExport() {
               </div>
 
               <div className="border-t border-border pt-2 space-y-2">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Include</span>
+                <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wider">Include</span>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox checked={copySemantic} onCheckedChange={(v) => setCopySemantic(!!v)} />
-                  <span className="text-xs">Semantic Tokens</span>
+                  <span className="text-caption">Semantic Tokens</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <Checkbox checked={copyLlm} onCheckedChange={(v) => setCopyLlm(!!v)} />
-                  <span className="text-xs">LLM Instructions</span>
+                  <span className="text-caption">LLM Instructions</span>
                 </label>
               </div>
 
@@ -195,7 +195,7 @@ export function CodeExport() {
         <TabsContent value="semantic">
           <div className="flex items-center gap-2 mb-3">
             <Badge variant="secondary">Semantic Layer</Badge>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-caption text-muted-foreground">
               References Primitive Tokens — paste after your :root block
             </span>
           </div>
@@ -204,7 +204,7 @@ export function CodeExport() {
         <TabsContent value="llm">
           <div className="flex items-center gap-2 mb-3">
             <Badge variant="secondary">LLM Briefing</Badge>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-caption text-muted-foreground">
               Paste into your AI prompt to explain your design system tokens
             </span>
           </div>

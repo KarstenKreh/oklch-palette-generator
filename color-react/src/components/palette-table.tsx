@@ -39,19 +39,19 @@ export function PaletteTable({ palette, showWhiteBlack }: PaletteTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-xs text-muted-foreground">Step</TableHead>
-          <TableHead className="text-xs text-muted-foreground">Color</TableHead>
-          <TableHead className="text-xs text-muted-foreground">Hex</TableHead>
-          <TableHead className="text-xs text-muted-foreground">OKLCH</TableHead>
-          <TableHead className="text-xs text-muted-foreground">L</TableHead>
-          <TableHead className="text-xs text-muted-foreground">C</TableHead>
-          <TableHead className="text-xs text-muted-foreground">Zone</TableHead>
+          <TableHead className="text-caption text-muted-foreground">Step</TableHead>
+          <TableHead className="text-caption text-muted-foreground">Color</TableHead>
+          <TableHead className="text-caption text-muted-foreground">Hex</TableHead>
+          <TableHead className="text-caption text-muted-foreground">OKLCH</TableHead>
+          <TableHead className="text-caption text-muted-foreground">L</TableHead>
+          <TableHead className="text-caption text-muted-foreground">C</TableHead>
+          <TableHead className="text-caption text-muted-foreground">Zone</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {entries.map((entry) => (
           <TableRow key={entry.step}>
-            <TableCell className="text-xs font-mono">{entry.step}</TableCell>
+            <TableCell className="text-caption font-mono">{entry.step}</TableCell>
             <TableCell>
               <div
                 className="size-6 rounded-sm border border-border"
@@ -59,24 +59,24 @@ export function PaletteTable({ palette, showWhiteBlack }: PaletteTableProps) {
               />
             </TableCell>
             <TableCell
-              className="text-xs font-mono cursor-pointer hover:text-foreground text-muted-foreground"
+              className="text-caption font-mono cursor-pointer hover:text-foreground text-muted-foreground"
               onClick={() => copyToClipboard(entry.hex)}
             >
               {entry.hex}
             </TableCell>
             <TableCell
-              className="text-xs font-mono cursor-pointer hover:text-foreground text-muted-foreground"
+              className="text-caption font-mono cursor-pointer hover:text-foreground text-muted-foreground"
               onClick={() => copyToClipboard(entry.css)}
             >
               {entry.css}
             </TableCell>
-            <TableCell className="text-xs font-mono">
+            <TableCell className="text-caption font-mono">
               {entry.L.toFixed(2)}
             </TableCell>
-            <TableCell className="text-xs font-mono">
+            <TableCell className="text-caption font-mono">
               {entry.C.toFixed(4)}
             </TableCell>
-            <TableCell className="text-xs text-muted-foreground">
+            <TableCell className="text-caption text-muted-foreground">
               {stepZone(entry.step as number)}
             </TableCell>
           </TableRow>

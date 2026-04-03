@@ -108,7 +108,7 @@ export function ColorPicker({ value, onChange, children }: ColorPickerProps) {
           <div className="w-8 h-8 rounded-sm border border-border" style={{ backgroundColor: currentHex }} />
           <Input
             value={currentHex}
-            className="font-mono text-xs h-8 rounded-sm"
+            className="font-mono text-caption h-8 rounded-sm"
             maxLength={7}
             onChange={(e) => {
               const raw = e.target.value.replace(/#/g, '');
@@ -125,8 +125,8 @@ export function ColorPicker({ value, onChange, children }: ColorPickerProps) {
         {/* Mode Tabs */}
         <Tabs defaultValue="hsl">
           <TabsList className="h-8 w-full">
-            <TabsTrigger value="hsl" className="text-xs h-7">HSL</TabsTrigger>
-            <TabsTrigger value="rgb" className="text-xs h-7">RGB</TabsTrigger>
+            <TabsTrigger value="hsl" className="text-caption h-7">HSL</TabsTrigger>
+            <TabsTrigger value="rgb" className="text-caption h-7">RGB</TabsTrigger>
           </TabsList>
           <TabsContent value="hsl" className="mt-2">
             <div className="grid grid-cols-3 gap-1.5">
@@ -136,13 +136,13 @@ export function ColorPicker({ value, onChange, children }: ColorPickerProps) {
                 { label: 'L', val: Math.round(hsl_l * 100), max: 100 },
               ].map(({ label, val, max }) => (
                 <div key={label} className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-muted-foreground">{label}</span>
+                  <span className="text-caption text-muted-foreground">{label}</span>
                   <Input
                     type="number"
                     min={0}
                     max={max}
                     value={val}
-                    className="h-7 text-xs font-mono rounded-sm"
+                    className="h-7 text-caption font-mono rounded-sm"
                     onChange={(e) => {
                       const inputs = {
                         H: label === 'H' ? clamp(parseInt(e.target.value) || 0, 0, 360) : Math.round(hsl_h),
@@ -167,13 +167,13 @@ export function ColorPicker({ value, onChange, children }: ColorPickerProps) {
                 { label: 'B', val: rgb_b },
               ].map(({ label, val }) => (
                 <div key={label} className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-muted-foreground">{label}</span>
+                  <span className="text-caption text-muted-foreground">{label}</span>
                   <Input
                     type="number"
                     min={0}
                     max={255}
                     value={val}
-                    className="h-7 text-xs font-mono rounded-sm"
+                    className="h-7 text-caption font-mono rounded-sm"
                     onChange={(e) => {
                       const cv = clamp(parseInt(e.target.value) || 0, 0, 255);
                       const nr = label === 'R' ? cv : rgb_r;

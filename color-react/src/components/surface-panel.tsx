@@ -219,7 +219,7 @@ export function SurfacePanel({
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <span
-            className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded inline-block mb-1"
+            className="text-caption font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded inline-block mb-1"
             style={{
               backgroundColor: bgHex,
               border: `1px solid ${borderMutedHex}`,
@@ -228,7 +228,7 @@ export function SurfacePanel({
           >
             {label}
           </span>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: textHex }}>
+          <h3 className="text-body-s font-semibold mb-3" style={{ color: textHex }}>
             {panelType === 'light' ? 'Surfaces' :
              panelType === 'dark' ? 'Surfaces' :
              'Neutral Surfaces'}
@@ -237,11 +237,11 @@ export function SurfacePanel({
           <div className="flex gap-3 pr-3">
             <div className="flex-1">
               <div className="h-px" style={{ backgroundColor: borderHex }} />
-              <span className="text-[9px] font-semibold mt-1 block" style={{ color: mutedFgHex }}>Border</span>
+              <span className="text-caption font-semibold mt-1 block" style={{ color: mutedFgHex }}>Border</span>
             </div>
             <div className="flex-1">
               <div className="h-px" style={{ backgroundColor: borderMutedHex }} />
-              <span className="text-[9px] font-semibold mt-1 block" style={{ color: mutedFgHex }}>Border Muted</span>
+              <span className="text-caption font-semibold mt-1 block" style={{ color: mutedFgHex }}>Border Muted</span>
             </div>
           </div>
         </div>
@@ -260,7 +260,7 @@ export function SurfacePanel({
         {surfaceCards.map((card) => (
           <div
             key={card.name}
-            className="rounded-lg p-2.5 text-xs flex flex-col justify-between aspect-[4/3]"
+            className="rounded-lg p-2.5 text-caption flex flex-col justify-between aspect-[4/3]"
             style={{
               backgroundColor: card.bg,
               color: textHex,
@@ -268,7 +268,7 @@ export function SurfacePanel({
             }}
           >
             <span className="font-medium">{card.name}</span>
-            <span className="text-[8px] font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
+            <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
           </div>
         ))}
       </div>
@@ -276,19 +276,19 @@ export function SurfacePanel({
       {/* Buttons */}
       <div className="flex gap-2">
         <div
-          className="rounded-md px-3 py-1.5 text-xs font-medium"
+          className="rounded-md px-3 py-1.5 text-caption font-medium"
           style={{ backgroundColor: primaryBg, color: primaryFg }}
         >
           Primary
         </div>
         <div
-          className="rounded-md px-3 py-1.5 text-xs font-medium"
+          className="rounded-md px-3 py-1.5 text-caption font-medium"
           style={{ backgroundColor: secondaryBg, color: secondaryFg }}
         >
           Secondary
         </div>
         <div
-          className="rounded-md px-3 py-1.5 text-xs font-medium"
+          className="rounded-md px-3 py-1.5 text-caption font-medium"
           style={{ backgroundColor: destructiveBg, color: destructiveFg }}
         >
           Destructive
@@ -305,7 +305,7 @@ export function SurfacePanel({
           const errBorderHex = isDark ? getHex(errorSurface, 700) : getHex(errorSurface, 300);
           return (
             <div
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-caption font-semibold"
               style={{ backgroundColor: errBadgeBg, color: errBadgeText, border: `1.5px solid ${errBorderHex}` }}
             >
               <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
@@ -317,7 +317,7 @@ export function SurfacePanel({
         {accentItems.map((item) => (
           <div
             key={item.name}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-caption font-semibold"
             style={{ backgroundColor: item.badgeBg, color: item.badgeText, border: `1.5px solid ${item.badgeBorder}` }}
           >
             <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
@@ -339,7 +339,7 @@ export function SurfacePanel({
                 border: `1px solid ${borderMutedHex}`,
               }}
             >
-              <span className="text-[9px] font-semibold" style={{ color: mutedFgHex }}>{s.name}</span>
+              <span className="text-caption font-semibold" style={{ color: mutedFgHex }}>{s.name}</span>
             </div>
           </div>
         ))}

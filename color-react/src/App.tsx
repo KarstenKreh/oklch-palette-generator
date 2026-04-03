@@ -63,14 +63,14 @@ function App() {
             <SeedColors />
           </div>
           <div>
-            <h3 className="text-base font-semibold mb-3">Theme Preview</h3>
+            <h3 className="text-body-s font-semibold mb-3">Theme Preview</h3>
             <SurfacePreview />
           </div>
         </div>
 
         {/* Primitive Tokens */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <h2 className="text-base font-semibold mb-3">Primitive Tokens</h2>
+          <h2 className="text-body-s font-semibold mb-3">Primitive Tokens</h2>
           <PrimitiveTabs />
         </div>
 

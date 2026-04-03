@@ -66,7 +66,7 @@ export function PrimitiveTabs() {
 
       {/* Neutral */}
       <TabsContent value="neutral">
-        <p className="mb-3 text-sm text-muted-foreground">
+        <p className="mb-3 text-caption text-muted-foreground">
           0% chroma — High Contrast surfaces &middot; #fff and #000 included
         </p>
         <PaletteTable palette={neutralExtended} showWhiteBlack />
@@ -98,12 +98,12 @@ function PaletteSubTabs({
       </TabsList>
 
       <TabsContent value="action">
-        <p className="mb-3 text-sm text-muted-foreground">{actionDesc}</p>
+        <p className="mb-3 text-caption text-muted-foreground">{actionDesc}</p>
         <PaletteTable palette={actionPalette} />
       </TabsContent>
 
       <TabsContent value="surface">
-        <p className="mb-3 text-sm text-muted-foreground">{surfaceDesc}</p>
+        <p className="mb-3 text-caption text-muted-foreground">{surfaceDesc}</p>
         <PaletteTable palette={surfacePalette} />
       </TabsContent>
     </Tabs>

@@ -87,7 +87,7 @@ export function SeedColors() {
   return (
     <div className="space-y-3">
       {/* Theme Settings header — aligns with "Theme Preview" on the right */}
-      <h3 className="text-base font-semibold">Theme Settings</h3>
+      <h3 className="text-body-s font-semibold">Theme Settings</h3>
 
       {/* Theme name */}
       <input
@@ -99,16 +99,16 @@ export function SeedColors() {
       />
 
       {/* Section header */}
-      <h2 className="text-sm font-semibold text-foreground">Seed Colors</h2>
+      <h2 className="text-body-s font-semibold text-foreground">Seed Colors</h2>
 
       {/* Brand group */}
       <div className="rounded-lg border border-border bg-card p-3 pb-2 space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Brand</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Brand</h3>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
           {/* Label row */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-caption font-medium text-muted-foreground">
               Brand
             </span>
             <Toggle
@@ -123,7 +123,7 @@ export function SeedColors() {
             </Toggle>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-caption font-medium text-muted-foreground">
               Surface
             </span>
             <Toggle
@@ -132,7 +132,7 @@ export function SeedColors() {
               size="sm"
               variant="outline"
               aria-label="Auto-derive surface from brand"
-              className="h-5 px-1.5 text-[0.65rem]"
+              className="h-5 px-1.5 text-caption"
             >
               Auto
             </Toggle>
@@ -166,12 +166,12 @@ export function SeedColors() {
 
       {/* Error group */}
       <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Error</h3>
+        <h3 className="text-body-s font-semibold text-foreground">Error</h3>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
           {/* Label row */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-caption font-medium text-muted-foreground">
               Error
             </span>
             <Toggle
@@ -180,7 +180,7 @@ export function SeedColors() {
               size="sm"
               variant="outline"
               aria-label="Auto-derive error color"
-              className="h-5 px-1.5 text-[0.65rem]"
+              className="h-5 px-1.5 text-caption"
             >
               Auto
             </Toggle>
@@ -196,10 +196,10 @@ export function SeedColors() {
             </Toggle>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-caption font-medium text-muted-foreground">
               Surface
             </span>
-            <span className="text-[0.65rem] text-muted-foreground">auto</span>
+            <span className="text-caption text-muted-foreground">auto</span>
           </div>
 
           {/* Input row */}
@@ -234,7 +234,7 @@ export function SeedColors() {
 
       {/* Additional Colors */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">
+        <h3 className="text-body-s font-semibold text-foreground">
           Additional Colors
         </h3>
         <AccentInputs />
@@ -245,7 +245,7 @@ export function SeedColors() {
 
       {/* Mode switch */}
       <div className="space-y-1.5">
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-body-s font-medium text-foreground">
           Palette Mode
         </span>
         <ModeSwitch
@@ -253,7 +253,7 @@ export function SeedColors() {
           options={MODE_OPTIONS}
           onChange={handleModeChange}
         />
-        <p className="text-[0.65rem] text-muted-foreground leading-tight">
+        <p className="text-caption text-muted-foreground leading-tight">
           {currentMode === 'balanced'
             ? 'Places step 500 at a balanced midpoint for maximum chroma.'
             : 'Centers the palette on your exact brand color. Use Pin to also force button colors to your exact hex.'}
@@ -262,7 +262,7 @@ export function SeedColors() {
 
       {/* FG Contrast mode switch */}
       <div className="space-y-1.5">
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-body-s font-medium text-foreground">
           Foreground Contrast
         </span>
         <ModeSwitch
@@ -270,7 +270,7 @@ export function SeedColors() {
           options={FG_CONTRAST_OPTIONS}
           onChange={handleFgContrastChange}
         />
-        <p className="text-[0.65rem] text-muted-foreground leading-tight">
+        <p className="text-caption text-muted-foreground leading-tight">
           Picks light or dark text on colored buttons. "Best" always maximises contrast, "Prefer Light/Dark" follows your preference as long as WCAG AA (4.5 : 1) is met.
         </p>
       </div>

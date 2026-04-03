@@ -58,7 +58,7 @@ export function ChromaSlider() {
     <div className="space-y-2">
       {/* Header row */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-body-s font-medium text-foreground">
           Surface Chroma
         </span>
         <div className="flex items-center gap-1">
@@ -76,7 +76,7 @@ export function ChromaSlider() {
               max={100}
               value={localPct}
               onChange={handleInput}
-              className="h-full w-[4ch] bg-transparent text-center text-xs font-mono tabular-nums text-foreground outline-none border-x border-input"
+              className="h-full w-[4ch] bg-transparent text-center text-caption font-mono tabular-nums text-foreground outline-none border-x border-input"
             />
             <button
               type="button"
@@ -86,7 +86,7 @@ export function ChromaSlider() {
               <Plus className="size-3" />
             </button>
           </div>
-          <span className="text-xs text-muted-foreground">%</span>
+          <span className="text-caption text-muted-foreground">%</span>
         </div>
       </div>
 
@@ -108,10 +108,10 @@ export function ChromaSlider() {
 
       {/* Sub-labels */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Grey</span>
-        <span className="text-xs text-muted-foreground">Vibrant</span>
+        <span className="text-caption text-muted-foreground">Grey</span>
+        <span className="text-caption text-muted-foreground">Vibrant</span>
       </div>
-      <p className="text-[0.65rem] text-muted-foreground leading-tight">
+      <p className="text-caption text-muted-foreground leading-tight">
         Blends surface and background tokens between neutral grey and your brand hue.
       </p>
     </div>
