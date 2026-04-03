@@ -24,7 +24,7 @@ export function BaseInput({
         step={0.0625}
         value={value}
         onChange={handleChange}
-        className="h-6 text-[11px] font-mono text-right w-16 px-1.5 rounded-sm"
+        className="h-7 text-xs font-mono text-right w-16 px-1.5 rounded-sm"
       />
       <span className="text-[10px] text-muted-foreground/50 shrink-0 w-8">
         {Math.round(value * 16)}px

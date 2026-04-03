@@ -69,7 +69,7 @@ export function RatioSlider({
             value={matchedPreset?.value.toString() ?? ''}
             onValueChange={handlePreset}
           >
-            <SelectTrigger className="h-7 text-xs w-24 px-2 gap-1 rounded-sm">
+            <SelectTrigger className="h-7 text-xs w-32 px-2 gap-1 rounded-sm">
               <span className="truncate">
                 {matchedPreset ? matchedPreset.name : '—'}
               </span>
@@ -163,7 +163,7 @@ function HintWithStory({ hint }: { hint: string }) {
             than <strong className="text-foreground">0.8%</strong> from √φ ≈ 1.272.
           </p>
           <p>
-            The full 19-step scale averages at 1.148 — much lower, because the fine-tuning
+            The full 19-step scale averages at 1.148 — lower, because the fine-tuning
             steps (10→10.5→11→12) optimise <em>legibility within a level</em>, not contrast
             between levels. The typesetters intuitively distinguished between hierarchical
             jumps and fine adjustments — and √φ describes precisely the former.

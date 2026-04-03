@@ -17,7 +17,7 @@ export function ScaleControls() {
   const store = useTypeStore();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Scale Mode */}
       <div className="space-y-2">
         <h3 className="text-sm font-semibold text-foreground">Scale mode</h3>
@@ -95,6 +95,7 @@ export function ScaleControls() {
           label="Mono"
           value={store.monoFont}
           onChange={store.setMonoFont}
+          categories={['mono']}
         />
       </div>
 

@@ -1,27 +1,38 @@
-import { useEffect } from 'react';
-import { buildFontshareUrl, FONT_CATALOG } from '@/lib/fontshare';
-
-const LINK_ID = 'fontshare-catalog';
+import { useEffect, useSyncExternalStore } from 'react';
+import {
+  fetchFontCatalog,
+  subscribeCatalog,
+  getCatalog,
+  loadFont,
+  type FontEntry,
+} from '@/lib/fontshare';
+import { useTypeStore } from '@/store/type-store';
 
 /**
- * Loads ALL catalog fonts via a single Fontshare CSS link.
- * The CSS file is small (@font-face declarations only).
- * Actual font files are downloaded lazily by the browser
- * when text is rendered in a given font.
+ * Fetches the full Fontshare catalog on mount and
+ * loads CSS for the currently-selected fonts on demand.
  */
 export function useFontLoader() {
-  useEffect(() => {
-    const allSlugs = FONT_CATALOG.map((f) => f.slug);
-    const url = buildFontshareUrl(allSlugs);
-    if (!url) return;
+  const headingFont = useTypeStore((s) => s.headingFont);
+  const bodyFont = useTypeStore((s) => s.bodyFont);
+  const monoFont = useTypeStore((s) => s.monoFont);
 
-    let link = document.getElementById(LINK_ID) as HTMLLinkElement | null;
-    if (!link) {
-      link = document.createElement('link');
-      link.id = LINK_ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-    link.href = url;
+  // Kick off the API fetch once
+  useEffect(() => {
+    fetchFontCatalog();
   }, []);
+
+  // Load selected fonts on demand
+  useEffect(() => {
+    if (headingFont) loadFont(headingFont);
+    if (bodyFont) loadFont(bodyFont);
+    if (monoFont) loadFont(monoFont);
+  }, [headingFont, bodyFont, monoFont]);
+}
+
+/**
+ * Returns the live font catalog (updates when the API responds).
+ */
+export function useFontCatalog(): FontEntry[] {
+  return useSyncExternalStore(subscribeCatalog, getCatalog);
 }

@@ -17,7 +17,7 @@ export function SpacingTable() {
         <TableRow>
           <TableHead className="w-20">Token</TableHead>
           <TableHead className="w-20">Multiple</TableHead>
-          <TableHead className="w-24">Value</TableHead>
+          <TableHead className="w-24">Size</TableHead>
           <TableHead>Preview</TableHead>
         </TableRow>
       </TableHeader>

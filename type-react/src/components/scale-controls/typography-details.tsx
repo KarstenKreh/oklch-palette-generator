@@ -76,7 +76,7 @@ export function TypographyDetails() {
                 value={store.lineHeightOverrides[level] ?? ''}
                 placeholder={DEFAULT_LINE_HEIGHTS[level].toString()}
                 onChange={(e) => handleLineHeight(level, e.target.value)}
-                className="h-6 text-[11px] font-mono flex-1 text-right px-1.5 rounded-sm"
+                className="h-7 text-xs font-mono flex-1 text-right px-1.5 rounded-sm"
               />
               <Input
                 type="number"
@@ -86,7 +86,7 @@ export function TypographyDetails() {
                 value={store.letterSpacingOverrides[level] ?? ''}
                 placeholder={DEFAULT_LETTER_SPACINGS[level].toString()}
                 onChange={(e) => handleLetterSpacing(level, e.target.value)}
-                className="h-6 text-[11px] font-mono flex-1 text-right px-1.5 rounded-sm"
+                className="h-7 text-xs font-mono flex-1 text-right px-1.5 rounded-sm"
               />
             </div>
           ))}

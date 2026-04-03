@@ -43,8 +43,8 @@ export function TraditionalAssignments({
       </div>
       <div className="flex items-center gap-1.5">
         <span className="text-[10px] text-muted-foreground/60 w-12 shrink-0" />
-        <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Desktop</span>
         <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Mobile</span>
+        <span className="text-[10px] text-muted-foreground/60 flex-1 text-center">Desktop</span>
       </div>
       <div className="grid grid-cols-1 gap-1">
         {TYPE_LEVELS.map((level) => (
@@ -53,12 +53,12 @@ export function TraditionalAssignments({
               {LEVEL_LABELS[level]}
             </span>
             <SizeSelect
-              value={assignments[level]}
-              onChange={(v) => onAssign(level, v)}
-            />
-            <SizeSelect
               value={mobileAssignments[level]}
               onChange={(v) => onMobileAssign(level, v)}
+            />
+            <SizeSelect
+              value={assignments[level]}
+              onChange={(v) => onAssign(level, v)}
             />
           </div>
         ))}
@@ -82,7 +82,7 @@ function SizeSelect({
       value={value.toString()}
       onValueChange={(v) => onChange(parseFloat(v))}
     >
-      <SelectTrigger className="h-6 text-[11px] flex-1 px-1.5 rounded-sm min-w-0">
+      <SelectTrigger className="h-7 text-xs flex-1 px-1.5 rounded-sm min-w-0">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

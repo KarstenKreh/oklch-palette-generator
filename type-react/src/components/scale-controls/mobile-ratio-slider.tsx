@@ -1,6 +1,5 @@
+import { useState, useEffect } from 'react';
 import { useTypeStore } from '@/store/type-store';
-import type { MobileRatioMode } from '@/store/type-store';
-import { ModeSwitch } from '@/components/mode-switch';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,6 +25,11 @@ export function MobileRatioSlider() {
   const isAuto = store.mobileRatioMode === 'auto';
   const sliderValue = isAuto ? autoRatio : store.mobileRatio;
 
+  // Local string state so the input can be fully cleared
+  const storeValue = isAuto ? String(-store.autoShrink) : String(store.mobileRatio);
+  const [inputText, setInputText] = useState(storeValue);
+  useEffect(() => { setInputText(storeValue); }, [storeValue]);
+
   const handleSlider = (val: number | readonly number[]) => {
     const raw = Array.isArray(val) ? val[0] : val;
     const snapped = snap(raw);
@@ -39,12 +43,22 @@ export function MobileRatioSlider() {
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const n = parseFloat(e.target.value);
+    const raw = e.target.value;
+    setInputText(raw);
+    const n = parseFloat(raw);
+    if (isNaN(n)) return;
     if (isAuto) {
-      if (!isNaN(n) && n >= 0 && n <= 100) store.setAutoShrink(n);
+      const abs = Math.abs(n);
+      if (abs >= 0 && abs <= 100) store.setAutoShrink(abs);
     } else {
-      if (!isNaN(n) && n >= RATIO_MIN && n <= RATIO_MAX) store.setMobileRatio(n);
+      if (n >= RATIO_MIN && n <= RATIO_MAX) store.setMobileRatio(n);
     }
+  };
+
+  const handleBlur = () => {
+    // Reset to store value on blur if empty or invalid
+    const n = parseFloat(inputText);
+    if (isNaN(n)) setInputText(storeValue);
   };
 
   const handlePreset = (v: string) => {
@@ -68,11 +82,12 @@ export function MobileRatioSlider() {
         <div className="relative">
           <Input
             type="number"
-            min={isAuto ? 0 : RATIO_MIN}
-            max={isAuto ? 100 : RATIO_MAX}
+            min={isAuto ? -100 : RATIO_MIN}
+            max={isAuto ? 0 : RATIO_MAX}
             step={isAuto ? 1 : 0.001}
-            value={isAuto ? store.autoShrink : store.mobileRatio}
+            value={inputText}
             onChange={handleInput}
+            onBlur={handleBlur}
             className="h-7 text-xs font-mono w-[4.5rem] text-right px-1.5 rounded-sm"
             style={isAuto ? { paddingRight: '1.5rem' } : undefined}
           />
@@ -84,9 +99,9 @@ export function MobileRatioSlider() {
         </div>
         <Select
           value={matchedPreset?.value.toString() ?? ''}
-          onValueChange={handlePreset}
+          onValueChange={(v) => { if (v) handlePreset(v); }}
         >
-          <SelectTrigger className="h-7 text-xs w-24 px-2 gap-1 rounded-sm">
+          <SelectTrigger className="h-7 text-xs w-32 px-2 gap-1 rounded-sm">
             <span className="truncate">
               {matchedPreset ? matchedPreset.name : '—'}
             </span>

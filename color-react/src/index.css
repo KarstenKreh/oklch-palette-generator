@@ -2,22 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@font-face {
-  font-family: 'Sora';
-  src: url('/fonts/sora-variable.woff2') format('woff2');
-  font-weight: 100 800;
-  font-display: swap;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Sora';
-  src: url('/fonts/sora-variable-italic.woff2') format('woff2');
-  font-weight: 100 800;
-  font-display: swap;
-  font-style: italic;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 body {
@@ -27,8 +11,28 @@ body {
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Sora', sans-serif;
+  --font-heading: 'Satoshi', sans-serif;
+  --font-sans: 'Satoshi', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Type Scale (Ratio 1.3 — standby.design/type) */
+  --text-h1: clamp(3.0032rem, 0.735vw + 2.8309rem, 3.7129rem);
+  --text-h2: clamp(2.4103rem, 0.4617vw + 2.3021rem, 2.8561rem);
+  --text-h3: clamp(1.9344rem, 0.2719vw + 1.8707rem, 2.197rem);
+  --text-h4: clamp(1.5525rem, 0.1424vw + 1.5191rem, 1.69rem);
+  --text-h5: clamp(1.246rem, 0.0559vw + 1.2329rem, 1.3rem);
+  --text-h6: 1rem;
+  --text-body-l: clamp(1.5525rem, 0.1424vw + 1.5191rem, 1.69rem);
+  --text-body-m: clamp(1.246rem, 0.0559vw + 1.2329rem, 1.3rem);
+  --text-body-s: 1rem;
+
+  --leading-h4: 1.25;
+  --leading-h5: 1.3;
+  --leading-h6: 1.4;
+  --leading-body-s: 1.5;
+
+  --tracking-h4: 0em;
+  --tracking-body-s: 0.01em;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
