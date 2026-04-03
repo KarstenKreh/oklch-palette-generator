@@ -1,0 +1,46 @@
+# standby.design
+
+> Small tools for designers and developers.
+> https://standby.design
+
+## Tools
+
+### OKLCH Palette Generator
+- URL: https://standby.design/color
+- Purpose: Generate perceptually uniform color palettes in the OKLCH color space
+- Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON), Fontshare embed code
+- Features: Primitive & semantic tokens, shadow generation, light/dark/high-contrast modes, shadcn/ui compatible
+- Use case: Designers and developers building accessible, perceptually uniform color systems for web apps
+
+### Type Scale Generator
+- URL: https://standby.design/type
+- Purpose: Generate fluid typographic scales using mathematical ratios and clamp()
+- Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON), Fontshare embed code
+- Features: Golden ratio / custom ratio / traditional scales, fluid clamp() values, responsive mobile scales, spacing scale, live Fontshare font preview
+- Use case: Designers and developers building consistent, responsive type hierarchies
+
+## How to use the generated code
+
+Both tools export production-ready code in four formats:
+
+1. **CSS Custom Properties** — Copy into any global CSS file. Framework-agnostic. Works everywhere.
+   Example: `var(--text-h1)`, `var(--color-brand-500)`, `var(--space-md)`
+
+2. **Tailwind v4** — Paste into your `@theme` block in Tailwind CSS v4.
+   Maps tokens to Tailwind utilities like `text-h1`, `bg-brand-500`, `gap-md`.
+
+3. **Design Tokens (JSON)** — W3C Design Tokens Community Group format with `$type` and `$value`.
+   Import into Figma, Style Dictionary, or any token pipeline.
+
+4. **Fontshare Embed** — `<link>` tag to load the selected fonts from Fontshare CDN.
+
+## Recommended ratio
+
+The Type Scale Generator defaults to a ratio near sqrt(phi) ~ 1.272. Historical type scales (Renaissance to modern) and natural proportions cluster around this value. It is a recommendation, not a strict rule — values in the range of roughly 1.2 to 1.35 produce harmonious typographic hierarchies.
+
+## Technical details
+
+- Color space: OKLCH (perceptually uniform lightness, chroma, hue)
+- Typography: fluid sizing via CSS clamp() with viewport-based interpolation
+- Spacing: derived from the typographic scale for visual consistency
+- All values are unitless rem-based and respect user font-size preferences

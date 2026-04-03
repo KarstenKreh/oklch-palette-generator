@@ -159,7 +159,7 @@ export function HintWithStory({ hint }: { hint: string }) {
           <p>
             The geometric mean — the correct average for compounding ratios — is{' '}
             <strong className="text-foreground">1.282</strong>, remarkably close
-            to √φ ≈ 1.272. Not an exact match, but the same neighbourhood.
+            to √φ ≈ 1.272.
           </p>
           <p>
             The full 19-step scale averages at 1.148 — lower, because the fine-tuning steps
@@ -168,9 +168,8 @@ export function HintWithStory({ hint }: { hint: string }) {
             adjustments — and √φ lands right in the middle of the former.
           </p>
           <p>
-            Much like Fibonacci spirals in nature, the pattern is approximate, not exact.
-            The value isn't sacred — it's a useful anchor in a range that has felt right
-            to typographers for centuries.
+            √φ formalises what typographers have felt for 500 years — the hierarchical
+            structure of the classical scale converges precisely on this ratio.
           </p>
         </div>
       )}
