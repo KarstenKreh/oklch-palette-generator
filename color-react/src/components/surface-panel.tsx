@@ -260,7 +260,7 @@ export function SurfacePanel({
         {surfaceCards.map((card) => (
           <div
             key={card.name}
-            className="rounded-lg p-2.5 text-caption flex flex-col justify-between aspect-[4/3]"
+            className="rounded-lg p-2.5 text-caption flex flex-col justify-between min-h-20"
             style={{
               backgroundColor: card.bg,
               color: textHex,

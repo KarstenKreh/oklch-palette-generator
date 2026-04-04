@@ -12,6 +12,7 @@ import { useUrlState } from '@/hooks/use-url-state';
 import { useThemeStore } from '@/store/theme-store';
 import { encodeState } from '@/lib/url-state';
 import { useFavicon } from '@/hooks/use-favicon';
+import { PirateFooter } from '@/components/pirate-footer';
 
 function App() {
   const palette = usePalette();
@@ -79,6 +80,7 @@ function App() {
           <CodeExport />
         </div>
       </div>
+      <PirateFooter />
       <Toaster />
     </div>
   );

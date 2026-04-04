@@ -12,6 +12,7 @@ import { useFontLoader } from '@/hooks/use-font-loader';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useTypeStore } from '@/store/type-store';
 import { encodeState } from '@/lib/url-state';
+import { PirateFooter } from '@/components/pirate-footer';
 
 function App() {
   const store = useTypeStore();
@@ -95,6 +96,7 @@ function App() {
           <CodeExport />
         </div>
       </div>
+      <PirateFooter />
       <Toaster />
     </div>
   );

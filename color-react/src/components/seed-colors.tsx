@@ -94,7 +94,7 @@ export function SeedColors() {
         value={themeName}
         onChange={(e) => setThemeName(e.target.value)}
         maxLength={60}
-        placeholder="Theme Name"
+        placeholder="Name Your Theme"
         className="text-lg font-semibold text-foreground w-full rounded-lg border border-border bg-card px-3 py-2 outline-none focus:ring-2 focus:ring-ring"
       />
 

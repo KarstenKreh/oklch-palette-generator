@@ -122,7 +122,7 @@ function CodeBlock({
       >
         <Copy className="h-3.5 w-3.5" />
       </Button>
-      <pre className="bg-background rounded-md p-4 pr-10 overflow-auto max-h-80 text-caption font-mono leading-relaxed whitespace-pre">
+      <pre className="bg-background border border-border rounded-md p-4 pr-10 overflow-auto max-h-80 text-caption font-mono leading-relaxed whitespace-pre">
         {code}
       </pre>
     </div>
