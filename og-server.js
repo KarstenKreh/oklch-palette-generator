@@ -12,6 +12,8 @@ const PORT = 80;
 const STATIC_ROOT = '/app/public';
 const COLOR_INDEX = path.join(STATIC_ROOT, 'color', 'index.html');
 const TYPE_INDEX = path.join(STATIC_ROOT, 'type', 'index.html');
+const SYSTEM_INDEX = path.join(STATIC_ROOT, 'system', 'index.html');
+const SHAPE_INDEX = path.join(STATIC_ROOT, 'shape', 'index.html');
 const ROOT_INDEX = path.join(STATIC_ROOT, 'index.html');
 
 const MIME_TYPES = {
@@ -41,6 +43,20 @@ try {
   typeHtmlTemplate = fs.readFileSync(TYPE_INDEX, 'utf-8');
 } catch (e) {
   console.error('Could not read type index.html:', e.message);
+}
+
+let systemHtmlTemplate = '';
+try {
+  systemHtmlTemplate = fs.readFileSync(SYSTEM_INDEX, 'utf-8');
+} catch (e) {
+  console.error('Could not read system index.html:', e.message);
+}
+
+let shapeHtmlTemplate = '';
+try {
+  shapeHtmlTemplate = fs.readFileSync(SHAPE_INDEX, 'utf-8');
+} catch (e) {
+  console.error('Could not read shape index.html:', e.message);
 }
 
 const HEX_RE = /^[0-9a-fA-F]{6}$/;
@@ -191,6 +207,20 @@ const server = http.createServer((req, res) => {
   if ((pathname === '/type' || pathname.startsWith('/type/')) && !path.extname(pathname)) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(typeHtmlTemplate || 'Not found');
+    return;
+  }
+
+  // /system SPA fallback — any /system/* path without a file extension serves index.html
+  if ((pathname === '/system' || pathname.startsWith('/system/')) && !path.extname(pathname)) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(systemHtmlTemplate || 'Not found');
+    return;
+  }
+
+  // /shape SPA fallback — any /shape/* path without a file extension serves index.html
+  if ((pathname === '/shape' || pathname.startsWith('/shape/')) && !path.extname(pathname)) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(shapeHtmlTemplate || 'Not found');
     return;
   }
 

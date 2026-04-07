@@ -1,4 +1,5 @@
 import { useCallback, type ClipboardEvent, type ChangeEvent } from 'react';
+import { Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ColorPicker } from '@/components/color-picker';
@@ -13,6 +14,8 @@ interface ColorInputProps {
   previewSwatches?: string[];
   readOnly?: boolean;
   readOnlyHex?: string;
+  /** Show a lock icon overlay on the swatch */
+  locked?: boolean;
 }
 
 export function ColorInput({
@@ -22,6 +25,7 @@ export function ColorInput({
   previewSwatches,
   readOnly,
   readOnlyHex,
+  locked,
 }: ColorInputProps) {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,12 +55,18 @@ export function ColorInput({
     [onChange],
   );
 
-  const swatchBtn = (color: string, key?: string) => (
+  const swatchBtn = (color: string, key?: string, showLock?: boolean) => (
     <div
       key={key}
-      className="w-7 h-7 shrink-0"
+      className="relative w-7 h-7 shrink-0"
       style={{ backgroundColor: color }}
-    />
+    >
+      {showLock && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/25 rounded-[inherit]">
+          <Lock className="size-3 text-white drop-shadow-sm" />
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -64,22 +74,22 @@ export function ColorInput({
       {/* Swatches — grouped, no gap, rounded container */}
       {readOnly ? (
         <div className="flex items-center overflow-hidden rounded-md border border-border">
-          {swatchBtn(swatchColor)}
+          {swatchBtn(swatchColor, undefined, locked)}
           {previewSwatches?.map((color, i) => swatchBtn(color, `ps-${i}`))}
         </div>
       ) : (
         <ColorPicker value={swatchColor} onChange={handlePickerChange}>
           <div className="flex items-center overflow-hidden rounded-md border border-border cursor-pointer hover:ring-2 hover:ring-ring transition-shadow">
-            {swatchBtn(swatchColor)}
+            {swatchBtn(swatchColor, undefined, locked)}
             {previewSwatches?.map((color, i) => swatchBtn(color, `ps-${i}`))}
           </div>
         </ColorPicker>
       )}
 
       {/* Hex display */}
-      <div className="flex items-center gap-0.5 min-w-0">
+      <div className={cn("flex items-center gap-0.5 min-w-0", locked && "text-muted-foreground")}>
         <span className="text-caption text-muted-foreground select-none">#</span>
-        {readOnly ? (
+        {readOnly || locked ? (
           <span className="h-7 leading-7 w-[7.5ch] font-mono text-caption text-muted-foreground select-none pointer-events-none">
             {readOnlyHex ?? value}
           </span>

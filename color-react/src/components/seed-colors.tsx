@@ -205,11 +205,11 @@ export function SeedColors() {
                   aria-label="Auto-derive surface from brand"
                   className="h-5 px-1.5 text-caption"
                 >
-                  {bgAutoMatch ? 'Auto' : 'Custom'}
+                  Auto
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
-                {bgAutoMatch ? 'Surface color is derived from your brand color.' : 'You set a custom surface color.'}
+                {bgAutoMatch ? 'Surface color is auto-derived from your brand color.' : 'Click to auto-derive surface from brand.'}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -226,6 +226,7 @@ export function SeedColors() {
             swatchColor={bgAutoMatch ? brandHex : effectiveBgHex}
             previewSwatches={[surface500Hex, surface50Hex].filter(Boolean) as string[]}
             readOnlyHex={surface50Hex?.replace('#', '')}
+            locked={bgAutoMatch}
           />
         </div>
       </div>
@@ -328,6 +329,7 @@ export function SeedColors() {
               swatchColor={effectiveErrorHex}
               readOnly
               readOnlyHex={effectiveErrorHex.replace('#', '')}
+              locked
             />
           ) : (
             <ColorInput

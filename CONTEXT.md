@@ -10,6 +10,8 @@ Design tool suite at [standby.design](https://standby.design). Generates product
 standby.design/              Hub landing page (static HTML)
 ├── /color                    OKLCH Palette Generator (React SPA)
 ├── /type                     Fluid Type Scale Generator (React SPA)
+├── /shape                    Shape Token Generator (React SPA)
+├── /system                   Design System Viewer (React SPA)
 ├── /api/fonts                Fontshare catalog proxy (CORS workaround)
 ├── /color/og-image?c=HEX    Dynamic OG image endpoint (SVG → PNG via sharp)
 └── og-server.js              Node.js server: routing, static files, OG injection
@@ -21,12 +23,14 @@ standby.design/              Hub landing page (static HTML)
 |-----|-----|-------|---------|
 | **Color** | `color-react/` | `/color` | OKLCH palette generation: 18-step scales, semantic tokens, shadows, light/dark/HC modes, shadcn/ui export |
 | **Type** | `type-react/` | `/type` | Fluid type scales with `clamp()`, three scale modes, Fontshare font preview, spacing derivation |
-| **Hub** | `index.html` | `/` | Landing page linking to both tools |
+| **Shape** | `shape-react/` | `/shape` | Shape tokens: shadows, borders, radii, glass effects, focus rings |
+| **System** | `system-react/` | `/system` | Combined design system viewer: merges color + type + shape into a single export |
+| **Hub** | `index.html` | `/` | Landing page linking to all tools |
 | **Legacy** | `color/` | — | Original vanilla JS color tool (superseded, kept for reference only — never edit) |
 
 ### Shared Stack
 
-Both React apps share identical dependencies:
+All three React apps share identical dependencies:
 - **React 18.3** + **Vite 5.4** + **TypeScript 5.6**
 - **Tailwind CSS v4.2** (with `@tailwindcss/vite` plugin)
 - **Zustand 5** (state management)
@@ -36,11 +40,12 @@ Both React apps share identical dependencies:
 
 ### Shared Patterns
 
-- **State**: Zustand stores with `setFullState()` for bulk updates from URL decode
-- **URL persistence**: Full config encoded in URL hash — no backend. Shareable links.
-- **Export**: CSS custom properties, Tailwind v4 `@theme`, design tokens JSON
+- **State**: Zustand stores with `setFullState()` for bulk updates from URL decode (Color + Type). System app is read-only (no store).
+- **Unified URL persistence**: All tools share a unified hash format: `#c=<color-hash>&t=<type-hash>&s=<shape-hash>`. Each tool reads/writes only its own segment, preserves the rest. Legacy hashes are auto-detected for backward compatibility. See `lib/unified-hash.ts`.
+- **Cross-tool navigation**: Color → Type → System flow via links that carry the full hash. Each link encodes the current tool's state and passes through the other segments.
+- **Export**: CSS custom properties, Tailwind v4 `@theme`, design tokens JSON. System app provides a merged export combining color + type tokens.
 - **UI**: shadcn/ui-style components in `components/ui/` (Button, Tabs, Slider, etc.)
-- **Dark-only UI**: Both apps force dark mode for their own chrome
+- **Dark-only UI**: All apps force dark mode for their own chrome
 
 ---
 
@@ -337,10 +342,12 @@ Lightweight Node.js HTTP server (no framework) running on port 80 inside Docker.
 ### Docker Build (`Dockerfile`)
 
 ```
-Stage 1 (build-color): node:20-alpine, npm ci + build color-react
-Stage 2 (build-type):  node:20-alpine, npm ci + build type-react
-Stage 3 (runtime):     node:20-alpine, sharp, copies both dists + static assets
-                       Runs og-server.js on port 80
+Stage 1 (build-color):  node:20-alpine, npm ci + build color-react
+Stage 2 (build-type):   node:20-alpine, npm ci + build type-react
+Stage 3 (build-system): node:20-alpine, npm ci + build system-react
+Stage 4 (build-shape):  node:20-alpine, npm ci + build shape-react
+Stage 5 (runtime):      node:20-alpine, sharp, copies all four dists + static assets
+                        Runs og-server.js on port 80
 ```
 
 ### Deploy (`deploy.sh`)

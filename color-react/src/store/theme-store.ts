@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { PaletteMode } from '@/lib/palette';
-import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@/lib/palette';
+import { SUCCESS_HUE, WARNING_HUE, INFO_HUE, computeAutoAccentHex, computeAutoErrorHex } from '@/lib/palette';
 
 export interface Accent {
   name: string;
@@ -79,7 +79,13 @@ export const useThemeStore = create<ThemeState>((set) => ({
     return { bgAutoMatch: next, ...(next ? { bgColorHex: s.brandHex } : {}) };
   }),
   setErrorColorHex: (hex) => set({ errorColorHex: hex }),
-  toggleErrorAutoMatch: () => set((s) => ({ errorAutoMatch: !s.errorAutoMatch })),
+  toggleErrorAutoMatch: () => set((s) => {
+    const next = !s.errorAutoMatch;
+    if (!next) {
+      return { errorAutoMatch: false, errorColorHex: computeAutoErrorHex(s.brandHex) };
+    }
+    return { errorAutoMatch: true };
+  }),
   toggleBrandPin: () => set((s) => ({ brandPin: !s.brandPin, ...(!s.brandPin ? {} : { brandInvert: false }) })),
   toggleBrandInvert: () => set((s) => ({ brandInvert: !s.brandInvert })),
   toggleErrorPin: () => set((s) => ({ errorPin: !s.errorPin, ...(!s.errorPin ? {} : { errorInvert: false }) })),
@@ -111,7 +117,14 @@ export const useThemeStore = create<ThemeState>((set) => ({
     extraAccents: s.extraAccents.map((a, i) => i === index ? { ...a, invert: !a.invert } : a),
   })),
   toggleAccentAutoMatch: (index) => set((s) => ({
-    extraAccents: s.extraAccents.map((a, i) => i === index ? { ...a, autoMatch: !a.autoMatch } : a),
+    extraAccents: s.extraAccents.map((a, i) => {
+      if (i !== index) return a;
+      const next = !a.autoMatch;
+      if (!next) {
+        return { ...a, autoMatch: false, hex: computeAutoAccentHex(s.brandHex, a.autoHue) };
+      }
+      return { ...a, autoMatch: true };
+    }),
   })),
   setFullState: (partial) => set(partial),
 }));

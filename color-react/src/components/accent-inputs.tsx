@@ -267,6 +267,7 @@ function AccentRow({
             swatchColor={effectiveHex}
             readOnly
             readOnlyHex={effectiveHex.replace('#', '')}
+            locked
           />
         ) : (
           <ColorInput
