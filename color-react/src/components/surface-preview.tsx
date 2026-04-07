@@ -25,6 +25,8 @@ export function SurfacePreview() {
   } = usePalette();
 
   const fgContrastMode = useThemeStore((s) => s.fgContrastMode);
+  const brandInvert = useThemeStore((s) => s.brandInvert);
+  const errorInvert = useThemeStore((s) => s.errorInvert);
 
   const brandMap = toLookup(brand);
   const surfaceMap = toLookup(surface);
@@ -38,7 +40,9 @@ export function SurfacePreview() {
     errorSurface: errorSurfaceMap,
     neutral: neutralMap,
     brandSwatchOverride,
+    brandInvert,
     errorSwatchOverride,
+    errorInvert,
     accentPalettes,
     fgContrastMode,
   };

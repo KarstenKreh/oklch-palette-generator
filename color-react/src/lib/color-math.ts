@@ -81,6 +81,13 @@ export function maxChromaInGamut(L: number, H: number): number {
   return lo;
 }
 
+export function invertHex(hex: string): string {
+  const [L, C, H] = hexToOklch(hex);
+  const invL = 1 - L;
+  const maxC = maxChromaInGamut(invL, H);
+  return oklchToHex(invL, Math.min(C, maxC * 0.95), H);
+}
+
 export function relativeLuminance(hex: string): number {
   const [r, g, b] = hexToRgb(hex);
   return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);

@@ -75,7 +75,7 @@ export function CodeExport() {
     brandSwatchOverride, errorSwatchOverride, effectiveBgHex, effectiveErrorHex,
   } = usePalette();
   const store = useThemeStore();
-  const { chromaScale, brandHex, brandPin, errorPin, fgContrastMode, themeName, currentMode } = store;
+  const { chromaScale, brandHex, brandPin, brandInvert, errorPin, errorInvert, fgContrastMode, themeName, currentMode } = store;
 
   // Copy dropdown state
   const [copyFormat, setCopyFormat] = useState<'oklch' | 'hex'>('oklch');
@@ -97,11 +97,11 @@ export function CodeExport() {
   const semanticCode = useMemo(() =>
     generateSemantic(
       accentPalettes, brand, error, errorSurface, surface,
-      brandPin, brandSwatchOverride?.hex ?? null,
-      errorPin, errorSwatchOverride?.hex ?? null,
+      brandPin, brandSwatchOverride?.hex ?? null, brandInvert,
+      errorPin, errorSwatchOverride?.hex ?? null, errorInvert,
       fgContrastMode, themeName
     ),
-    [accentPalettes, brand, error, errorSurface, surface, brandPin, brandSwatchOverride, errorPin, errorSwatchOverride, fgContrastMode, themeName]
+    [accentPalettes, brand, error, errorSurface, surface, brandPin, brandSwatchOverride, brandInvert, errorPin, errorSwatchOverride, errorInvert, fgContrastMode, themeName]
   );
 
   const llmCode = useMemo(() =>

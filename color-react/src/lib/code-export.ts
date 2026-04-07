@@ -1,6 +1,6 @@
 // Code export — generates CSS custom property strings
 
-import { hexToOklch, contrastRatio } from './color-math';
+import { hexToOklch, contrastRatio, invertHex } from './color-math';
 import { generateShadowValues } from './shadows';
 import type { PaletteEntry } from './palette';
 import type { AccentPalette } from '@/hooks/use-palette';
@@ -72,7 +72,8 @@ function generateShadowTokens(bgHex: string, isDark: boolean): Row[] {
 function buildBlock(sel: string, rows: Row[]): string {
   let o = `${sel} {\n`;
   rows.forEach(([name, prefix, step]) => {
-    if (prefix === null) o += `  /* ${step} */\n`;
+    if (name === '#comment') o += `  /* ${step} */\n`;
+    else if (prefix === null) o += `  /* ${step} */\n`;
     else if (prefix === '#direct') o += `  --${name}: ${step};\n`;
     else o += `  --${name}: var(--color-${prefix}-${step});\n`;
   });
@@ -135,8 +136,8 @@ export function generatePrimitivesHex(
 export function generateSemantic(
   accentPalettes: AccentPalette[],
   brandPal: PaletteEntry[], errPal: PaletteEntry[], errSurfPal: PaletteEntry[], surfacePal: PaletteEntry[],
-  brandPin: boolean, pinnedBrandHex: string | null,
-  errorPin: boolean, pinnedErrorHex: string | null,
+  brandPin: boolean, pinnedBrandHex: string | null, brandInvert: boolean,
+  errorPin: boolean, pinnedErrorHex: string | null, errorInvert: boolean,
   fgMode: FgContrastMode, themeName: string
 ): string {
   const brandMap = palMap(brandPal);
@@ -152,22 +153,51 @@ export function generateSemantic(
   // Brand pin
   const bCss = bPin && bHex ? hexToCss(bHex) : null;
   const bFgCss = bPin && bHex ? fgDirect(bHex, brandMap, 50, 975, 'brand', fgMode) : null;
+
+  // Inverted brand for dark mode (lightness mirrored, hue/chroma preserved)
+  const bInvHex = bPin && bHex && brandInvert ? invertHex(bHex) : null;
+  const bInvCss = bInvHex ? hexToCss(bInvHex) : null;
+  const bInvFgCss = bInvHex ? fgDirect(bInvHex, brandMap, 50, 975, 'brand', fgMode) : null;
+
   const primaryLight: Row   = bPin && bHex ? ['primary', '#direct', bCss!] : ['primary', 'brand', 600];
   const primaryFgLight: Row = bPin && bHex ? ['primary-foreground', '#direct', bFgCss!] : ['primary-foreground', 'brand', fgStep(brandMap[600]?.hex, brandMap, 50, 975, fgMode)];
-  const primaryDark: Row    = bPin && bHex ? ['primary', '#direct', bCss!] : ['primary', 'brand', 400];
-  const primaryFgDark: Row  = bPin && bHex ? ['primary-foreground', '#direct', bFgCss!] : ['primary-foreground', 'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975, fgMode)];
+  const primaryDark: Row    = bPin && bHex ? (bInvCss ? ['primary', '#direct', bInvCss] : ['primary', '#direct', bCss!]) : ['primary', 'brand', 400];
+  const primaryFgDark: Row  = bPin && bHex ? (bInvFgCss ? ['primary-foreground', '#direct', bInvFgCss] : ['primary-foreground', '#direct', bFgCss!]) : ['primary-foreground', 'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975, fgMode)];
   const sbPrimLight: Row    = bPin && bHex ? ['sidebar-primary', '#direct', bCss!] : ['sidebar-primary', 'brand', 600];
   const sbPrimFgLight: Row  = bPin && bHex ? ['sidebar-primary-foreground', '#direct', bFgCss!] : ['sidebar-primary-foreground', 'brand', fgStep(brandMap[600]?.hex, brandMap, 50, 975, fgMode)];
-  const sbPrimDark: Row     = bPin && bHex ? ['sidebar-primary', '#direct', bCss!] : ['sidebar-primary', 'brand', 400];
-  const sbPrimFgDark: Row   = bPin && bHex ? ['sidebar-primary-foreground', '#direct', bFgCss!] : ['sidebar-primary-foreground', 'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975, fgMode)];
+  const sbPrimDark: Row     = bPin && bHex ? (bInvCss ? ['sidebar-primary', '#direct', bInvCss] : ['sidebar-primary', '#direct', bCss!]) : ['sidebar-primary', 'brand', 400];
+  const sbPrimFgDark: Row   = bPin && bHex ? (bInvFgCss ? ['sidebar-primary-foreground', '#direct', bInvFgCss] : ['sidebar-primary-foreground', '#direct', bFgCss!]) : ['sidebar-primary-foreground', 'brand', fgStep(brandMap[400]?.hex, brandMap, 50, 975, fgMode)];
+
+  // Contrast warning for pinned brand used as text color
+  const brandContrastWarnLight: Row[] = [];
+  const brandContrastWarnDark: Row[] = [];
+  if (bPin && bHex) {
+    const lightBg = surfMap[50]?.hex;
+    const darkBg = surfMap[875]?.hex;
+    const darkCheckHex = bInvHex || bHex;
+    const lightFail = lightBg ? contrastRatio(bHex, lightBg) < 4.5 : false;
+    const darkFail = darkBg ? contrastRatio(darkCheckHex, darkBg) < 4.5 : false;
+    if (lightFail) {
+      brandContrastWarnLight.push(['#comment', null,
+        `⚠ Pinned primary has low contrast on light surfaces — do not use as text color. Use --foreground for text on light backgrounds.`]);
+    }
+    if (darkFail) {
+      brandContrastWarnDark.push(['#comment', null,
+        `⚠ Pinned primary has low contrast on dark surfaces — do not use as text color. Use --foreground for text on dark backgrounds.`]);
+    }
+  }
 
   // Error pin
   const eCss = ePin && eHex ? hexToCss(eHex) : null;
   const eFgCss = ePin && eHex ? fgDirect(eHex, errSurfMap, 100, 900, 'error-surface', fgMode) : null;
+  const eInvHex = ePin && eHex && errorInvert ? invertHex(eHex) : null;
+  const eInvCss = eInvHex ? hexToCss(eInvHex) : null;
+  const eInvFgCss = eInvHex ? fgDirect(eInvHex, errSurfMap, 100, 900, 'error-surface', fgMode) : null;
+
   const destLight: Row   = ePin && eHex ? ['destructive', '#direct', eCss!] : ['destructive', 'error', 600];
   const destFgLight: Row = ePin && eHex ? ['destructive-foreground', '#direct', eFgCss!] : ['destructive-foreground', 'error-surface', fgStep(errMap[600]?.hex, errSurfMap, 100, 900, fgMode)];
-  const destDark: Row    = ePin && eHex ? ['destructive', '#direct', eCss!] : ['destructive', 'error', 400];
-  const destFgDark: Row  = ePin && eHex ? ['destructive-foreground', '#direct', eFgCss!] : ['destructive-foreground', 'error-surface', fgStep(errMap[400]?.hex, errSurfMap, 100, 900, fgMode)];
+  const destDark: Row    = ePin && eHex ? (eInvCss ? ['destructive', '#direct', eInvCss] : ['destructive', '#direct', eCss!]) : ['destructive', 'error', 400];
+  const destFgDark: Row  = ePin && eHex ? (eInvFgCss ? ['destructive-foreground', '#direct', eInvFgCss] : ['destructive-foreground', '#direct', eFgCss!]) : ['destructive-foreground', 'error-surface', fgStep(errMap[400]?.hex, errSurfMap, 100, 900, fgMode)];
 
   const root = buildBlock(':root', [
     [null as unknown as string, null, 'Base'],
@@ -178,6 +208,7 @@ export function generateSemantic(
     ['popover', 'surface', 25], ['popover-foreground', 'surface', 975],
     [null as unknown as string, null, 'Primary'],
     primaryLight, primaryFgLight,
+    ...brandContrastWarnLight,
     [null as unknown as string, null, 'Secondary — softened brand'],
     ['secondary', 'brand', 200], ['secondary-foreground', 'brand', fgStep(brandMap[200]?.hex, brandMap, 100, 900, fgMode)],
     [null as unknown as string, null, 'Muted'],
@@ -209,6 +240,7 @@ export function generateSemantic(
     ['popover', 'surface', 800], ['popover-foreground', 'surface', 25],
     [null as unknown as string, null, 'Primary'],
     primaryDark, primaryFgDark,
+    ...brandContrastWarnDark,
     [null as unknown as string, null, 'Secondary — softened brand'],
     ['secondary', 'brand', 800], ['secondary-foreground', 'brand', fgStep(brandMap[800]?.hex, brandMap, 100, 900, fgMode)],
     [null as unknown as string, null, 'Muted'],
@@ -235,14 +267,19 @@ export function generateSemantic(
   accentPalettes.forEach(entry => {
     const n = entry.cssName;
     const aPin = !!entry.pin;
+    const aInv = !!entry.invert;
     const aHex = entry.hex;
     const aCss = aPin ? hexToCss(aHex) : null;
     const aMap = palMap(entry.palette || []);
     const aFgCss = aPin ? fgDirect(aHex, aMap, 50, 975, n, fgMode) : null;
+    const aInvHex = aPin && aInv ? invertHex(aHex) : null;
+    const aInvCss = aInvHex ? hexToCss(aInvHex) : null;
+    const aInvFgCss = aInvHex ? fgDirect(aInvHex, aMap, 50, 975, n, fgMode) : null;
+
     const aLight: Row = aPin ? [n, '#direct', aCss!] : [n, n, 600];
     const aFgL: Row = aPin ? [`${n}-foreground`, '#direct', aFgCss!] : [`${n}-foreground`, n, fgStep(aMap[600]?.hex, aMap, 50, 975, fgMode)];
-    const aDark: Row = aPin ? [n, '#direct', aCss!] : [n, n, 400];
-    const aFgD: Row = aPin ? [`${n}-foreground`, '#direct', aFgCss!] : [`${n}-foreground`, n, fgStep(aMap[400]?.hex, aMap, 50, 975, fgMode)];
+    const aDark: Row = aPin ? (aInvCss ? [n, '#direct', aInvCss] : [n, '#direct', aCss!]) : [n, n, 400];
+    const aFgD: Row = aPin ? (aInvFgCss ? [`${n}-foreground`, '#direct', aInvFgCss] : [`${n}-foreground`, '#direct', aFgCss!]) : [`${n}-foreground`, n, fgStep(aMap[400]?.hex, aMap, 50, 975, fgMode)];
 
     const accentRoot = buildBlock(':root', [
       [null as unknown as string, null, `${entry.name} — light`],
@@ -320,6 +357,13 @@ export function generateLlmBriefing(
     ? `\n> **Pinned** means the exact input hex is used for primary/destructive button colors instead of the generated palette step (brand-600/400 or error-600/400).\n`
     : '';
 
+  let pinnedContrastWarning = '';
+  if (brandPin) {
+    pinnedContrastWarning = `
+> ⚠ **Contrast warning — pinned primary**: The pinned brand color (\`${brandHex}\`) may not have sufficient contrast (WCAG AA 4.5:1) against your surface backgrounds when used as a text color. **Do not use \`--primary\` for body text.** Use \`--foreground\` for general text. \`--primary-foreground\` is only for text on primary-colored backgrounds (e.g. buttons).
+`;
+  }
+
   return `# ${title} — Theme Briefing
 
 All colors are generated in the **OKLCH** color space (perceptually uniform). Gamut mapping to sRGB is handled automatically — you never need to worry about out-of-gamut values.
@@ -329,8 +373,7 @@ All colors are generated in the **OKLCH** color space (perceptually uniform). Ga
 | Role | Hex | CSS prefix | Notes |
 |------|-----|------------|-------|
 ${colorRows}
-${pinnedNote}
-
+${pinnedNote}${pinnedContrastWarning}
 ## Semantic Token Mapping
 
 | Token | Light | Dark | Usage |

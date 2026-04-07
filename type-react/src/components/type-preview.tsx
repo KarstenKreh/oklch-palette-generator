@@ -9,10 +9,10 @@ import { Smartphone, Tablet, Monitor } from 'lucide-react';
 const VW_MIN = 320;
 const VW_MAX = 1920;
 
-const VW_MARKERS = [
+const VW_MARKERS: { value: number; icon: typeof Smartphone; label: string; rotate?: boolean }[] = [
   { value: 375, icon: Smartphone, label: 'Mobile' },
   { value: 768, icon: Tablet, label: 'Tablet' },
-  { value: 1024, icon: Tablet, label: 'Tablet landscape' },
+  { value: 1024, icon: Tablet, label: 'Tablet landscape', rotate: true },
   { value: 1920, icon: Monitor, label: 'Desktop' },
 ];
 
@@ -70,10 +70,10 @@ export function TypePreview() {
     h4: 'Card Heading',
     h5: 'Small Heading',
     h6: 'Label Text',
-    'body-l': "Nobody exists on purpose. Nobody belongs anywhere. We're all going to die. Come watch TV.",
+    'body-l': "Your boos mean nothing, I've seen what makes you cheer.",
     'body-m': "Wubba lubba dub dub! Sometimes science is more art than science. A lot of people don't get that.",
-    'body-s': "To live is to risk it all, otherwise you're just an inert chunk of randomly assembled molecules.",
-    'caption': 'Published Mar 15, 2024 · 4 min read',
+    'body-s': "I know that new situations can be intimidating. You're lookin' around and it's all scary and different, but y'know, meeting them head-on, charging into 'em like a bull — that's how we grow as people.",
+    'caption': "I'm a scientist; because I invent, transform, create, and destroy for a living, and when I don't like something about the world, I change it.",
   };
 
   return (
@@ -112,7 +112,7 @@ export function TypePreview() {
                 style={{ left: `${pct}%`, top: 'calc(50% + 8px)' }}
                 title={`${m.label} (${m.value}px)`}
               >
-                <Icon className="h-3 w-3" />
+                <Icon className={`h-3 w-3${m.rotate ? ' -rotate-90' : ''}`} />
               </button>
             );
           })}
@@ -182,7 +182,7 @@ export function TypePreview() {
                   fontFamily: monoFF,
                   lineHeight: bodyS.lineHeight,
                 }}
-                className="text-foreground transition-[font-size] duration-200"
+                className="text-foreground transition-[font-size] duration-200 whitespace-nowrap"
               >
                 {previewText || 'const portalGun = require("dimension-c137");'}
               </p>

@@ -12,7 +12,9 @@ interface EncodableState {
   chromaScale: number;
   currentMode: PaletteMode;
   brandPin: boolean;
+  brandInvert: boolean;
   errorPin: boolean;
+  errorInvert: boolean;
   fgContrastMode: FgContrastMode;
   themeName: string;
   extraAccents: Accent[];
@@ -23,9 +25,9 @@ export function encodeState(s: EncodableState): string {
   const bg = s.bgColorHex.replace('#', '');
   const err = s.errorColorHex.replace('#', '');
   const chroma = Math.round(s.chromaScale * 100);
-  let hash = `${brand},${bg},${s.bgAutoMatch ? 1 : 0},${err},${s.errorAutoMatch ? 1 : 0},${chroma},${s.currentMode},${s.brandPin ? 1 : 0},${s.errorPin ? 1 : 0},${s.fgContrastMode},${encodeURIComponent(s.themeName)}`;
+  let hash = `${brand},${bg},${s.bgAutoMatch ? 1 : 0},${err},${s.errorAutoMatch ? 1 : 0},${chroma},${s.currentMode},${s.brandPin ? 1 : 0},${s.errorPin ? 1 : 0},${s.fgContrastMode},${encodeURIComponent(s.themeName)},${s.brandInvert ? 1 : 0},${s.errorInvert ? 1 : 0}`;
   s.extraAccents.forEach(a => {
-    hash += `!${encodeURIComponent(a.name)}:${a.hex.replace('#', '')}:${a.pin ? 1 : 0}`;
+    hash += `!${encodeURIComponent(a.name)}:${a.hex.replace('#', '')}:${a.pin ? 1 : 0}:${a.autoMatch ? 1 : 0}:${Math.round(a.autoHue)}:${a.invert ? 1 : 0}`;
   });
   return hash;
 }
@@ -39,7 +41,9 @@ interface DecodedState {
   chromaScale: number;
   currentMode: PaletteMode;
   brandPin: boolean;
+  brandInvert: boolean;
   errorPin: boolean;
+  errorInvert: boolean;
   fgContrastMode: FgContrastMode;
   themeName: string;
   extraAccents: Accent[];
@@ -67,7 +71,6 @@ export function decodeState(hash: string): DecodedState | null {
     errorPin: p[8] === '1',
     fgContrastMode: 'best',
     themeName: 'Standby.Design',
-    extraAccents: [],
   };
 
   const chromaVal = parseInt(chroma);
@@ -84,6 +87,11 @@ export function decodeState(hash: string): DecodedState | null {
 
   result.themeName = p.length > 10 && p[10] ? decodeURIComponent(p[10]) : 'Standby.Design';
 
+  // v2 fields: brandInvert (pos 11), errorInvert (pos 12) — default false for old URLs
+  result.brandInvert = p.length > 11 && p[11] === '1';
+  result.errorInvert = p.length > 12 && p[12] === '1';
+
+  result.extraAccents = [];
   for (let i = 1; i < segments.length; i++) {
     const firstColon = segments[i].indexOf(':');
     if (firstColon === -1) continue;
@@ -92,9 +100,12 @@ export function decodeState(hash: string): DecodedState | null {
     const restParts = rest.split(':');
     const rawHex = restParts[0];
     const pin = restParts[1] === '1';
+    const autoMatch = restParts[2] === '1';
+    const autoHue = restParts[3] ? parseInt(restParts[3]) || 0 : 0;
+    const accentInvert = restParts[4] === '1';
     const name = decodeURIComponent(rawName) || ('Extra ' + i);
-    if (/^[0-9a-fA-F]{6}$/.test(rawHex)) {
-      result.extraAccents.push({ name, hex: '#' + rawHex.toUpperCase(), pin });
+    if (autoMatch || /^[0-9a-fA-F]{6}$/.test(rawHex)) {
+      result.extraAccents.push({ name, hex: '#' + rawHex.toUpperCase(), pin, invert: accentInvert, autoMatch, autoHue });
     }
   }
 

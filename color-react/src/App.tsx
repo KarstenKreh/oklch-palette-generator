@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { SeedColors } from '@/components/seed-colors';
 import { PrimitiveTabs } from '@/components/primitive-tabs';
@@ -43,6 +44,7 @@ function App() {
   }, [themeName]);
 
   return (
+    <TooltipProvider>
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Header */}
@@ -83,6 +85,7 @@ function App() {
       <PirateFooter />
       <Toaster />
     </div>
+    </TooltipProvider>
   );
 }
 

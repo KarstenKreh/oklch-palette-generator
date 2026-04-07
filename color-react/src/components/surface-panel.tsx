@@ -1,7 +1,7 @@
 import type { PaletteEntry } from '@/lib/palette';
 import type { AccentPalette } from '@/hooks/use-palette';
 import type { FgContrastMode } from '@/store/theme-store';
-import { contrastRatio } from '@/lib/color-math';
+import { contrastRatio, invertHex } from '@/lib/color-math';
 import { generateShadowValues } from '@/lib/shadows';
 import { PanelSvg } from '@/components/panel-svg';
 
@@ -13,7 +13,9 @@ export interface SurfacePanelProps {
   error: Record<number, PaletteEntry>;
   errorSurface: Record<number, PaletteEntry>;
   brandSwatchOverride: { hex: string; L: number } | null;
+  brandInvert: boolean;
   errorSwatchOverride: { hex: string; L: number } | null;
+  errorInvert: boolean;
   accentPalettes: AccentPalette[];
   fgContrastMode: FgContrastMode;
 }
@@ -172,7 +174,9 @@ export function SurfacePanel({
   error,
   errorSurface,
   brandSwatchOverride,
+  brandInvert,
   errorSwatchOverride,
+  errorInvert,
   accentPalettes,
   fgContrastMode,
 }: SurfacePanelProps) {
@@ -182,9 +186,15 @@ export function SurfacePanel({
   const surfaceCards = getSurfaceCards(panelType, config, brand);
 
   // Button colors
-  const primaryBg = brandSwatchOverride?.hex ?? (isDark ? getHex(brand, 400) : getHex(brand, 600));
+  const pinnedHex = brandSwatchOverride?.hex;
+  const primaryBg = pinnedHex
+    ? (isDark && brandInvert ? invertHex(pinnedHex) : pinnedHex)
+    : (isDark ? getHex(brand, 400) : getHex(brand, 600));
   const secondaryBg = isDark ? getHex(brand, 800) : getHex(brand, 200);
-  const destructiveBg = errorSwatchOverride?.hex ?? (isDark ? getHex(error, 400) : getHex(error, 600));
+  const pinnedErrorHex = errorSwatchOverride?.hex;
+  const destructiveBg = pinnedErrorHex
+    ? (isDark && errorInvert ? invertHex(pinnedErrorHex) : pinnedErrorHex)
+    : (isDark ? getHex(error, 400) : getHex(error, 600));
 
   const primaryFg = chooseFg(primaryBg, fgContrastMode);
   const secondaryFg = chooseFg(secondaryBg, fgContrastMode);

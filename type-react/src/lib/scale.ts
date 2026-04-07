@@ -113,7 +113,7 @@ export const TRADITIONAL_SIZES: { px: number; name: string }[] = [
 export const DEFAULT_TRADITIONAL: Record<TypeLevel, number> = {
   'display': 72, 'h1': 48, 'h2': 36, 'h3': 24,
   'h4': 20, 'h5': 18, 'h6': 16,
-  'body-l': 20, 'body-m': 18, 'body-s': 16, 'caption': 12,
+  'body-l': 20, 'body-m': 18, 'body-s': 16, 'caption': 14,
 };
 
 /** One step down in TRADITIONAL_SIZES for each default desktop value */

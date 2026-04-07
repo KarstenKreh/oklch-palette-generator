@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useThemeStore } from '@/store/theme-store';
-import { generatePalette, computeAutoErrorHex, type PaletteEntry } from '@/lib/palette';
+import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@/lib/palette';
 import { hexToOklch } from '@/lib/color-math';
 
 export interface AccentPalette {
@@ -10,6 +10,7 @@ export interface AccentPalette {
   palette: PaletteEntry[];
   slatedPalette: PaletteEntry[];
   pin: boolean;
+  invert: boolean;
 }
 
 export function accentCssName(name: string): string {
@@ -34,15 +35,19 @@ export function usePalette() {
     const slated = generatePalette(effectiveBgHex, chromaScale, currentMode);
 
     const accentPalettes: AccentPalette[] = extraAccents
-      .filter(a => /^#[0-9a-fA-F]{6}$/.test(a.hex))
-      .map(a => ({
-        name: a.name,
-        hex: a.hex,
-        cssName: accentCssName(a.name),
-        palette: generatePalette(a.hex, 1.0, currentMode),
-        slatedPalette: generatePalette(a.hex, chromaScale, currentMode),
-        pin: a.pin,
-      }));
+      .filter(a => a.autoMatch || /^#[0-9a-fA-F]{6}$/.test(a.hex))
+      .map(a => {
+        const effectiveHex = a.autoMatch ? computeAutoAccentHex(brandHex, a.autoHue) : a.hex;
+        return {
+          name: a.name,
+          hex: effectiveHex,
+          cssName: accentCssName(a.name),
+          palette: generatePalette(effectiveHex, 1.0, currentMode),
+          slatedPalette: generatePalette(effectiveHex, chromaScale, currentMode),
+          pin: a.pin,
+          invert: a.invert,
+        };
+      });
 
     const brandSwatchOverride = brandPin
       ? { hex: brandHex, L: hexToOklch(brandHex)[0] }

@@ -8,7 +8,10 @@ export type Step = (typeof STEPS)[number];
 export const L_WHITE = 0.98;
 export const L_BLACK = 0.10;
 
-const ERROR_HUE = 25;
+export const ERROR_HUE = 25;
+export const SUCCESS_HUE = 145;
+export const WARNING_HUE = 85;
+export const INFO_HUE = 255;
 
 export interface PaletteEntry {
   step: Step;
@@ -24,12 +27,16 @@ function surfaceChromaCorrection(L: number): number {
   return Math.pow(L / 0.45, 1.2);
 }
 
-export function computeAutoErrorHex(primaryHex: string): string {
+export function computeAutoAccentHex(primaryHex: string, hue: number): string {
   const [pL, pC, pH] = hexToOklch(primaryHex);
   const primaryMaxC = maxChromaInGamut(pL, pH);
   const saturation = primaryMaxC > 0.001 ? pC / primaryMaxC : 0.5;
-  const errorMaxC = maxChromaInGamut(pL, ERROR_HUE);
-  return oklchToHex(pL, errorMaxC * saturation * 0.95, ERROR_HUE);
+  const accentMaxC = maxChromaInGamut(pL, hue);
+  return oklchToHex(pL, accentMaxC * saturation * 0.95, hue);
+}
+
+export function computeAutoErrorHex(primaryHex: string): string {
+  return computeAutoAccentHex(primaryHex, ERROR_HUE);
 }
 
 export type PaletteMode = 'balanced' | 'exact';
