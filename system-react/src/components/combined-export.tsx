@@ -1,15 +1,18 @@
 import { useMemo, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Copy, Check } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { DecodedColorState } from '@/lib/color-url-state';
 import type { UrlState } from '@/lib/type-url-state';
 import type { PaletteEntry } from '@/lib/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@/lib/scale';
 import type { SpacingToken } from '@/lib/spacing';
+import type { ShapeState } from '@/lib/shape-url-state';
 import {
   generatePrimitivesOklch,
   generateSemantic,
+  generateLlmBriefing as generateColorLlmBriefing,
 } from '@/lib/color-code-export';
 import { generateShadowValues } from '@/lib/shadows';
 import {
@@ -17,6 +20,12 @@ import {
   generateTailwindV4Export as generateTypeTailwind,
   generateFontEmbed,
 } from '@/lib/type-code-export';
+import {
+  generateShapeCss,
+  generateShapeTailwind,
+  generateLlmBriefing as generateShapeLlmBriefing,
+  optsFromState as shapeOptsFromState,
+} from '@/lib/shape-code-export';
 
 interface PaletteResult {
   brand: PaletteEntry[];
@@ -37,9 +46,9 @@ interface CombinedExportProps {
   typeState: UrlState | null;
   scale: ComputedLevel[] | null;
   spacing: SpacingToken[] | null;
+  shapeState: Partial<ShapeState> | null;
+  surfaceHex?: string;
 }
-
-type Tab = 'css' | 'tailwind' | 'embed';
 
 function getScaleLabel(typeState: UrlState | null): string {
   if (!typeState) return 'Custom Ratio';
@@ -49,8 +58,8 @@ function getScaleLabel(typeState: UrlState | null): string {
   return `Custom Ratio (${r})`;
 }
 
-export function CombinedExport({ colorState, palette, typeState, scale, spacing }: CombinedExportProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('css');
+export function CombinedExport({ colorState, palette, typeState, scale, spacing, shapeState, surfaceHex }: CombinedExportProps) {
+  const [activeTab, setActiveTab] = useState('css');
   const [copied, setCopied] = useState(false);
 
   const colorCss = useMemo(() => {
@@ -105,53 +114,68 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing 
     });
   }, [typeState, scale, spacing]);
 
+  const shapeCss = useMemo(() => {
+    if (!shapeState) return '';
+    const opts = shapeOptsFromState(shapeState, surfaceHex);
+    return generateShapeCss(opts);
+  }, [shapeState, surfaceHex]);
+
+  const shapeTailwind = useMemo(() => {
+    if (!shapeState) return '';
+    const opts = shapeOptsFromState(shapeState, surfaceHex);
+    return generateShapeTailwind(opts);
+  }, [shapeState, surfaceHex]);
+
   const fontEmbed = useMemo(() => {
     if (!typeState) return '';
     return generateFontEmbed(typeState.headingFont, typeState.bodyFont, typeState.monoFont);
   }, [typeState]);
 
-  const output = useMemo(() => {
-    switch (activeTab) {
-      case 'css': {
-        let combined = '';
-        if (colorCss) combined += colorCss;
-        if (typeCss) {
-          if (combined) combined += '\n';
-          combined += typeCss;
-        }
-        return combined || '/* No configuration available */';
-      }
-      case 'tailwind': {
-        let combined = '';
-        if (colorCss) {
-          // For Tailwind, reuse the CSS primitives (color tokens work in @theme too)
-          combined += colorCss;
-        }
-        if (typeTailwind) {
-          if (combined) combined += '\n';
-          combined += typeTailwind;
-        }
-        return combined || '/* No configuration available */';
-      }
-      case 'embed': {
-        return fontEmbed || '<!-- No fonts selected -->';
-      }
+  const llmBriefing = useMemo(() => {
+    let md = '';
+
+    // Color briefing
+    if (colorState && palette) {
+      md += generateColorLlmBriefing(
+        colorState.brandHex,
+        palette.effectiveBgHex,
+        palette.effectiveErrorHex,
+        palette.accentPalettes,
+        colorState.chromaScale,
+        colorState.currentMode,
+        colorState.brandPin,
+        colorState.errorPin,
+        colorState.themeName,
+        colorState.fgContrastMode,
+      );
     }
-  }, [activeTab, colorCss, typeCss, typeTailwind, fontEmbed]);
+
+    // Shape briefing
+    if (shapeState) {
+      const opts = shapeOptsFromState(shapeState, surfaceHex);
+      if (md) md += '\n---\n\n';
+      md += generateShapeLlmBriefing(opts);
+    }
+
+    return md || '<!-- No configuration available -->';
+  }, [colorState, palette, shapeState, surfaceHex]);
+
+  const outputs = useMemo(() => {
+    const css = [colorCss, typeCss, shapeCss].filter(Boolean).join('\n') || '/* No configuration available */';
+    const tailwind = [colorCss, typeTailwind, shapeTailwind].filter(Boolean).join('\n') || '/* No configuration available */';
+    const embed = fontEmbed || '<!-- No fonts selected -->';
+    return { css, tailwind, embed, llm: llmBriefing };
+  }, [colorCss, typeCss, typeTailwind, shapeCss, shapeTailwind, fontEmbed, llmBriefing]);
+
+  const currentOutput = outputs[activeTab as keyof typeof outputs] ?? outputs.css;
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(output).then(() => {
+    navigator.clipboard.writeText(currentOutput).then(() => {
       setCopied(true);
       toast('Copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [output]);
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'css', label: 'CSS' },
-    { key: 'tailwind', label: 'Tailwind v4' },
-    { key: 'embed', label: 'Font Embed' },
-  ];
+  }, [currentOutput]);
 
   return (
     <div>
@@ -166,24 +190,50 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing 
         </button>
       </div>
 
-      <div className="flex gap-1 mb-3">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-              activeTab === tab.key
-                ? 'bg-muted text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="css" className="text-caption">
+            CSS Custom Properties
+          </TabsTrigger>
+          <TabsTrigger value="tailwind" className="text-caption">
+            Tailwind v4
+          </TabsTrigger>
+          <TabsTrigger value="embed" className="text-caption">
+            Font Embed
+          </TabsTrigger>
+          <TabsTrigger value="llm" className="text-caption">
+            LLM Briefing
+          </TabsTrigger>
+        </TabsList>
 
-      <pre className="bg-background rounded-lg p-4 text-xs overflow-x-auto max-h-[500px] overflow-y-auto font-mono leading-relaxed">
-        <code>{output}</code>
+        <TabsContent value="css">
+          <CodeBlock code={outputs.css} onCopy={() => { navigator.clipboard.writeText(outputs.css).then(() => toast('Copied!')); }} />
+        </TabsContent>
+        <TabsContent value="tailwind">
+          <CodeBlock code={outputs.tailwind} onCopy={() => { navigator.clipboard.writeText(outputs.tailwind).then(() => toast('Copied!')); }} />
+        </TabsContent>
+        <TabsContent value="embed">
+          <CodeBlock code={outputs.embed} onCopy={() => { navigator.clipboard.writeText(outputs.embed).then(() => toast('Copied!')); }} />
+        </TabsContent>
+        <TabsContent value="llm">
+          <CodeBlock code={outputs.llm} onCopy={() => { navigator.clipboard.writeText(outputs.llm).then(() => toast('Copied!')); }} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function CodeBlock({ code, onCopy }: { code: string; onCopy: () => void }) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onCopy}
+        className="absolute top-2 right-2 h-7 w-7 p-0 z-10 inline-flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Copy className="h-3.5 w-3.5" />
+      </button>
+      <pre className="bg-background border border-border rounded-md p-4 pr-10 overflow-x-auto max-h-[500px] overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre">
+        <code>{code}</code>
       </pre>
     </div>
   );

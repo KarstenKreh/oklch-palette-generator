@@ -404,6 +404,10 @@ ${pinnedNote}${pinnedContrastWarning}
 | \`--sidebar-accent\` | brand-100 | brand-800 |
 | \`--sidebar-border\` | surface-300 | surface-600 |
 
+### Surface Layering
+
+\`--background\` is the **base canvas** — the empty page with nothing on it. Everything placed on the screen (cards, lists, charts, inputs, modals) uses \`--card\`. On mobile, the visible screen is often entirely covered by content, so the entire screen may appear as \`--card\` — but \`--background\` is still the layer underneath, visible in gaps between widgets or behind sheet transitions. On desktop, \`--background\` is more visible because containers don't always fill the viewport. Think of it as: \`--background\` = the wall, \`--card\` = the paper pinned to it.
+
 Every background token has a matching \`*-foreground\` counterpart. Always pair them.
 ${accentPalettes.length > 0 ? `
 ### Accent Scopes

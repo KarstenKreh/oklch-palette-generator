@@ -24,8 +24,18 @@ export function useUrlState() {
     headingFont: s.headingFont,
     bodyFont: s.bodyFont,
     monoFont: s.monoFont,
+    headingWeight: s.headingWeight,
+    weightCompensation: s.weightCompensation,
+    mobileBaseSize: s.mobileBaseSize,
+    mobileRatioMode: s.mobileRatioMode,
+    autoShrink: s.autoShrink,
+    spacingBaseMultiplier: s.spacingBaseMultiplier,
+    lineHeightOverrides: s.lineHeightOverrides,
+    letterSpacingOverrides: s.letterSpacingOverrides,
     traditionalAssignments:
       s.scaleMode === 'traditional' ? s.traditionalAssignments : undefined,
+    traditionalMobileAssignments:
+      s.scaleMode === 'traditional' ? s.traditionalMobileAssignments : undefined,
   });
 
   useEffect(() => {
@@ -49,13 +59,23 @@ export function useUrlState() {
             baseSize: state.baseSize,
             customRatio: state.customRatio,
             mobileRatio: state.mobileRatio,
-            mobileRatioMode: 'custom' as const,
+            mobileRatioMode: state.mobileRatioMode,
+            mobileBaseSize: state.mobileBaseSize,
+            autoShrink: state.autoShrink,
             headingFont: state.headingFont,
+            headingWeight: state.headingWeight,
+            weightCompensation: state.weightCompensation,
             bodyFont: state.bodyFont,
             monoFont: state.monoFont,
+            spacingBaseMultiplier: state.spacingBaseMultiplier,
+            lineHeightOverrides: state.lineHeightOverrides,
+            letterSpacingOverrides: state.letterSpacingOverrides,
           };
           if (state.traditionalAssignments) {
             partial.traditionalAssignments = state.traditionalAssignments;
+          }
+          if (state.traditionalMobileAssignments) {
+            partial.traditionalMobileAssignments = state.traditionalMobileAssignments;
           }
           store.setFullState(partial);
         }
@@ -81,8 +101,13 @@ export function useUrlState() {
       c: othersRef.current.c, t: encoded, s: othersRef.current.s,
     }));
   }, [
-    store.scaleMode, store.baseSize, store.customRatio, store.mobileRatio,
-    store.headingFont, store.bodyFont, store.monoFont, store.traditionalAssignments,
+    store.scaleMode, store.baseSize, store.mobileBaseSize, store.customRatio,
+    store.mobileRatioMode, store.mobileRatio, store.autoShrink,
+    store.headingFont, store.headingWeight, store.weightCompensation,
+    store.bodyFont, store.monoFont,
+    store.spacingBaseMultiplier,
+    store.lineHeightOverrides, store.letterSpacingOverrides,
+    store.traditionalAssignments, store.traditionalMobileAssignments,
   ]);
 
   return others;

@@ -1,9 +1,19 @@
 /**
- * URL hash state encoding/decoding for the type scale generator.
+ * URL hash state decoding for the type scale (read-only in system app).
  *
- * Format: #mode,baseSize,customRatio,mobileRatio,headingFont,bodyFont,monoFont[,assignments...]
+ * Format (v2):
+ *   mode,baseSize,customRatio,mobileRatio,headingFont,bodyFont,monoFont[,trad...]|key=val&key=val
  *
- * Assignments are only present for traditional mode (9 comma-separated px values).
+ * Extended keys:
+ *   hw  = headingWeight (100–900, default 500)
+ *   wc  = weightCompensation (0|1, default 1)
+ *   mbs = mobileBaseSize (rem, default = baseSize)
+ *   mrm = mobileRatioMode ('auto'|'custom', default 'auto')
+ *   as  = autoShrink (%, default 25)
+ *   sbm = spacingBaseMultiplier (number, default 1)
+ *   lh  = lineHeightOverrides (level:val;level:val)
+ *   ls  = letterSpacingOverrides (level:val;level:val)
+ *   tm  = traditionalMobileAssignments (px,px,...  in TYPE_LEVELS order)
  */
 
 import type { TypeLevel } from './scale';
@@ -17,34 +27,37 @@ export interface UrlState {
   headingFont: string;
   bodyFont: string;
   monoFont: string;
+  headingWeight: number;
+  weightCompensation: boolean;
+  mobileBaseSize: number;
+  mobileRatioMode: 'auto' | 'custom';
+  autoShrink: number;
+  spacingBaseMultiplier: number;
+  lineHeightOverrides: Partial<Record<TypeLevel, number>>;
+  letterSpacingOverrides: Partial<Record<TypeLevel, number>>;
   traditionalAssignments?: Record<TypeLevel, number>;
+  traditionalMobileAssignments?: Record<TypeLevel, number>;
 }
 
-export function encodeState(state: UrlState): string {
-  const parts = [
-    state.scaleMode,
-    state.baseSize,
-    state.customRatio,
-    state.mobileRatio,
-    state.headingFont,
-    state.bodyFont,
-    state.monoFont,
-  ];
-
-  if (state.scaleMode === 'traditional' && state.traditionalAssignments) {
-    for (const level of TYPE_LEVELS) {
-      parts.push(state.traditionalAssignments[level]);
+function decodeOverrides(str: string): Partial<Record<TypeLevel, number>> {
+  const result: Partial<Record<TypeLevel, number>> = {};
+  if (!str) return result;
+  for (const pair of str.split(';')) {
+    const [key, val] = pair.split(':');
+    if (key && val && TYPE_LEVELS.includes(key as TypeLevel)) {
+      const n = parseFloat(val);
+      if (!isNaN(n)) result[key as TypeLevel] = n;
     }
   }
-
-  return parts.join(',');
+  return result;
 }
 
 export function decodeState(hash: string): UrlState | null {
   const raw = hash.replace(/^#/, '');
   if (!raw) return null;
 
-  const parts = raw.split(',');
+  const [positional, extStr] = raw.split('|');
+  const parts = positional.split(',');
   if (parts.length < 7) return null;
 
   const mode = parts[0] as UrlState['scaleMode'];
@@ -63,6 +76,14 @@ export function decodeState(hash: string): UrlState | null {
     headingFont: parts[4],
     bodyFont: parts[5],
     monoFont: parts[6],
+    headingWeight: 500,
+    weightCompensation: true,
+    mobileBaseSize: baseSize,
+    mobileRatioMode: 'auto',
+    autoShrink: 25,
+    spacingBaseMultiplier: 1,
+    lineHeightOverrides: {},
+    letterSpacingOverrides: {},
   };
 
   if (mode === 'traditional' && parts.length >= 16) {
@@ -73,13 +94,51 @@ export function decodeState(hash: string): UrlState | null {
       if (isNaN(val)) return null;
       assignments[TYPE_LEVELS[i]] = val;
     }
-    // Fill missing levels with defaults (backward compat for old URLs)
     for (const level of TYPE_LEVELS) {
       if (!(level in assignments)) {
         assignments[level] = DEFAULT_TRADITIONAL[level];
       }
     }
     state.traditionalAssignments = assignments;
+  }
+
+  if (extStr) {
+    const params = new URLSearchParams(extStr);
+
+    const hw = params.get('hw');
+    if (hw) { const n = parseInt(hw); if (!isNaN(n)) state.headingWeight = n; }
+
+    const wc = params.get('wc');
+    if (wc === '0') state.weightCompensation = false;
+
+    const mbs = params.get('mbs');
+    if (mbs) { const n = parseFloat(mbs); if (!isNaN(n)) state.mobileBaseSize = n; }
+
+    const mrm = params.get('mrm');
+    if (mrm === 'custom') state.mobileRatioMode = 'custom';
+
+    const as = params.get('as');
+    if (as) { const n = parseFloat(as); if (!isNaN(n)) state.autoShrink = n; }
+
+    const sbm = params.get('sbm');
+    if (sbm) { const n = parseFloat(sbm); if (!isNaN(n)) state.spacingBaseMultiplier = n; }
+
+    const lh = params.get('lh');
+    if (lh) state.lineHeightOverrides = decodeOverrides(lh);
+
+    const ls = params.get('ls');
+    if (ls) state.letterSpacingOverrides = decodeOverrides(ls);
+
+    const tm = params.get('tm');
+    if (tm && mode === 'traditional') {
+      const tmParts = tm.split(',');
+      const tmAssign = {} as Record<TypeLevel, number>;
+      for (let i = 0; i < Math.min(TYPE_LEVELS.length, tmParts.length); i++) {
+        const val = parseFloat(tmParts[i]);
+        if (!isNaN(val)) tmAssign[TYPE_LEVELS[i]] = val;
+      }
+      state.traditionalMobileAssignments = tmAssign;
+    }
   }
 
   return state;

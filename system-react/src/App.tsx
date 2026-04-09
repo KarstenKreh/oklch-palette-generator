@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, type CSSProperties } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ function App() {
   const [colorSegment, setColorSegment] = useState<string | null>(null);
   const [typeSegment, setTypeSegment] = useState<string | null>(null);
   const [shapeSegment, setShapeSegment] = useState<string | null>(null);
+  const [themeName, setThemeName] = useState('');
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -59,17 +60,20 @@ function App() {
     setColorSegment(cs);
     setTypeSegment(ts);
     setShapeSegment(ss);
-    if (cs) setColorState(decodeColorState(cs));
+    if (cs) {
+      const decoded = decodeColorState(cs);
+      setColorState(decoded);
+      if (decoded?.themeName) setThemeName(decoded.themeName);
+    }
     if (ts) setTypeState(decodeTypeState(ts));
     if (ss) setShapeState(decodeShapeState(ss));
   }, []);
 
   useEffect(() => {
-    const name = colorState?.themeName;
-    document.title = name && name !== 'Standby.Design'
-      ? `${name} — Design System`
+    document.title = themeName && themeName !== 'Standby.Design'
+      ? `${themeName} — Design System`
       : 'Design System — standby.design';
-  }, [colorState?.themeName]);
+  }, [themeName]);
 
   const palette = useMemo<PaletteResult | null>(() => {
     if (!colorState) return null;
@@ -119,27 +123,31 @@ function App() {
       s = traditionalScale(typeState.traditionalAssignments, typeState.traditionalAssignments);
     } else {
       const effectiveMobileRatio = typeState.mobileRatio;
-      s = customScale(typeState.baseSize, typeState.customRatio, effectiveMobileRatio, typeState.baseSize);
+      s = customScale(typeState.baseSize, typeState.customRatio, effectiveMobileRatio, typeState.mobileBaseSize ?? typeState.baseSize);
     }
-    s = applyWeightCompensation(s, 500);
-    s = applyTypography(s, {}, {});
+    if (typeState.weightCompensation !== false) {
+      s = applyWeightCompensation(s, typeState.headingWeight ?? 500);
+    }
+    s = applyTypography(s, typeState.lineHeightOverrides ?? {}, typeState.letterSpacingOverrides ?? {});
     return s;
   }, [typeState]);
 
   const spacing = useMemo<SpacingToken[] | null>(() => {
     if (!scale) return null;
-    return computeSpacingTokens(scale, 1.0);
-  }, [scale]);
+    return computeSpacingTokens(scale, typeState?.spacingBaseMultiplier ?? 1.0);
+  }, [scale, typeState]);
 
   const handleNameChange = useCallback((name: string) => {
-    if (!colorState) return;
-    const updated = { ...colorState, themeName: name };
-    setColorState(updated);
-    const newColorSegment = encodeColorState(updated);
-    setColorSegment(newColorSegment);
-    history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined,
-    }));
+    setThemeName(name);
+    if (colorState) {
+      const updated = { ...colorState, themeName: name };
+      setColorState(updated);
+      const newColorSegment = encodeColorState(updated);
+      setColorSegment(newColorSegment);
+      history.replaceState(null, '', '#' + buildUnifiedHash({
+        c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined,
+      }));
+    }
   }, [colorState, typeSegment, shapeSegment]);
 
   const getCurrentHash = useCallback(() => {
@@ -152,6 +160,7 @@ function App() {
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
   }, [getCurrentHash]);
 
+  const [screenIdx, setScreenIdx] = useState(0);
   const hasColor = !!colorState && !!palette;
   const hasType = !!typeState && !!scale;
 
@@ -171,10 +180,10 @@ function App() {
               <label className="text-xs text-muted-foreground mb-1 block">Name your Design System</label>
               <input
                 type="text"
-                value={colorState?.themeName || ''}
+                value={themeName}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="My Design System"
-                className="bg-transparent text-foreground font-semibold w-full outline-none placeholder:text-muted-foreground/40"
+                className="text-foreground font-semibold w-full rounded-lg border border-border bg-card px-3 py-2 outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/40"
                 style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}
               />
             </div>
@@ -203,15 +212,32 @@ function App() {
         {/* Live App Preview */}
         {(hasColor || hasType) && (
           <div className="mb-6">
-            <h2 className="text-body-s font-semibold mb-3">Preview</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Preview</h2>
+              <div className="flex items-center rounded-md border border-border overflow-hidden">
+                {(['Dashboard', 'Messages', 'Profile'] as const).map((name, i) => (
+                  <button
+                    key={name}
+                    onClick={() => setScreenIdx(i)}
+                    className={`px-2.5 py-1 text-caption font-medium transition-colors cursor-pointer ${
+                      screenIdx === i ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
             <AppPreview
               palette={palette}
               scale={scale}
               spacing={spacing}
               shape={shapeState}
-              themeName={colorState?.themeName || ''}
+              themeName={themeName}
               headingFont={typeState?.headingFont}
               bodyFont={typeState?.bodyFont}
+              headingWeight={typeState?.headingWeight}
+              screenIdx={screenIdx}
             />
           </div>
         )}
@@ -219,7 +245,7 @@ function App() {
         {/* Color Summary */}
         {hasColor && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <h2 className="text-body-s font-semibold mb-3">Color Palette</h2>
+            <h2 className="font-semibold mb-3" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Color Palette</h2>
             <ColorSummary palette={palette} />
           </div>
         )}
@@ -227,13 +253,13 @@ function App() {
         {/* Type Summary */}
         {hasType && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <h2 className="text-body-s font-semibold mb-3">Typography</h2>
+            <h2 className="font-semibold mb-3" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Typography</h2>
             <TypeSummary scale={scale} spacing={spacing} typeState={typeState} />
           </div>
         )}
 
         {/* Combined Export */}
-        {(hasColor || hasType) && (
+        {(hasColor || hasType || shapeState) && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
             <CombinedExport
               colorState={hasColor ? colorState : null}
@@ -241,6 +267,8 @@ function App() {
               typeState={typeState}
               scale={scale}
               spacing={spacing}
+              shapeState={shapeState}
+              surfaceHex={palette?.effectiveBgHex}
             />
           </div>
         )}

@@ -47,8 +47,6 @@ export function SeedColors() {
   const setMode = useThemeStore((s) => s.setMode);
   const fgContrastMode = useThemeStore((s) => s.fgContrastMode);
   const setFgContrastMode = useThemeStore((s) => s.setFgContrastMode);
-  const themeName = useThemeStore((s) => s.themeName);
-  const setThemeName = useThemeStore((s) => s.setThemeName);
   const extraAccents = useThemeStore((s) => s.extraAccents);
   const addAccent = useThemeStore((s) => s.addAccent);
 
@@ -119,18 +117,6 @@ export function SeedColors() {
 
   return (
     <div className="space-y-3">
-      {/* Theme Settings header — aligns with "Theme Preview" on the right */}
-      <h3 className="text-body-s font-semibold">Name your Theme</h3>
-
-      {/* Theme name */}
-      <input
-        value={themeName}
-        onChange={(e) => setThemeName(e.target.value)}
-        maxLength={60}
-        placeholder="Name Your Theme"
-        className="text-lg font-semibold text-foreground w-full rounded-lg border border-border bg-card px-3 py-2 outline-none focus:ring-2 focus:ring-ring"
-      />
-
       {/* Section header */}
       <h2 className="text-body-s font-semibold text-foreground">Seed Colors</h2>
 
@@ -362,7 +348,7 @@ export function SeedColors() {
             variant="outline"
             size="icon"
             onClick={addAccent}
-            disabled={extraAccents.length >= 3}
+            disabled={extraAccents.length >= 10}
             aria-label="Add color"
             className="size-7"
           >

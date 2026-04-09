@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { ShapeControls } from '@/components/shape-controls';
 import { ShapePreview } from '@/components/shape-preview';
+import { CodeExport } from '@/components/code-export';
 import { ToolNav } from '@/components/tool-nav';
 import { useShapeStore } from '@/store/shape-store';
 import { encodeState } from '@/lib/url-state';
@@ -70,7 +71,7 @@ function App() {
             </Button>
           </div>
           <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
-            Configure <strong>Shadows</strong>, <strong>Borders</strong>, <strong>Radius</strong>, <strong>Glass</strong> and <strong>Focus Rings</strong> &mdash; export production-ready design tokens for your UI.
+            Configure <strong>Shadows</strong>, <strong>Borders</strong>, <strong>Radius</strong> and <strong>Focus Rings</strong> &mdash; export production-ready design tokens for your UI.
           </p>
 
           {/* Main layout: controls + preview */}
@@ -83,6 +84,9 @@ function App() {
               <ShapePreview />
             </div>
           </div>
+
+          {/* Code Export */}
+          <CodeExport />
         </div>
       </div>
       <Toaster />

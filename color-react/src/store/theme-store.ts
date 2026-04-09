@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { PaletteMode } from '@/lib/palette';
-import { SUCCESS_HUE, WARNING_HUE, INFO_HUE, computeAutoAccentHex, computeAutoErrorHex } from '@/lib/palette';
+import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@/lib/palette';
 
 export interface Accent {
   name: string;
@@ -60,9 +60,9 @@ export const useThemeStore = create<ThemeState>((set) => ({
   errorColorHex: '#CC3333',
   errorAutoMatch: true,
   extraAccents: [],
-  brandPin: false,
+  brandPin: true,
   brandInvert: false,
-  errorPin: false,
+  errorPin: true,
   errorInvert: false,
   themeName: 'Standby.Design',
   fgContrastMode: 'best',
@@ -79,13 +79,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     return { bgAutoMatch: next, ...(next ? { bgColorHex: s.brandHex } : {}) };
   }),
   setErrorColorHex: (hex) => set({ errorColorHex: hex }),
-  toggleErrorAutoMatch: () => set((s) => {
-    const next = !s.errorAutoMatch;
-    if (!next) {
-      return { errorAutoMatch: false, errorColorHex: computeAutoErrorHex(s.brandHex) };
-    }
-    return { errorAutoMatch: true };
-  }),
+  toggleErrorAutoMatch: () => set((s) => ({ errorAutoMatch: !s.errorAutoMatch })),
   toggleBrandPin: () => set((s) => ({ brandPin: !s.brandPin, ...(!s.brandPin ? {} : { brandInvert: false }) })),
   toggleBrandInvert: () => set((s) => ({ brandInvert: !s.brandInvert })),
   toggleErrorPin: () => set((s) => ({ errorPin: !s.errorPin, ...(!s.errorPin ? {} : { errorInvert: false }) })),
@@ -93,15 +87,15 @@ export const useThemeStore = create<ThemeState>((set) => ({
   setFgContrastMode: (mode) => set({ fgContrastMode: mode }),
   setThemeName: (name) => set({ themeName: name }),
   addAccent: () => set((s) => {
-    if (s.extraAccents.length >= 3) return s;
+    if (s.extraAccents.length >= 10) return s;
     const presets: Accent[] = [
-      { name: 'Success', hex: '#33994D', pin: false, invert: false, autoMatch: true, autoHue: SUCCESS_HUE },
-      { name: 'Warning', hex: '#998033', pin: false, invert: false, autoMatch: true, autoHue: WARNING_HUE },
-      { name: 'Info', hex: '#3355CC', pin: false, invert: false, autoMatch: true, autoHue: INFO_HUE },
+      { name: 'Success', hex: '#33994D', pin: true, invert: false, autoMatch: true, autoHue: SUCCESS_HUE },
+      { name: 'Warning', hex: '#998033', pin: true, invert: false, autoMatch: true, autoHue: WARNING_HUE },
+      { name: 'Info', hex: '#3355CC', pin: true, invert: false, autoMatch: true, autoHue: INFO_HUE },
     ];
     const usedNames = new Set(s.extraAccents.map(a => a.name));
     const next = presets.find(p => !usedNames.has(p.name))
-      ?? { name: `Extra ${s.extraAccents.length + 1}`, hex: '#7C3AED', pin: false, invert: false, autoMatch: false, autoHue: 0 };
+      ?? { name: `Extra ${s.extraAccents.length + 1}`, hex: '#7C3AED', pin: true, invert: false, autoMatch: false, autoHue: 0 };
     return { extraAccents: [...s.extraAccents, { ...next }] };
   }),
   removeAccent: (index) => set((s) => ({
@@ -117,14 +111,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     extraAccents: s.extraAccents.map((a, i) => i === index ? { ...a, invert: !a.invert } : a),
   })),
   toggleAccentAutoMatch: (index) => set((s) => ({
-    extraAccents: s.extraAccents.map((a, i) => {
-      if (i !== index) return a;
-      const next = !a.autoMatch;
-      if (!next) {
-        return { ...a, autoMatch: false, hex: computeAutoAccentHex(s.brandHex, a.autoHue) };
-      }
-      return { ...a, autoMatch: true };
-    }),
+    extraAccents: s.extraAccents.map((a, i) => i === index ? { ...a, autoMatch: !a.autoMatch } : a),
   })),
   setFullState: (partial) => set(partial),
 }));

@@ -34,9 +34,21 @@ function App() {
     headingFont: store.headingFont,
     bodyFont: store.bodyFont,
     monoFont: store.monoFont,
+    headingWeight: store.headingWeight,
+    weightCompensation: store.weightCompensation,
+    mobileBaseSize: store.mobileBaseSize,
+    mobileRatioMode: store.mobileRatioMode,
+    autoShrink: store.autoShrink,
+    spacingBaseMultiplier: store.spacingBaseMultiplier,
+    lineHeightOverrides: store.lineHeightOverrides,
+    letterSpacingOverrides: store.letterSpacingOverrides,
     traditionalAssignments:
       store.scaleMode === 'traditional'
         ? store.traditionalAssignments
+        : undefined,
+    traditionalMobileAssignments:
+      store.scaleMode === 'traditional'
+        ? store.traditionalMobileAssignments
         : undefined,
   }), [store]);
 

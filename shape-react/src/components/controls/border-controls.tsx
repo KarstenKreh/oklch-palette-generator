@@ -2,7 +2,7 @@ import { Switch } from '@/components/ui/switch';
 import { useShapeStore } from '@/store/shape-store';
 import { cn } from '@/lib/utils';
 
-const WIDTHS = [0, 1, 1.5, 2, 3];
+const WIDTHS = [0, 0.5, 1, 1.5, 2, 2.5, 3];
 
 export function BorderControls() {
   const {
@@ -27,7 +27,7 @@ export function BorderControls() {
                 type="button"
                 onClick={() => setBorderWidth(w)}
                 className={cn(
-                  "px-2.5 py-1 text-caption font-medium transition-colors",
+                  "px-2.5 py-1 text-caption font-medium transition-colors cursor-pointer",
                   "first:rounded-l-md last:rounded-r-md",
                   borderWidth === w
                     ? "bg-primary text-primary-foreground"

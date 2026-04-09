@@ -63,7 +63,7 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       className="relative rounded-lg p-4 space-y-4 flex-1 min-w-0 overflow-hidden"
       style={{ backgroundColor: colors.bg, color: colors.text }}
     >
-      {/* Background circle for glass/transparency visibility */}
+      {/* Decorative background circle */}
       <div
         className="absolute pointer-events-none"
         style={{

@@ -213,7 +213,9 @@ export function SurfacePanel({
     for (const e of accent.palette) {
       accentActionLookup[e.step as number] = e;
     }
-    const dotBg = accent.pin ? accent.hex : (isDark ? getHex(accentActionLookup, 400) : getHex(accentActionLookup, 600));
+    const dotBg = accent.pin
+      ? (isDark && accent.invert ? invertHex(accent.hex) : accent.hex)
+      : (isDark ? getHex(accentActionLookup, 400) : getHex(accentActionLookup, 600));
     const badgeBg = isDark ? getHex(accentLookup, 800) : getHex(accentLookup, 100);
     const badgeBorder = isDark ? getHex(accentLookup, 700) : getHex(accentLookup, 300);
     const badgeText = isDark ? getHex(accentActionLookup, 50) : getHex(accentActionLookup, 950);

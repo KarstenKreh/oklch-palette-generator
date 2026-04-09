@@ -61,7 +61,7 @@ export function HeadingWeightControls() {
         <div className={`w-8 h-[18px] rounded-full p-0.5 transition-colors ${
           store.weightCompensation ? 'bg-primary' : 'bg-muted-foreground/30'
         }`}>
-          <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-md border border-black/15 transition-transform ${
+          <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm border border-border-muted transition-transform ${
             store.weightCompensation ? 'translate-x-3.5' : 'translate-x-0'
           }`} />
         </div>

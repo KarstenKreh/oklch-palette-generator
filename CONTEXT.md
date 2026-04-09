@@ -365,6 +365,18 @@ cd color-react && npm run dev   # localhost:5173
 cd type-react && npm run dev    # localhost:5174
 ```
 
+### Testing
+
+**Vitest** unit tests for all pure lib functions. Each app has its own `vitest.config.ts`.
+
+```bash
+cd color-react && npm test      # 112 tests — unified-hash, url-state, color-math, palette, shadows, code-export
+cd type-react  && npm test      #  48 tests — url-state, scale, spacing, clamp, code-export
+cd shape-react && npm test      #  15 tests — url-state
+```
+
+No component tests, no E2E — only pure functions. Snapshot tests cover code-export output stability. `npm run test:watch` for dev mode.
+
 ---
 
 ## Design Decisions
