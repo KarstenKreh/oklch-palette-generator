@@ -87,14 +87,17 @@ function buildTokens(
     ? `0 ${Math.round(2 * shadowStr)}px ${Math.round(8 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.2 : 0.06) * shadowStr}), 0 ${Math.round(1 * shadowStr)}px ${Math.round(3 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.15 : 0.04) * shadowStr})`
     : 'none';
 
-  const firstAccent = palette?.accentPalettes?.[0];
-  const accentColor = firstAccent
-    ? (firstAccent.pin ? firstAccent.hex : p(firstAccent.palette, dark ? 400 : 500))
-    : p(brand, dark ? 400 : 500);
-
   const findAccent = (name: string) =>
     palette?.accentPalettes?.find(a => a.cssName === name);
 
+  /** Resolve an accent palette's display color, respecting pin + invert */
+  const resolveAccent = (ap: AccentPalette | undefined, fallbackPal: PaletteEntry[]) => {
+    if (!ap) return dark ? p(fallbackPal, 400) : p(fallbackPal, 600);
+    if (ap.pin) return ap.hex;
+    return dark ? p(ap.palette, 400) : p(ap.palette, 600);
+  };
+
+  const firstAccent = palette?.accentPalettes?.[0];
   const successPal = findAccent('success');
   const warningPal = findAccent('warning');
 
@@ -111,10 +114,10 @@ function buildTokens(
       const primaryHex = palette?.brandSwatchOverride ? palette.brandSwatchOverride.hex : (dark ? p(brand, 400) : p(brand, 600));
       return pickFg(primaryHex, p(surface, dark ? 975 : 50), p(surface, dark ? 50 : 975), fgContrastMode);
     })(),
-    accent: accentColor,
+    accent: resolveAccent(firstAccent, brand),
     destructive: palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600)),
-    success: successPal ? p(successPal.palette, dark ? 400 : 500) : p(brand, dark ? 400 : 500),
-    warning: warningPal ? p(warningPal.palette, dark ? 400 : 500) : p(brand, dark ? 400 : 500),
+    success: resolveAccent(successPal, brand),
+    warning: resolveAccent(warningPal, brand),
     primarySecondary: dark ? p(brand, 800) : p(brand, 200),
     successSecondary: successPal ? p(successPal.palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     accentSecondary: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
