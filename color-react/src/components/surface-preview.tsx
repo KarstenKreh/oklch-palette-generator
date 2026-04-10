@@ -11,7 +11,13 @@ function toLookup(palette: PaletteEntry[]): Record<number, PaletteEntry> {
   return map;
 }
 
-export function SurfacePreview() {
+export interface ShapeTokens {
+  borderEnabled: boolean;
+  borderWidth: number;
+  borderRadius: number;
+}
+
+export function SurfacePreview({ shapeTokens }: { shapeTokens?: ShapeTokens }) {
   const {
     brand,
     surface,
@@ -49,10 +55,10 @@ export function SurfacePreview() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <SurfacePanel panelType="light" palette={surfaceMap} {...shared} />
-      <SurfacePanel panelType="dark" palette={surfaceMap} {...shared} />
-      <SurfacePanel panelType="light-hc" palette={surfaceMap} {...shared} />
-      <SurfacePanel panelType="dark-hc" palette={surfaceMap} {...shared} />
+      <SurfacePanel panelType="light" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
+      <SurfacePanel panelType="dark" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
+      <SurfacePanel panelType="light-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
+      <SurfacePanel panelType="dark-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
     </div>
   );
 }

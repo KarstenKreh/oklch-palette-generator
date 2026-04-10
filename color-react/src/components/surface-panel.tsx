@@ -4,6 +4,7 @@ import type { FgContrastMode } from '@/store/theme-store';
 import { contrastRatio, invertHex } from '@/lib/color-math';
 import { generateShadowValues } from '@/lib/shadows';
 import { PanelSvg } from '@/components/panel-svg';
+import { Sun, Moon, SunDim, MoonStar } from 'lucide-react';
 
 export interface SurfacePanelProps {
   panelType: 'light' | 'dark' | 'light-hc' | 'dark-hc';
@@ -18,6 +19,7 @@ export interface SurfacePanelProps {
   errorInvert: boolean;
   accentPalettes: AccentPalette[];
   fgContrastMode: FgContrastMode;
+  shapeTokens?: { borderEnabled: boolean; borderWidth: number; borderRadius: number };
 }
 
 const DARK_FG = '#1A1A1A';
@@ -179,9 +181,13 @@ export function SurfacePanel({
   errorInvert,
   accentPalettes,
   fgContrastMode,
+  shapeTokens,
 }: SurfacePanelProps) {
   const config = getPanelConfig(panelType, palette, neutral);
   const { label, bgHex, textHex, isDark, cardHex, elevatedHex, activeHex, mutedHex, mutedFgHex, borderHex, borderMutedHex } = config;
+
+  const bw = shapeTokens?.borderEnabled !== false ? (shapeTokens?.borderWidth ?? 1) : 0;
+  const br = shapeTokens?.borderRadius ?? 8;
 
   const surfaceCards = getSurfaceCards(panelType, config, brand);
 
@@ -224,20 +230,25 @@ export function SurfacePanel({
 
   return (
     <div
-      className="rounded-xl p-5 flex flex-col gap-4"
-      style={{ backgroundColor: bgHex, color: textHex, border: `1px solid ${borderMutedHex}` }}
+      className="p-5 flex flex-col gap-4"
+      style={{ backgroundColor: bgHex, color: textHex, border: bw ? `${bw}px solid ${borderMutedHex}` : 'none', borderRadius: br + 4 }}
     >
       {/* Header row: label + title + borders left, illustration right */}
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <span
-            className="text-caption font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded inline-block mb-1"
+            className="text-caption font-semibold uppercase tracking-wider px-1.5 py-0.5 inline-flex items-center gap-1 mb-1"
             style={{
               backgroundColor: bgHex,
-              border: `1px solid ${borderMutedHex}`,
+              border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
+              borderRadius: Math.max(4, br - 4),
               color: textHex,
             }}
           >
+            {panelType === 'light' && <Sun size={11} />}
+            {panelType === 'dark' && <Moon size={11} />}
+            {panelType === 'light-hc' && <SunDim size={11} />}
+            {panelType === 'dark-hc' && <MoonStar size={11} />}
             {label}
           </span>
           <h3 className="text-body-s font-semibold mb-3" style={{ color: textHex }}>
@@ -272,11 +283,12 @@ export function SurfacePanel({
         {surfaceCards.map((card) => (
           <div
             key={card.name}
-            className="rounded-lg p-2.5 text-caption flex flex-col justify-between min-h-20"
+            className="p-2.5 text-caption flex flex-col justify-between min-h-20"
             style={{
               backgroundColor: card.bg,
               color: textHex,
-              border: `1px solid ${borderMutedHex}`,
+              border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
+              borderRadius: br,
             }}
           >
             <span className="font-medium">{card.name}</span>
@@ -288,20 +300,20 @@ export function SurfacePanel({
       {/* Buttons */}
       <div className="flex gap-2">
         <div
-          className="rounded-md px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: primaryBg, color: primaryFg }}
+          className="px-3 py-1.5 text-caption font-medium"
+          style={{ backgroundColor: primaryBg, color: primaryFg, borderRadius: Math.max(4, br - 2) }}
         >
           Primary
         </div>
         <div
-          className="rounded-md px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: secondaryBg, color: secondaryFg }}
+          className="px-3 py-1.5 text-caption font-medium"
+          style={{ backgroundColor: secondaryBg, color: secondaryFg, borderRadius: Math.max(4, br - 2) }}
         >
           Secondary
         </div>
         <div
-          className="rounded-md px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: destructiveBg, color: destructiveFg }}
+          className="px-3 py-1.5 text-caption font-medium"
+          style={{ backgroundColor: destructiveBg, color: destructiveFg, borderRadius: Math.max(4, br - 2) }}
         >
           Destructive
         </div>
@@ -317,8 +329,8 @@ export function SurfacePanel({
           const errBorderHex = isDark ? getHex(errorSurface, 700) : getHex(errorSurface, 300);
           return (
             <div
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-caption font-semibold"
-              style={{ backgroundColor: errBadgeBg, color: errBadgeText, border: `1.5px solid ${errBorderHex}` }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+              style={{ backgroundColor: errBadgeBg, color: errBadgeText, border: bw ? `${bw}px solid ${errBorderHex}` : 'none', borderRadius: br }}
             >
               <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
               Error
@@ -329,8 +341,8 @@ export function SurfacePanel({
         {accentItems.map((item) => (
           <div
             key={item.name}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-caption font-semibold"
-            style={{ backgroundColor: item.badgeBg, color: item.badgeText, border: `1.5px solid ${item.badgeBorder}` }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+            style={{ backgroundColor: item.badgeBg, color: item.badgeText, border: bw ? `${bw}px solid ${item.badgeBorder}` : 'none', borderRadius: br }}
           >
             <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
             {item.name}
@@ -348,7 +360,7 @@ export function SurfacePanel({
                 backgroundColor: cardHex,
                 boxShadow: s.shadow,
                 color: textHex,
-                border: `1px solid ${borderMutedHex}`,
+                border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
               }}
             >
               <span className="text-caption font-semibold" style={{ color: mutedFgHex }}>{s.name}</span>

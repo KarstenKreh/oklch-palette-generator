@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -25,6 +25,19 @@ function App() {
   useThemeCss(palette.brand, palette.slated, palette.neutral);
   const otherSegments = useUrlState();
   useFavicon(brandHex);
+
+  // Decode shape tokens from s= segment for preview
+  const shapeTokens = useMemo(() => {
+    const s = otherSegments.s;
+    if (!s) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
+    const p = s.split(',');
+    if (p.length < 12) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
+    return {
+      borderEnabled: p[7] === '1',
+      borderWidth: !isNaN(parseInt(p[8])) ? parseInt(p[8]) / 10 : 1,
+      borderRadius: !isNaN(parseInt(p[11])) ? parseInt(p[11]) : 8,
+    };
+  }, [otherSegments.s]);
 
   const getCurrentHash = useCallback(() => {
     const colorEncoded = encodeState(store);
@@ -82,7 +95,7 @@ function App() {
             </div>
             <div>
               <h3 className="text-body-s font-semibold mb-3">Theme Preview</h3>
-              <SurfacePreview />
+              <SurfacePreview shapeTokens={shapeTokens} />
             </div>
           </div>
 
