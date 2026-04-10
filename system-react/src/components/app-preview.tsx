@@ -45,7 +45,7 @@ interface Tokens {
   bg: string; bgCard: string; bgElevated: string;
   fg: string; muted: string;
   primary: string; primaryFg: string;
-  accent: string; destructive: string;
+  accent: string; destructive: string; destructiveFg: string;
   success: string; warning: string;
   primarySecondary: string; successSecondary: string;
   accentSecondary: string; destructiveSecondary: string;
@@ -116,6 +116,10 @@ function buildTokens(
     })(),
     accent: resolveAccent(firstAccent, brand),
     destructive: palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600)),
+    destructiveFg: (() => {
+      const destHex = palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600));
+      return pickFg(destHex, p(surface, dark ? 975 : 50), p(surface, dark ? 50 : 975), fgContrastMode);
+    })(),
     success: resolveAccent(successPal, brand),
     warning: resolveAccent(warningPal, brand),
     primarySecondary: dark ? p(brand, 800) : p(brand, 200),
@@ -212,7 +216,7 @@ function DashboardScreen({ t }: { t: Tokens }) {
               <span style={{
                 fontSize: '0.4rem', fontWeight: 600,
                 padding: '1px 4px', borderRadius: Math.max(2, t.radius - 4),
-                backgroundColor: stat.secondaryBg, color: stat.color,
+                backgroundColor: stat.secondaryBg, color: pickFg(stat.secondaryBg, stat.color, t.fg, 'best'),
               }}>{stat.change}</span>
             </div>
             <div style={{ fontSize: t.fs('h5') || '0.95rem', fontWeight: t.headingFw, fontFamily: hFf, letterSpacing: t.ls('h5'), color: t.fg }}>{stat.value}</div>
@@ -256,7 +260,8 @@ function DashboardScreen({ t }: { t: Tokens }) {
             <div style={{
               width: '26px', height: '26px', borderRadius: '50%',
               backgroundColor: avatarColors[i % avatarColors.length],
-              color: [t.primary, t.accent, t.destructive][i % 3], display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: pickFg(avatarColors[i % avatarColors.length], [t.primary, t.accent, t.destructive][i % 3], t.fg, 'best'),
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.5rem', fontWeight: 600, flexShrink: 0,
             }}>{act.initials}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -294,7 +299,7 @@ function DashboardScreen({ t }: { t: Tokens }) {
         <button style={{
           flex: 1, padding: '4px 8px',
           borderRadius: Math.max(3, t.radius - 2), border: 'none',
-          backgroundColor: t.destructive, color: '#fff',
+          backgroundColor: t.destructive, color: t.destructiveFg,
           fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
         }}>Delete</button>
       </div>
@@ -490,7 +495,7 @@ function MessengerScreen({ t }: { t: Tokens }) {
                   <span style={{
                     position: 'absolute', top: '-3px', right: '-6px',
                     minWidth: '10px', height: '10px', borderRadius: '5px',
-                    backgroundColor: t.destructive, color: '#fff',
+                    backgroundColor: t.destructive, color: t.destructiveFg,
                     fontSize: '0.35rem', fontWeight: 700,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     padding: '0 2px',
