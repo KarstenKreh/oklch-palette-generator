@@ -6,6 +6,8 @@ import type { ComputedLevel } from '@/lib/scale';
 import type { SpacingToken } from '@/lib/spacing';
 import type { ShapeState } from '@/lib/shape-url-state';
 import { PhoneMockup } from '@/components/phone-mockup';
+import { contrastRatio } from '@/lib/color-math';
+import type { FgContrastMode } from '@/lib/color-url-state';
 
 interface PaletteResult {
   brand: PaletteEntry[];
@@ -14,6 +16,8 @@ interface PaletteResult {
   neutral: PaletteEntry[];
   accentPalettes: AccentPalette[];
   effectiveBgHex: string;
+  brandSwatchOverride: { hex: string; L: number } | null;
+  errorSwatchOverride: { hex: string; L: number } | null;
 }
 
 interface AppPreviewProps {
@@ -26,6 +30,7 @@ interface AppPreviewProps {
   bodyFont?: string;
   headingWeight?: number;
   screenIdx?: number;
+  fgContrastMode?: FgContrastMode;
 }
 
 function p(pal: PaletteEntry[], step: number): string {
@@ -55,10 +60,19 @@ interface Tokens {
   headingFw: number;
 }
 
+function pickFg(bgHex: string, lightHex: string, darkHex: string, fgMode: FgContrastMode): string {
+  const lightCR = contrastRatio(lightHex, bgHex);
+  const darkCR = contrastRatio(darkHex, bgHex);
+  if (fgMode === 'preferDark') return darkCR >= 4.5 ? darkHex : lightHex;
+  if (fgMode === 'preferLight') return lightCR >= 4.5 ? lightHex : darkHex;
+  return lightCR >= darkCR ? lightHex : darkHex;
+}
+
 function buildTokens(
   palette: PaletteResult | null, scale: ComputedLevel[] | null,
   spacing: SpacingToken[] | null, shape: Partial<ShapeState> | null,
   dark: boolean, headingFont?: string, bodyFont?: string, headingWeight?: number,
+  fgContrastMode: FgContrastMode = 'best',
 ): Tokens {
   const brand = palette?.brand || [];
   const surface = palette?.surface || [];
@@ -66,15 +80,16 @@ function buildTokens(
   const error = palette?.error || [];
 
   const radius = shape?.borderRadius ?? 8;
-  const borderW = shape?.borderEnabled ? (shape?.borderWidth ?? 1) : 0;
+  const borderW = (shape?.borderEnabled ?? true) ? (shape?.borderWidth ?? 1) : 0;
   const shadowStr = shape?.shadowStrength ?? 1;
   const shadowBlur = shape?.shadowBlurScale ?? 1;
   const shadow = (shape?.shadowEnabled ?? true)
     ? `0 ${Math.round(2 * shadowStr)}px ${Math.round(8 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.2 : 0.06) * shadowStr}), 0 ${Math.round(1 * shadowStr)}px ${Math.round(3 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.15 : 0.04) * shadowStr})`
     : 'none';
 
-  const accentColor = palette?.accentPalettes?.[0]
-    ? p(palette.accentPalettes[0].palette, dark ? 400 : 500)
+  const firstAccent = palette?.accentPalettes?.[0];
+  const accentColor = firstAccent
+    ? (firstAccent.pin ? firstAccent.hex : p(firstAccent.palette, dark ? 400 : 500))
     : p(brand, dark ? 400 : 500);
 
   const findAccent = (name: string) =>
@@ -89,19 +104,22 @@ function buildTokens(
     bg: dark ? p(surface, 875) : p(surface, 50),
     bgCard: dark ? p(surface, 825) : p(surface, 25),
     bgElevated: dark ? p(surface, 800) : p(surface, 25),
-    fg: dark ? p(neutral, 50) : p(neutral, 975),
-    muted: p(neutral, dark ? 400 : 500),
-    primary: dark ? p(brand, 400) : p(brand, 600),
-    primaryFg: dark ? p(neutral, 975) : '#FFFFFF',
+    fg: dark ? p(surface, 25) : p(surface, 975),
+    muted: dark ? p(surface, 300) : p(surface, 700),
+    primary: palette?.brandSwatchOverride ? palette.brandSwatchOverride.hex : (dark ? p(brand, 400) : p(brand, 600)),
+    primaryFg: (() => {
+      const primaryHex = palette?.brandSwatchOverride ? palette.brandSwatchOverride.hex : (dark ? p(brand, 400) : p(brand, 600));
+      return pickFg(primaryHex, p(surface, dark ? 975 : 50), p(surface, dark ? 50 : 975), fgContrastMode);
+    })(),
     accent: accentColor,
-    destructive: dark ? p(error, 400) : p(error, 600),
-    success: successPal ? p(successPal.palette, dark ? 400 : 500) : (dark ? '#4ade80' : '#16a34a'),
-    warning: warningPal ? p(warningPal.palette, dark ? 400 : 500) : (dark ? '#facc15' : '#ca8a04'),
+    destructive: palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600)),
+    success: successPal ? p(successPal.palette, dark ? 400 : 500) : p(brand, dark ? 400 : 500),
+    warning: warningPal ? p(warningPal.palette, dark ? 400 : 500) : p(brand, dark ? 400 : 500),
     primarySecondary: dark ? p(brand, 800) : p(brand, 200),
-    successSecondary: successPal ? p(successPal.palette, dark ? 800 : 200) : (dark ? '#052e16' : '#dcfce7'),
+    successSecondary: successPal ? p(successPal.palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     accentSecondary: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     destructiveSecondary: dark ? p(error, 800) : p(error, 200),
-    border: dark ? p(neutral, 800) : p(neutral, 200),
+    border: dark ? p(surface, 700) : p(surface, 200),
     radius, borderW, shadow,
     fs: (name: string) => { const v = l(name); return v ? `${v.maxRem}rem` : undefined; },
     lh: (name: string) => l(name)?.lineHeight,
@@ -146,15 +164,11 @@ const activities = [
   { name: 'Jordan Lee', action: 'Reported issue', time: '1h', status: 'error' as const, initials: 'JL' },
 ];
 
-const progressItems = [
-  { label: 'Design System', pct: 72, colorKey: 'primary' as const },
-  { label: 'Documentation', pct: 45, colorKey: 'accent' as const },
-];
 
 function DashboardScreen({ t }: { t: Tokens }) {
   const hFf = t.headingFf || t.bodyFf || 'sans-serif';
   const bFf = t.bodyFf || 'sans-serif';
-  const avatarColors = [t.primary, t.accent, t.destructive];
+  const avatarColors = [t.primarySecondary, t.accentSecondary, t.destructiveSecondary];
   const statusMap = {
     success: { label: 'Done', color: t.success },
     warning: { label: 'Review', color: t.warning },
@@ -234,12 +248,12 @@ function DashboardScreen({ t }: { t: Tokens }) {
           <div key={act.name} style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '4px 0',
-            borderBottom: i < activities.length - 1 ? `1px solid ${t.border}` : 'none',
+            borderBottom: i < activities.length - 1 ? `${t.borderW || 1}px solid ${t.border}` : 'none',
           }}>
             <div style={{
               width: '26px', height: '26px', borderRadius: '50%',
               backgroundColor: avatarColors[i % avatarColors.length],
-              color: t.primaryFg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: [t.primary, t.accent, t.destructive][i % 3], display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.5rem', fontWeight: 600, flexShrink: 0,
             }}>{act.initials}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -259,25 +273,7 @@ function DashboardScreen({ t }: { t: Tokens }) {
         ))}
       </Card>
 
-      {/* Widget 5: Progress */}
-      <Card t={t}>
-        <div style={{ fontSize: t.fs('body-s') || '0.8rem', fontWeight: 600, fontFamily: hFf, color: t.fg, marginBottom: '6px' }}>
-          Progress
-        </div>
-        {progressItems.map((prog, i) => (
-          <div key={prog.label} style={{ marginBottom: i < progressItems.length - 1 ? '6px' : 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <span style={{ fontSize: t.fs('caption') || '0.65rem', color: t.fg, fontWeight: 500 }}>{prog.label}</span>
-              <span style={{ fontSize: t.fs('caption') || '0.65rem', color: t.muted }}>{prog.pct}%</span>
-            </div>
-            <div style={{ width: '100%', height: '6px', backgroundColor: t.bg, borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: `${prog.pct}%`, height: '100%', backgroundColor: t[prog.colorKey], borderRadius: '3px' }} />
-            </div>
-          </div>
-        ))}
-      </Card>
-
-      {/* Widget 6: Quick Actions */}
+      {/* Widget 5: Quick Actions */}
       <div style={{ display: 'flex', gap: '6px' }}>
         <button style={{
           flex: 1, padding: '4px 8px',
@@ -423,7 +419,7 @@ function MessengerScreen({ t }: { t: Tokens }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '5px 10px',
-              borderBottom: `1px solid ${t.border}`,
+              borderBottom: `${t.borderW || 1}px solid ${t.border}`,
               cursor: i === 0 ? 'pointer' : undefined,
             }}
           >
@@ -601,7 +597,7 @@ function ProfileScreen({ t }: { t: Tokens }) {
                 <div key={item.label} style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '5px 0',
-                  borderBottom: i < group.items.length - 1 ? `1px solid ${t.border}` : 'none',
+                  borderBottom: i < group.items.length - 1 ? `${t.borderW || 1}px solid ${t.border}` : 'none',
                 }}>
                   <div style={{
                     width: '20px', height: '20px', borderRadius: Math.max(3, t.radius - 4),
@@ -647,9 +643,9 @@ function PhoneContent({ t, screenIdx }: { t: Tokens; screenIdx: number }) {
 }
 
 /* ─── Main Export ─── */
-export function AppPreview({ palette, scale, spacing, shape, themeName, headingFont, bodyFont, headingWeight, screenIdx = 0 }: AppPreviewProps) {
-  const light = buildTokens(palette, scale, spacing, shape, false, headingFont, bodyFont, headingWeight);
-  const dark = buildTokens(palette, scale, spacing, shape, true, headingFont, bodyFont, headingWeight);
+export function AppPreview({ palette, scale, spacing, shape, themeName, headingFont, bodyFont, headingWeight, screenIdx = 0, fgContrastMode = 'best' }: AppPreviewProps) {
+  const light = buildTokens(palette, scale, spacing, shape, false, headingFont, bodyFont, headingWeight, fgContrastMode);
+  const dark = buildTokens(palette, scale, spacing, shape, true, headingFont, bodyFont, headingWeight, fgContrastMode);
 
   return (
     <>

@@ -14,15 +14,64 @@ import { applyWeightCompensation } from '@/lib/weight-compensation';
 import { applyTypography } from '@/lib/typography';
 import { computeSpacingTokens, type SpacingToken } from '@/lib/spacing';
 import type { AccentPalette } from '@/lib/color-code-export';
+import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@/lib/palette';
 import { ColorSummary } from '@/components/color-summary';
 import { TypeSummary } from '@/components/type-summary';
 import { CombinedExport } from '@/components/combined-export';
 import { AppPreview } from '@/components/app-preview';
 import { PirateFooter } from '@/components/pirate-footer';
+import { SquarePen } from 'lucide-react';
 
 function accentCssName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'accent';
 }
+
+const DEFAULT_COLOR_STATE: DecodedColorState = {
+  brandHex: '#335A7F',
+  bgColorHex: '#335A7F',
+  bgAutoMatch: true,
+  errorColorHex: '#CC3333',
+  errorAutoMatch: true,
+  chromaScale: 0.25,
+  currentMode: 'balanced',
+  brandPin: false,
+  brandInvert: false,
+  errorPin: false,
+  errorInvert: false,
+  fgContrastMode: 'best',
+  themeName: '',
+  extraAccents: [
+    { name: 'Success', hex: '#33994D', pin: false, invert: false, autoMatch: true, autoHue: SUCCESS_HUE },
+    { name: 'Warning', hex: '#998033', pin: false, invert: false, autoMatch: true, autoHue: WARNING_HUE },
+    { name: 'Info', hex: '#3355CC', pin: false, invert: false, autoMatch: true, autoHue: INFO_HUE },
+  ],
+};
+
+const DEFAULT_TYPE_HASH = 'custom,1,1.272,1.19,satoshi,satoshi,system-mono';
+
+const DEFAULT_SHAPE_STATE: Partial<ShapeState> = {
+  shadowEnabled: true,
+  shadowType: 'normal',
+  shadowStrength: 1.0,
+  shadowBlurScale: 1.0,
+  shadowScale: 1.272,
+  shadowColorMode: 'auto',
+  shadowCustomColor: '#000000',
+  borderEnabled: true,
+  borderWidth: 1,
+  borderColorMode: 'auto',
+  borderCustomColor: '#000000',
+  borderRadius: 8,
+  glassEnabled: false,
+  glassBlur: 12,
+  glassOpacity: 0.8,
+  ringWidth: 2,
+  ringOffset: 2,
+  ringColorMode: 'auto',
+  ringCustomColor: '#000000',
+  separationMode: 'shadow',
+};
+
 
 interface PaletteResult {
   brand: PaletteEntry[];
@@ -60,6 +109,7 @@ function App() {
     setColorSegment(cs);
     setTypeSegment(ts);
     setShapeSegment(ss);
+
     if (cs) {
       const decoded = decodeColorState(cs);
       setColorState(decoded);
@@ -67,6 +117,11 @@ function App() {
     }
     if (ts) setTypeState(decodeTypeState(ts));
     if (ss) setShapeState(decodeShapeState(ss));
+
+    // Fill in defaults for any missing segments
+    if (!cs) setColorState(DEFAULT_COLOR_STATE);
+    if (!ts) setTypeState(decodeTypeState(DEFAULT_TYPE_HASH));
+    if (!ss) setShapeState(DEFAULT_SHAPE_STATE);
   }, []);
 
   useEffect(() => {
@@ -156,7 +211,7 @@ function App() {
 
   const handleShare = useCallback(() => {
     const hash = getCurrentHash();
-    const url = window.location.origin + '/system#' + hash;
+    const url = window.location.origin + '/system/#' + hash;
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
   }, [getCurrentHash]);
 
@@ -238,6 +293,7 @@ function App() {
               bodyFont={typeState?.bodyFont}
               headingWeight={typeState?.headingWeight}
               screenIdx={screenIdx}
+              fgContrastMode={colorState?.fgContrastMode}
             />
           </div>
         )}
@@ -245,7 +301,16 @@ function App() {
         {/* Color Summary */}
         {hasColor && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <h2 className="font-semibold mb-3" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Color Palette</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Color Palette</h2>
+              <a
+                href={`/color#${getCurrentHash()}`}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pr-1"
+              >
+                <SquarePen size={14} />
+                Edit
+              </a>
+            </div>
             <ColorSummary palette={palette} />
           </div>
         )}
@@ -253,7 +318,16 @@ function App() {
         {/* Type Summary */}
         {hasType && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <h2 className="font-semibold mb-3" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Typography</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Typography</h2>
+              <a
+                href={`/type#${getCurrentHash()}`}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pr-1"
+              >
+                <SquarePen size={14} />
+                Edit
+              </a>
+            </div>
             <TypeSummary scale={scale} spacing={spacing} typeState={typeState} />
           </div>
         )}

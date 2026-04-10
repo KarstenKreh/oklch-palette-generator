@@ -9,6 +9,8 @@ interface PaletteResult {
   error: PaletteEntry[];
   neutral: PaletteEntry[];
   accentPalettes: AccentPalette[];
+  brandSwatchOverride: { hex: string; L: number } | null;
+  errorSwatchOverride: { hex: string; L: number } | null;
 }
 
 /* ─── helpers ─── */
@@ -38,8 +40,8 @@ interface ColorRole {
 function buildRoles(palette: PaletteResult): ColorRole[] {
   const roles: ColorRole[] = [];
 
-  // Brand — primary color
-  const brandHex = p(palette.brand, 500);
+  // Brand — primary color (use pinned hex when available)
+  const brandHex = palette.brandSwatchOverride?.hex || p(palette.brand, 500);
   roles.push({
     label: 'Brand',
     description: 'Your primary color — buttons, links, and accents.',
@@ -65,8 +67,8 @@ function buildRoles(palette: PaletteResult): ColorRole[] {
     fg: fgFor(surfaceDarkHex),
   });
 
-  // Error
-  const errorHex = p(palette.error, 500);
+  // Error (use pinned hex when available)
+  const errorHex = palette.errorSwatchOverride?.hex || p(palette.error, 500);
   roles.push({
     label: 'Error',
     description: 'Errors, warnings, and destructive actions.',
@@ -74,9 +76,9 @@ function buildRoles(palette: PaletteResult): ColorRole[] {
     fg: fgFor(errorHex),
   });
 
-  // Accent colors
+  // Accent colors (use pinned hex when available)
   for (const accent of palette.accentPalettes) {
-    const accentHex = p(accent.palette, 500);
+    const accentHex = accent.pin ? accent.hex : p(accent.palette, 500);
     const descriptions: Record<string, string> = {
       success: 'Positive feedback — confirmations and completed states.',
       warning: 'Caution — states that need attention.',
@@ -111,7 +113,7 @@ function ColorCard({ role }: { role: ColorRole }) {
         </span>
       </div>
       {/* Label + description */}
-      <div className="px-2.5 py-2 bg-background">
+      <div className="px-2.5 py-2 bg-background flex-1">
         <div className="text-sm font-medium text-foreground">{role.label}</div>
         <div className="text-xs text-muted-foreground leading-snug mt-0.5">
           {role.description}

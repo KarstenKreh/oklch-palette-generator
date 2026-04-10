@@ -1,5 +1,6 @@
 import { useTypeStore } from '@/store/type-store';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { weightCorrectionFactor } from '@/lib/weight-compensation';
 
 const WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
@@ -53,19 +54,12 @@ export function HeadingWeightControls() {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={() => store.setWeightCompensation(!store.weightCompensation)}
-        className="flex items-center gap-2 w-full text-left cursor-pointer group"
-      >
-        <div className={`w-8 h-[18px] rounded-full p-0.5 transition-colors ${
-          store.weightCompensation ? 'bg-primary' : 'bg-muted-foreground/30'
-        }`}>
-          <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm border border-border-muted transition-transform ${
-            store.weightCompensation ? 'translate-x-3.5' : 'translate-x-0'
-          }`} />
-        </div>
-        <span className="text-caption text-muted-foreground group-hover:text-foreground transition-colors">
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={store.weightCompensation}
+          onCheckedChange={store.setWeightCompensation}
+        />
+        <span className="text-caption text-muted-foreground">
           Compensate for weight
         </span>
         {store.weightCompensation && correctionPct !== 0 && (
@@ -73,7 +67,7 @@ export function HeadingWeightControls() {
             {correctionPct > 0 ? '+' : ''}{correctionPct}%
           </span>
         )}
-      </button>
+      </div>
       {store.weightCompensation && (
         <p className="text-caption leading-snug text-muted-foreground">
           Adjusts heading sizes to preserve the perceived area ratio.
