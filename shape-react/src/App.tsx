@@ -29,9 +29,19 @@ function App() {
 
   const handleShare = useCallback(() => {
     const hash = getCurrentHash();
-    const url = window.location.origin + window.location.pathname + '#' + hash;
+    const params = new URLSearchParams();
+    const cs = otherSegments.c;
+    if (cs) {
+      const parts = cs.split(',');
+      const hex = parts[0];
+      const name = parts[10] ? decodeURIComponent(parts[10]) : '';
+      if (name) params.set('t', name);
+      if (/^[0-9a-fA-F]{6}$/.test(hex)) params.set('c', hex);
+    }
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const url = window.location.origin + window.location.pathname + query + '#' + hash;
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
-  }, [getCurrentHash]);
+  }, [getCurrentHash, otherSegments]);
 
   // Read brand color from color hash on mount
   useEffect(() => {

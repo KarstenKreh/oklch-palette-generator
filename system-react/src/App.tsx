@@ -211,9 +211,17 @@ function App() {
 
   const handleShare = useCallback(() => {
     const hash = getCurrentHash();
-    const url = window.location.origin + '/system/#' + hash;
+    const params = new URLSearchParams();
+    if (colorState) {
+      const name = colorState.themeName?.trim();
+      const hex = colorState.brandHex?.replace('#', '');
+      if (name) params.set('t', name);
+      if (hex && /^[0-9a-fA-F]{6}$/.test(hex)) params.set('c', hex);
+    }
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const url = window.location.origin + '/system/' + query + '#' + hash;
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
-  }, [getCurrentHash]);
+  }, [getCurrentHash, colorState]);
 
   const [screenIdx, setScreenIdx] = useState(0);
   const hasColor = !!colorState && !!palette;

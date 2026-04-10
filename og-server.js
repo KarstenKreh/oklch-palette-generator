@@ -182,45 +182,48 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // /color/ with ?t= or ?c= → inject OG tags
-  if ((pathname === '/color' || pathname === '/color/' || pathname.startsWith('/color/index')) &&
-      (url.searchParams.has('t') || url.searchParams.has('c'))) {
-    const themeName = url.searchParams.get('t') || '';
-    const brandHex = url.searchParams.get('c') || '';
-    if (themeName && colorHtmlTemplate) {
-      const safeHex = HEX_RE.test(brandHex) ? brandHex : '';
-      const html = injectOgTags(colorHtmlTemplate, themeName, safeHex);
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(html);
-      return;
+  // Tool name mapping for OG descriptions
+  const TOOL_META = {
+    color: { template: colorHtmlTemplate, label: 'OKLCH Theme Generator', desc: 'color theme' },
+    type:  { template: typeHtmlTemplate,  label: 'Type Scale Generator',  desc: 'typographic scale' },
+    shape: { template: shapeHtmlTemplate, label: 'Shape Token Generator', desc: 'shape token set' },
+    system:{ template: systemHtmlTemplate,label: 'Design System',         desc: 'design system' },
+  };
+
+  // SPA fallback for all tools — inject OG tags when ?t= or ?c= present
+  const toolMatch = pathname.match(/^\/(color|type|shape|system)(\/|$)/);
+  if (toolMatch && !path.extname(pathname)) {
+    const tool = toolMatch[1];
+    const meta = TOOL_META[tool];
+    const template = meta?.template;
+
+    if (template && (url.searchParams.has('t') || url.searchParams.has('c'))) {
+      const themeName = url.searchParams.get('t') || '';
+      const brandHex = url.searchParams.get('c') || '';
+      if (themeName) {
+        const safeHex = HEX_RE.test(brandHex) ? brandHex : '';
+        const safeName = themeName.replace(/[<>"&]/g, c =>
+          ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', '&': '&amp;' })[c]
+        );
+        const title = `${safeName} — ${meta.label}`;
+        const description = `${safeName} — a ${meta.desc} created on standby.design.`;
+        const imageUrl = safeHex
+          ? `https://standby.design/color/og-image?c=${safeHex}`
+          : 'https://standby.design/color/og-image.png';
+        const html = injectOgTags(template, themeName, safeHex)
+          .replace(new RegExp(`<meta property="og:description" content="[^"]*"`),
+            `<meta property="og:description" content="${description}"`)
+          .replace(new RegExp(`<meta name="twitter:description" content="[^"]*"`),
+            `<meta name="twitter:description" content="${description}"`);
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+        return;
+      }
     }
-  }
 
-  // /color SPA fallback — any /color/* path without a file extension serves index.html
-  if ((pathname === '/color' || pathname.startsWith('/color/')) && !path.extname(pathname)) {
+    // Plain SPA fallback (no query params)
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(colorHtmlTemplate || 'Not found');
-    return;
-  }
-
-  // /type SPA fallback — any /type/* path without a file extension serves index.html
-  if ((pathname === '/type' || pathname.startsWith('/type/')) && !path.extname(pathname)) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(typeHtmlTemplate || 'Not found');
-    return;
-  }
-
-  // /system SPA fallback — any /system/* path without a file extension serves index.html
-  if ((pathname === '/system' || pathname.startsWith('/system/')) && !path.extname(pathname)) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(systemHtmlTemplate || 'Not found');
-    return;
-  }
-
-  // /shape SPA fallback — any /shape/* path without a file extension serves index.html
-  if ((pathname === '/shape' || pathname.startsWith('/shape/')) && !path.extname(pathname)) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(shapeHtmlTemplate || 'Not found');
+    res.end(template || 'Not found');
     return;
   }
 
