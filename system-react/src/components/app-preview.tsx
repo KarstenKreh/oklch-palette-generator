@@ -45,8 +45,10 @@ interface Tokens {
   bg: string; bgCard: string; bgElevated: string;
   fg: string; muted: string;
   primary: string; primaryFg: string;
-  accent: string; destructive: string; destructiveFg: string;
-  success: string; warning: string;
+  accent: string; accentVis: string;
+  destructive: string; destructiveFg: string;
+  success: string; successVis: string;
+  warning: string; warningVis: string;
   primarySecondary: string; successSecondary: string;
   accentSecondary: string; destructiveSecondary: string;
   border: string;
@@ -90,11 +92,17 @@ function buildTokens(
   const findAccent = (name: string) =>
     palette?.accentPalettes?.find(a => a.cssName === name);
 
-  /** Resolve an accent palette's display color, respecting pin + invert */
+  /** Resolve an accent's semantic color, respecting pin (for buttons, text) */
   const resolveAccent = (ap: AccentPalette | undefined, fallbackPal: PaletteEntry[]) => {
     if (!ap) return dark ? p(fallbackPal, 400) : p(fallbackPal, 600);
     if (ap.pin) return ap.hex;
     return dark ? p(ap.palette, 400) : p(ap.palette, 600);
+  };
+
+  /** Resolve an accent's palette step — always visible on bg (for bars, dots, decorative) */
+  const resolveAccentVisible = (ap: AccentPalette | undefined, fallbackPal: PaletteEntry[]) => {
+    const pal = ap?.palette || fallbackPal;
+    return dark ? p(pal, 400) : p(pal, 600);
   };
 
   const firstAccent = palette?.accentPalettes?.[0];
@@ -115,13 +123,16 @@ function buildTokens(
       return pickFg(primaryHex, p(surface, dark ? 975 : 50), p(surface, dark ? 50 : 975), fgContrastMode);
     })(),
     accent: resolveAccent(firstAccent, brand),
+    accentVis: resolveAccentVisible(firstAccent, brand),
     destructive: palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600)),
     destructiveFg: (() => {
       const destHex = palette?.errorSwatchOverride ? palette.errorSwatchOverride.hex : (dark ? p(error, 400) : p(error, 600));
       return pickFg(destHex, p(surface, dark ? 975 : 50), p(surface, dark ? 50 : 975), fgContrastMode);
     })(),
     success: resolveAccent(successPal, brand),
+    successVis: resolveAccentVisible(successPal, brand),
     warning: resolveAccent(warningPal, brand),
+    warningVis: resolveAccentVisible(warningPal, brand),
     primarySecondary: dark ? p(brand, 800) : p(brand, 200),
     successSecondary: successPal ? p(successPal.palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     accentSecondary: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
@@ -233,7 +244,7 @@ function DashboardScreen({ t }: { t: Tokens }) {
         {(() => {
           // Use all available colors: primary, accent, success, warning, destructive
           // Cycle through them; they gracefully fallback to primary tones if not configured
-          const barColors = [t.primary, t.accent, t.success, t.warning];
+          const barColors = [t.primary, t.accentVis, t.successVis, t.warningVis];
           return barData.map((bar, i) => (
             <div key={bar.label} style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
               <div style={{ fontSize: '0.55rem', color: t.muted, width: '24px', textAlign: 'right', flexShrink: 0 }}>{bar.label}</div>
