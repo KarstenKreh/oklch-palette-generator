@@ -1,42 +1,58 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useShapeStore } from '@/store/shape-store';
 import { encodeState, decodeState } from '@/lib/url-state';
-import { isUnifiedHash, getMySegment, setMySegment } from '@/lib/unified-hash';
+import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@/lib/unified-hash';
+
+interface OtherSegments { c?: string; t?: string }
 
 /**
  * Two-way sync between shape store and URL hash.
  * Returns the other segments (c, t) for hash building.
  */
-export function useUrlState(): { c: string | null; t: string | null } {
+export function useUrlState(): OtherSegments {
   const store = useShapeStore();
   const initialized = useRef(false);
-  const otherSegments = useRef<{ c: string | null; t: string | null }>({ c: null, t: null });
+  const skipNextWrite = useRef(false);
+  const [others, setOthers] = useState<OtherSegments>({});
+  const othersRef = useRef<OtherSegments>({});
 
   // Phase 1: Read hash on mount
   useEffect(() => {
     const raw = window.location.hash.slice(1);
-    if (!raw) { initialized.current = true; return; }
 
-    if (isUnifiedHash(raw)) {
-      otherSegments.current.c = getMySegment(raw, 'c');
-      otherSegments.current.t = getMySegment(raw, 't');
+    const captured: OtherSegments = {};
+    if (raw && isUnifiedHash(raw)) {
+      captured.c = getMySegment(raw, 'c') || undefined;
+      captured.t = getMySegment(raw, 't') || undefined;
       const shapeRaw = getMySegment(raw, 's');
       if (shapeRaw) {
         const decoded = decodeState(shapeRaw);
         if (decoded) store.setFullState(decoded);
       }
     }
+    othersRef.current = captured;
+    setOthers(captured);
+
     initialized.current = true;
+    skipNextWrite.current = true;
+
+    // Write hash immediately using latest store state (not stale closure)
+    const currentStore = useShapeStore.getState();
+    const encoded = encodeState(currentStore);
+    history.replaceState(null, '', '#' + buildUnifiedHash({
+      c: captured.c, t: captured.t, s: encoded,
+    }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Phase 2: Write hash on state change
   useEffect(() => {
     if (!initialized.current) return;
+    if (skipNextWrite.current) { skipNextWrite.current = false; return; }
     const encoded = encodeState(store);
-    const current = window.location.hash.slice(1);
-    const newHash = setMySegment(current, 's', encoded);
-    history.replaceState(null, '', '#' + newHash);
+    history.replaceState(null, '', '#' + buildUnifiedHash({
+      c: othersRef.current.c, t: othersRef.current.t, s: encoded,
+    }));
   }, [
     store.shadowEnabled, store.shadowType, store.shadowStrength, store.shadowBlurScale, store.shadowScale,
     store.shadowColorMode, store.shadowCustomColor,
@@ -45,8 +61,7 @@ export function useUrlState(): { c: string | null; t: string | null } {
     store.glassEnabled, store.glassBlur, store.glassOpacity,
     store.ringWidth, store.ringOffset, store.ringColorMode, store.ringCustomColor,
     store.separationMode,
-    store,
   ]);
 
-  return otherSegments.current;
+  return others;
 }
