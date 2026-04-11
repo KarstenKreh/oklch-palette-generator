@@ -4,7 +4,7 @@ import { Copy, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { DecodedColorState } from '@/lib/color-url-state';
 import type { UrlState } from '@/lib/type-url-state';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@/lib/scale';
 import type { SpacingToken } from '@/lib/spacing';
@@ -14,7 +14,7 @@ import {
   generateSemantic,
   generateLlmBriefing as generateColorLlmBriefing,
 } from '@/lib/color-code-export';
-import { generateShadowValues } from '@/lib/shadows';
+import { generateShadowValues } from '@core/shadows';
 import {
   generateCssExport as generateTypeCss,
   generateTailwindV4Export as generateTypeTailwind,

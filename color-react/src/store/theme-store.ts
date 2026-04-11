@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { PaletteMode } from '@/lib/palette';
-import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@/lib/palette';
+import type { PaletteMode } from '@core/palette';
+import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@core/palette';
 
 export interface Accent {
   name: string;

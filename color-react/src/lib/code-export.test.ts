@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generatePrimitivesOklch, generateSemantic } from './code-export';
-import { generatePalette } from './palette';
+import { generatePalette } from '@core/palette';
 
 function makePalettes() {
   const brand = generatePalette('#335A7F');

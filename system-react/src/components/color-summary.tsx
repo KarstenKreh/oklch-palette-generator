@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 
 interface PaletteResult {

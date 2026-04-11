@@ -1,4 +1,4 @@
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 
 interface PanelSvgProps {
   idx: number;

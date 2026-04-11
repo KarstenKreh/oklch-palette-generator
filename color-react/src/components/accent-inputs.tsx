@@ -7,7 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { ColorInput } from '@/components/color-input';
 import { useThemeStore } from '@/store/theme-store';
 import { usePalette } from '@/hooks/use-palette';
-import { contrastRatio, invertHex } from '@/lib/color-math';
+import { contrastRatio, invertHex } from '@core/color-math';
 
 export function AccentInputs() {
   const extraAccents = useThemeStore((s) => s.extraAccents);

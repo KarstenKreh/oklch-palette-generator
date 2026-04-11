@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { hexToRgb, rgbToHsv, hsvToRgb, rgbToHsl, hslToRgb } from '@/lib/color-math';
+import { hexToRgb, rgbToHsv, hsvToRgb, rgbToHsl, hslToRgb } from '@core/color-math';
 
 function clamp(v: number, min: number, max: number) { return Math.min(max, Math.max(min, v)); }
 function rgbToHex255(r: number, g: number, b: number) {

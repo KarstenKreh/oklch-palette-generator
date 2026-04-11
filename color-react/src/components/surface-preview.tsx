@@ -1,7 +1,7 @@
 import { usePalette } from '@/hooks/use-palette';
 import { useThemeStore } from '@/store/theme-store';
 import { SurfacePanel } from '@/components/surface-panel';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 
 function toLookup(palette: PaletteEntry[]): Record<number, PaletteEntry> {
   const map: Record<number, PaletteEntry> = {};

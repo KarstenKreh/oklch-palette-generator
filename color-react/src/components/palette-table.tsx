@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 import {
   Table,
   TableBody,

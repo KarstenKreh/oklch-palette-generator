@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Phone, MoreHorizontal, Plus, ArrowUp, Search, SquarePen, MessageCircle, Users, Settings, CheckCheck, Bell, Moon, Shield, HelpCircle, LogOut, Camera, Trash2, ListFilter } from 'lucide-react';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@/lib/scale';
 import type { SpacingToken } from '@/lib/spacing';
 import type { ShapeState } from '@/lib/shape-url-state';
 import { PhoneMockup } from '@/components/phone-mockup';
-import { contrastRatio } from '@/lib/color-math';
+import { contrastRatio } from '@core/color-math';
 import type { FgContrastMode } from '@/lib/color-url-state';
 
 interface PaletteResult {

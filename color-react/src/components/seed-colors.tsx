@@ -9,8 +9,8 @@ import { ChromaSlider } from '@/components/chroma-slider';
 import { AccentInputs } from '@/components/accent-inputs';
 import { useThemeStore } from '@/store/theme-store';
 import { usePalette } from '@/hooks/use-palette';
-import { contrastRatio, invertHex } from '@/lib/color-math';
-import type { PaletteMode } from '@/lib/palette';
+import { contrastRatio, invertHex } from '@core/color-math';
+import type { PaletteMode } from '@core/palette';
 import type { FgContrastMode } from '@/store/theme-store';
 
 const MODE_OPTIONS = [

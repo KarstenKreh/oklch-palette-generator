@@ -1,7 +1,7 @@
 // URL state serialization — pure functions, no DOM access
 // Types inlined to avoid dependency on color-react's store
 
-import type { PaletteMode } from './palette';
+import type { PaletteMode } from '@core/palette';
 
 export type FgContrastMode = 'best' | 'preferLight' | 'preferDark';
 

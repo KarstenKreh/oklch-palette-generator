@@ -1,8 +1,8 @@
 // Code export — generates CSS custom property strings
 
-import { hexToOklch, contrastRatio, invertHex } from './color-math';
-import { generateShadowValues } from './shadows';
-import type { PaletteEntry } from './palette';
+import { hexToOklch, contrastRatio, invertHex } from '@core/color-math';
+import { generateShadowValues } from '@core/shadows';
+import type { PaletteEntry } from '@core/palette';
 import type { FgContrastMode } from './color-url-state';
 
 export interface AccentPalette {

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useThemeStore } from '@/store/theme-store';
-import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@/lib/palette';
-import { hexToOklch } from '@/lib/color-math';
+import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@core/palette';
+import { hexToOklch } from '@core/color-math';
 
 export interface AccentPalette {
   name: string;

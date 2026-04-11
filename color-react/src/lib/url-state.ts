@@ -1,7 +1,7 @@
 // URL state serialization — pure functions, no DOM access
 
 import type { Accent, FgContrastMode } from '@/store/theme-store';
-import type { PaletteMode } from './palette';
+import type { PaletteMode } from '@core/palette';
 
 interface EncodableState {
   brandHex: string;

@@ -1,8 +1,8 @@
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/hooks/use-palette';
 import type { FgContrastMode } from '@/store/theme-store';
-import { contrastRatio, invertHex } from '@/lib/color-math';
-import { generateShadowValues } from '@/lib/shadows';
+import { contrastRatio, invertHex } from '@core/color-math';
+import { generateShadowValues } from '@core/shadows';
 import { PanelSvg } from '@/components/panel-svg';
 import { Sun, Moon, SunDim, MoonStar } from 'lucide-react';
 

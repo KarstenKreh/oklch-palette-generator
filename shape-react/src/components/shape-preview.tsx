@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Vaso } from 'vaso';
 import { useShapeStore } from '@/store/shape-store';
-import { generateShadows, type ShadowConfig } from '@/lib/shadows';
-import { hexToOklch, oklchToHex } from '@/lib/color-math';
+import { generateShadows, type ShadowConfig } from '@core/shadows';
+import { hexToOklch, oklchToHex } from '@core/color-math';
 
 /** Derive a set of surface colors from a single hex for preview. */
 function deriveSurface(hex: string, isDark: boolean) {

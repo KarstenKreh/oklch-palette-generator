@@ -2,8 +2,8 @@
  * Code export generators for shape tokens (used in combined system export).
  */
 
-import { generateShadows, type ShadowConfig, type ShadowType } from './shadows';
-import { hexToOklch, oklchToHex } from './color-math';
+import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
+import { hexToOklch, oklchToHex } from '@core/color-math';
 import type { ColorMode, SeparationMode, ShapeState } from './shape-url-state';
 
 export interface ShapeExportOptions {

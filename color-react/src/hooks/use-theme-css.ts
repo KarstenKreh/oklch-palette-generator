@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { PaletteEntry } from '@/lib/palette';
+import type { PaletteEntry } from '@core/palette';
 
 export function useThemeCss(
   brand: PaletteEntry[],
