@@ -2,41 +2,71 @@ import { useMemo } from 'react';
 import { Vaso } from 'vaso';
 import { useShapeStore } from '@/store/shape-store';
 import { generateShadows, type ShadowConfig } from '@core/shadows';
-import { hexToOklch, oklchToHex } from '@core/color-math';
+import { generatePalette, computeAutoErrorHex, type PaletteEntry, type Step, type PaletteMode } from '@core/palette';
+import { contrastRatio } from '@core/color-math';
 
-/** Derive a set of surface colors from a single hex for preview. */
-function deriveSurface(hex: string, isDark: boolean) {
-  const [, C_brand, H] = hexToOklch(hex);
-  const C = 0.015; // surface chroma
+/** Look up a step in a palette by step number. */
+function step(palette: PaletteEntry[], s: Step): string {
+  return palette.find(e => e.step === s)!.hex;
+}
+
+/** Pick foreground from palette — decide direction via #FFF/#1A1A1A (matches Color app), return palette step. */
+function pickFgFromPalette(bgHex: string, palette: PaletteEntry[], lightStep: Step, darkStep: Step): string {
+  const crWhite = contrastRatio('#FFFFFF', bgHex);
+  const crDark = contrastRatio('#1A1A1A', bgHex);
+  return crWhite >= crDark ? step(palette, lightStep) : step(palette, darkStep);
+}
+
+/** Derive semantic preview colors from brand hex using the real palette engine. */
+function deriveSurface(hex: string, isDark: boolean, mode: PaletteMode = 'balanced', chromaScale: number = 1.0, brandPin: boolean = false) {
+  const brand = generatePalette(hex, 1.0, mode);
+  const surface = generatePalette(hex, chromaScale * 0.15, mode);
+  const errorHex = computeAutoErrorHex(hex);
+  const error = generatePalette(errorHex, 1.0, mode);
+  const errorSurface = generatePalette(errorHex, 0.1, mode);  // neutral version for fg
+
   if (isDark) {
+    const primaryBg = brandPin ? hex : step(brand, 400);
+    const secondaryBg = step(brand, 800);
+    const destructiveBg = step(error, 400);
     return {
-      bg: oklchToHex(0.15, C, H),
-      card: oklchToHex(0.20, C, H),
-      elevated: oklchToHex(0.24, C, H),
-      muted: oklchToHex(0.18, C, H),
-      secondary: oklchToHex(0.25, C_brand * 0.3, H),      // brand-800 equivalent
-      secondaryFg: oklchToHex(0.92, C * 0.3, H),
-      border: oklchToHex(0.28, C * 0.8, H),
-      borderMuted: oklchToHex(0.24, C * 0.5, H),
-      text: oklchToHex(0.92, C * 0.3, H),
-      textMuted: oklchToHex(0.65, C * 0.3, H),
-      primary: hex,
-      primaryFg: oklchToHex(0.98, 0, H),
+      bg: step(surface, 875),
+      card: step(surface, 825),
+      elevated: step(surface, 800),
+      muted: step(surface, 850),
+      secondary: secondaryBg,
+      secondaryFg: pickFgFromPalette(secondaryBg, brand, 100, 900),
+      destructive: destructiveBg,
+      destructiveFg: pickFgFromPalette(destructiveBg, errorSurface, 100, 900),
+      border: step(surface, 600),
+      borderMuted: step(surface, 700),
+      text: step(surface, 25),
+      textMuted: step(surface, 300),
+      primary: primaryBg,
+      primaryFg: pickFgFromPalette(primaryBg, brand, 50, 975),
+      ring: step(surface, 500),
     };
   }
+
+  const primaryBg = brandPin ? hex : step(brand, 600);
+  const secondaryBg = step(brand, 200);
+  const destructiveBg = step(error, 600);
   return {
-    bg: oklchToHex(0.96, C * 0.3, H),
-    card: oklchToHex(0.99, C * 0.1, H),
-    elevated: oklchToHex(1.0, 0, H),
-    muted: oklchToHex(0.94, C * 0.4, H),
-    secondary: oklchToHex(0.90, C_brand * 0.25, H),       // brand-200 equivalent
-    secondaryFg: oklchToHex(0.25, C_brand * 0.3, H),
-    border: oklchToHex(0.85, C * 0.6, H),
-    borderMuted: oklchToHex(0.90, C * 0.3, H),
-    text: oklchToHex(0.15, C * 0.3, H),
-    textMuted: oklchToHex(0.45, C * 0.3, H),
-    primary: hex,
-    primaryFg: oklchToHex(0.98, 0, H),
+    bg: step(surface, 50),
+    card: step(surface, 25),
+    elevated: step(surface, 25),
+    muted: step(surface, 75),
+    secondary: secondaryBg,
+    secondaryFg: pickFgFromPalette(secondaryBg, brand, 100, 900),
+    destructive: destructiveBg,
+    destructiveFg: pickFgFromPalette(destructiveBg, errorSurface, 100, 900),
+    border: step(surface, 300),
+    borderMuted: step(surface, 200),
+    text: step(surface, 975),
+    textMuted: step(surface, 700),
+    primary: primaryBg,
+    primaryFg: pickFgFromPalette(primaryBg, brand, 50, 975),
+    ring: step(surface, 400),
   };
 }
 
@@ -46,7 +76,7 @@ function deriveSurface(hex: string, isDark: boolean) {
 
 function PreviewPanel({ isDark }: { isDark: boolean }) {
   const store = useShapeStore();
-  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark), [store.surfaceHex, isDark]);
+  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin]);
   const isGlass = store.shapeStyle === 'glass';
 
   const shadowConfig: ShadowConfig = {
@@ -186,6 +216,16 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 </span>
               </Vaso>
             </div>
+            <button
+              className="px-3 py-1.5 text-caption font-medium"
+              style={{
+                backgroundColor: colors.destructive,
+                color: colors.destructiveFg,
+                borderRadius: `${radius}px`,
+              }}
+            >
+              Destructive
+            </button>
           </>
         ) : (
           <>
@@ -195,7 +235,6 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 backgroundColor: colors.primary,
                 color: colors.primaryFg,
                 borderRadius: `${radius}px`,
-                boxShadow: shadows.find(s => s.name === 'sm')?.shadow,
               }}
             >
               Primary
@@ -206,10 +245,19 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 backgroundColor: colors.secondary,
                 color: colors.secondaryFg,
                 borderRadius: `${radius}px`,
-                boxShadow: borderShadow || undefined,
               }}
             >
               Secondary
+            </button>
+            <button
+              className="px-3 py-1.5 text-caption font-medium"
+              style={{
+                backgroundColor: colors.destructive,
+                color: colors.destructiveFg,
+                borderRadius: `${radius}px`,
+              }}
+            >
+              Destructive
             </button>
           </>
         )}

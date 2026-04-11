@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { PaletteMode } from '@core/palette';
 
 export type ShapeStyle = 'paper' | 'glass';
 export type ShadowType = 'normal' | 'neumorphic' | 'flat';
@@ -41,8 +42,11 @@ export interface ShapeState {
   // Surface Separation
   separationMode: SeparationMode;
 
-  // Surface color for previews (overridden from color hash)
+  // Color parameters (read from color hash for preview accuracy)
   surfaceHex: string;
+  paletteMode: PaletteMode;
+  chromaScale: number;
+  brandPin: boolean;
 
   // Setters
   setShapeStyle: (v: ShapeStyle) => void;
@@ -67,6 +71,9 @@ export interface ShapeState {
   setRingCustomColor: (v: string) => void;
   setSeparationMode: (v: SeparationMode) => void;
   setSurfaceHex: (v: string) => void;
+  setPaletteMode: (v: PaletteMode) => void;
+  setChromaScale: (v: number) => void;
+  setBrandPin: (v: boolean) => void;
   setFullState: (state: Partial<ShapeState>) => void;
 }
 
@@ -106,8 +113,11 @@ export const useShapeStore = create<ShapeState>((set) => ({
   // Separation
   separationMode: 'shadow',
 
-  // Surface
+  // Color parameters
   surfaceHex: '#335A7F',
+  paletteMode: 'balanced' as PaletteMode,
+  chromaScale: 1.0,
+  brandPin: false,
 
   // Setters
   setShapeStyle: (v) => set({ shapeStyle: v }),
@@ -132,5 +142,8 @@ export const useShapeStore = create<ShapeState>((set) => ({
   setRingCustomColor: (v) => set({ ringCustomColor: v }),
   setSeparationMode: (v) => set({ separationMode: v }),
   setSurfaceHex: (v) => set({ surfaceHex: v }),
+  setPaletteMode: (v) => set({ paletteMode: v }),
+  setChromaScale: (v) => set({ chromaScale: v }),
+  setBrandPin: (v) => set({ brandPin: v }),
   setFullState: (partial) => set(partial),
 }));

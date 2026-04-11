@@ -43,14 +43,26 @@ function App() {
     navigator.clipboard.writeText(url).then(() => toast('Share link copied!'));
   }, [getCurrentHash, otherSegments]);
 
-  // Read brand color from color hash on mount
+  // Read brand color, palette mode, and chroma from color hash on mount
   useEffect(() => {
     const raw = window.location.hash.slice(1);
     const colorSegment = getMySegment(raw, 'c');
     if (colorSegment) {
-      const brandHex = colorSegment.split(',')[0];
+      const parts = colorSegment.split(',');
+      const brandHex = parts[0];
       if (/^[0-9a-fA-F]{6}$/.test(brandHex)) {
         store.setSurfaceHex('#' + brandHex);
+      }
+      const chromaPct = parseInt(parts[5]);
+      if (!isNaN(chromaPct)) {
+        store.setChromaScale(chromaPct / 100);
+      }
+      const mode = parts[6];
+      if (mode === 'balanced' || mode === 'exact') {
+        store.setPaletteMode(mode);
+      }
+      if (parts[7] === '1' || parts[7] === '0') {
+        store.setBrandPin(parts[7] === '1');
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,7 +108,9 @@ function App() {
           </div>
 
           {/* Code Export */}
-          <CodeExport />
+          <div className="bg-card border border-border rounded-lg p-4 mb-6">
+            <CodeExport />
+          </div>
         </div>
       </div>
       <Toaster />

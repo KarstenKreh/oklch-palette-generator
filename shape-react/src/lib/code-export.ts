@@ -3,7 +3,7 @@
  */
 
 import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
-import { hexToOklch, oklchToHex } from '@core/color-math';
+import { generatePalette, type PaletteEntry, type Step } from '@core/palette';
 import type { ColorMode, SeparationMode, ShapeStyle } from '@/store/shape-store';
 
 export interface ShapeExportOptions {
@@ -42,11 +42,14 @@ function buildShadowConfig(opts: ShapeExportOptions): ShadowConfig {
   };
 }
 
-/** Derive light / dark background hex from the surface color (mirrors shape-preview.tsx). */
+function paletteStep(palette: PaletteEntry[], s: Step): string {
+  return palette.find(e => e.step === s)!.hex;
+}
+
+/** Derive light / dark background hex using the real palette engine. */
 function deriveBgHex(surfaceHex: string, isDark: boolean): string {
-  const [, , H] = hexToOklch(surfaceHex);
-  const C = 0.015;
-  return isDark ? oklchToHex(0.15, C, H) : oklchToHex(0.96, C * 0.3, H);
+  const surface = generatePalette(surfaceHex, 0.1);
+  return isDark ? paletteStep(surface, 875) : paletteStep(surface, 50);
 }
 
 function radiusScale(base: number) {
