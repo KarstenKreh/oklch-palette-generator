@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTypeStore } from '@/store/type-store';
 import { Input } from '@/components/ui/input';
 import { ChevronDown } from 'lucide-react';
-import { TYPE_LEVELS, LEVEL_LABELS, type TypeLevel } from '@/lib/scale';
-import { DEFAULT_LINE_HEIGHTS, DEFAULT_LETTER_SPACINGS } from '@/lib/typography';
+import { TYPE_LEVELS, LEVEL_LABELS, type TypeLevel } from '@core/scale';
+import { DEFAULT_LINE_HEIGHTS, DEFAULT_LETTER_SPACINGS } from '@core/typography';
 
 export function TypographyDetails() {
   const [open, setOpen] = useState(false);

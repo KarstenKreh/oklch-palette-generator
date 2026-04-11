@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { TypeLevel } from '@/lib/scale';
-import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@/lib/scale';
+import type { TypeLevel } from '@core/scale';
+import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@core/scale';
 
 export type ScaleMode = 'golden' | 'traditional' | 'custom';
 export type MobileRatioMode = 'auto' | 'custom';

@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/select';
-import { RATIO_PRESETS } from '@/lib/scale';
+import { RATIO_PRESETS } from '@core/scale';
 import { snap, RATIO_MIN, RATIO_MAX } from './ratio-slider';
 
 export const MOBILE_MODE_OPTIONS = [

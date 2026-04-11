@@ -1,7 +1,7 @@
 import { useTypeStore } from '@/store/type-store';
 import { FontSelector } from '@/components/font-selector';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@/lib/scale';
+import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@core/scale';
 import type { ScaleMode } from '@/store/type-store';
 import { TraditionalAssignments } from './scale-controls/traditional-assignments';
 import { HeadingWeightControls } from './scale-controls/heading-weight-controls';

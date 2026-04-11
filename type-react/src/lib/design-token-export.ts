@@ -5,8 +5,8 @@
  * in the standardized format for Figma, Style Dictionary, etc.
  */
 
-import type { ComputedLevel } from './scale';
-import type { SpacingToken } from './spacing';
+import type { ComputedLevel } from '@core/scale';
+import type { SpacingToken } from '@core/spacing';
 import { fontFamily } from './fontshare';
 
 interface DesignTokenOptions {

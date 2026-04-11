@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTypeStore } from '@/store/type-store';
 import { useComputedScale } from './use-computed-scale';
-import { computeSpacingTokens, type SpacingToken } from '@/lib/spacing';
+import { computeSpacingTokens, type SpacingToken } from '@core/spacing';
 
 export function useComputedSpacing(): SpacingToken[] {
   const levels = useComputedScale();

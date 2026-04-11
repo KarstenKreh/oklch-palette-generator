@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateCssExport, generateTailwindV4Export } from './code-export';
-import { customScale } from './scale';
-import { computeSpacingTokens } from './spacing';
+import { customScale } from '@core/scale';
+import { computeSpacingTokens } from '@core/spacing';
 
 function makeOpts() {
   const levels = customScale(1.0, 1.272);

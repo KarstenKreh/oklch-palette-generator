@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { encodeState, decodeState, type UrlState } from './url-state';
-import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from './scale';
+import { DEFAULT_TRADITIONAL, DEFAULT_TRADITIONAL_MOBILE } from '@core/scale';
 
 function makeCustomState(overrides: Partial<UrlState> = {}): UrlState {
   return {

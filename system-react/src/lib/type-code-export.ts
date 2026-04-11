@@ -2,8 +2,8 @@
  * Code export generators for the type scale.
  */
 
-import type { ComputedLevel } from './scale';
-import type { SpacingToken } from './spacing';
+import type { ComputedLevel } from '@core/scale';
+import type { SpacingToken } from '@core/spacing';
 import { fontFamily, buildFontshareEmbed } from './fontshare';
 
 interface ExportOptions {

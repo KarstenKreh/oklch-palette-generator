@@ -4,8 +4,8 @@ import {
   traditionalScale,
   customScale,
   type ComputedLevel,
-} from '@/lib/scale';
-import { applyTypography } from '@/lib/typography';
+} from '@core/scale';
+import { applyTypography } from '@core/typography';
 
 export function useComputedScale(): ComputedLevel[] {
   const scaleMode = useTypeStore((s) => s.scaleMode);

@@ -6,8 +6,8 @@ import type { DecodedColorState } from '@/lib/color-url-state';
 import type { UrlState } from '@/lib/type-url-state';
 import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
-import type { ComputedLevel } from '@/lib/scale';
-import type { SpacingToken } from '@/lib/spacing';
+import type { ComputedLevel } from '@core/scale';
+import type { SpacingToken } from '@core/spacing';
 import type { ShapeState } from '@/lib/shape-url-state';
 import {
   generatePrimitivesOklch,

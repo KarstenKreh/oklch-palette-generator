@@ -18,8 +18,8 @@
  *   tm  = traditionalMobileAssignments (px,px,...  in TYPE_LEVELS order)
  */
 
-import type { TypeLevel } from './scale';
-import { TYPE_LEVELS, DEFAULT_TRADITIONAL } from './scale';
+import type { TypeLevel } from '@core/scale';
+import { TYPE_LEVELS, DEFAULT_TRADITIONAL } from '@core/scale';
 
 export interface UrlState {
   scaleMode: 'golden' | 'traditional' | 'custom';

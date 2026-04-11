@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/select';
-import { RATIO_PRESETS } from '@/lib/scale';
+import { RATIO_PRESETS } from '@core/scale';
 
 export const RATIO_MIN = 1.0;
 export const RATIO_MAX = 1.8;

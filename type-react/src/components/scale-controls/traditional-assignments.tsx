@@ -12,7 +12,7 @@ import {
   TYPE_LEVELS,
   LEVEL_LABELS,
   type TypeLevel,
-} from '@/lib/scale';
+} from '@core/scale';
 
 export function TraditionalAssignments({
   assignments,
