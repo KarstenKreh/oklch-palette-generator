@@ -34,7 +34,7 @@ export function ScaleControls() {
       {store.scaleMode === 'custom' && (
         <div className="space-y-2">
           <h3 className="text-body-s font-semibold text-foreground">Scale</h3>
-          <HintWithStory hint="We recommend a ratio around √φ ≈ 1.272 — historical type scales and natural proportions cluster in this range." />
+          <HintWithStory hint="Ratios between 1.20 and 1.50 produce clear visual hierarchy. The default (1.272) balances contrast with cohesion." />
           <div className="border border-border rounded-sm divide-y divide-border">
             {/* Desktop */}
             <div className="p-3 space-y-2">

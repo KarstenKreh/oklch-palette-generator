@@ -11,8 +11,8 @@ import {
 import { RATIO_PRESETS } from '@/lib/scale';
 import { snap, RATIO_MIN, RATIO_MAX } from './ratio-slider';
 
-const SQRT_PHI = 1.272;
-const SNAP_POINTS = [{ value: SQRT_PHI, label: '√φ' }];
+const CORRIDOR_MIN = 1.2;
+const CORRIDOR_MAX = 1.5;
 import { ModeSwitch } from '@/components/mode-switch';
 import { MOBILE_MODE_OPTIONS } from './mobile-ratio-slider';
 import type { MobileRatioMode } from '@/store/type-store';
@@ -90,8 +90,8 @@ export function MobileRatioSliderV2() {
         </div>
       </div>
 
-      {/* Slider with √φ marker */}
-      <div className="relative">
+      {/* Slider with recommended range highlight */}
+      <div className="relative mb-3">
         <Slider
           min={RATIO_MIN}
           max={RATIO_MAX}
@@ -99,24 +99,14 @@ export function MobileRatioSliderV2() {
           value={[sliderValue]}
           onValueChange={handleSlider}
         />
-        {SNAP_POINTS.map((p) => {
-          const pct = ((p.value - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
-          const distance = Math.abs(sliderValue - p.value);
-          const maxDist = p.value * 0.1;
-          const proximity = Math.max(0, 1 - distance / maxDist);
-          const opacity = 0.3 + proximity * 0.7;
-          return (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => handleSlider(p.value)}
-              className="absolute -translate-x-1/2 text-caption font-semibold cursor-pointer text-primary"
-              style={{ left: `${pct}%`, top: '-1.8rem', opacity }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+          style={{ left: `${((CORRIDOR_MIN - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100}%` }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+          style={{ left: `${((CORRIDOR_MAX - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100}%` }}
+        />
       </div>
 
       {/* Input + Preset select — full width below slider */}
@@ -153,7 +143,7 @@ export function MobileRatioSliderV2() {
               <SelectItem
                 key={p.value}
                 value={p.value.toString()}
-                className={`text-caption ${p.value === 1.272 ? 'text-primary font-medium' : ''}`}
+                className="text-caption"
               >
                 {p.name} ({p.value})
               </SelectItem>

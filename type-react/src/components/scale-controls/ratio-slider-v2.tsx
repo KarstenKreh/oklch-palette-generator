@@ -10,9 +10,8 @@ import {
 import { RATIO_PRESETS } from '@/lib/scale';
 import { snap, RATIO_MIN, RATIO_MAX } from './ratio-slider';
 
-const SQRT_PHI = 1.272;
-
-const SNAP_POINTS = [{ value: SQRT_PHI, label: '√φ' }];
+const CORRIDOR_MIN = 1.2;
+const CORRIDOR_MAX = 1.5;
 
 export function RatioSliderV2({
   value,
@@ -37,13 +36,16 @@ export function RatioSliderV2({
 
   const matchedPreset = RATIO_PRESETS.find((p) => p.value === value);
 
+  const corridorLeft = ((CORRIDOR_MIN - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
+  const corridorRight = ((CORRIDOR_MAX - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
+
   return (
     <div className="space-y-2">
       {/* Label */}
       <span className="text-caption text-muted-foreground">Scale ratio</span>
 
-      {/* Slider with √φ marker */}
-      <div className="relative">
+      {/* Slider with corridor tick marks */}
+      <div className="relative mb-3">
         <Slider
           min={RATIO_MIN}
           max={RATIO_MAX}
@@ -51,24 +53,14 @@ export function RatioSliderV2({
           value={[value]}
           onValueChange={handleSlider}
         />
-        {SNAP_POINTS.map((p) => {
-          const pct = ((p.value - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
-          const distance = Math.abs(value - p.value);
-          const maxDist = p.value * 0.1; // 10% range
-          const proximity = Math.max(0, 1 - distance / maxDist);
-          const opacity = 0.3 + proximity * 0.7;
-          return (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => onChange(p.value)}
-              className="absolute -translate-x-1/2 text-caption font-semibold cursor-pointer text-primary"
-              style={{ left: `${pct}%`, top: '-1.8rem', opacity }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+          style={{ left: `${corridorLeft}%` }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+          style={{ left: `${corridorRight}%` }}
+        />
       </div>
 
       {/* Input + Preset select — full width below slider */}
@@ -96,7 +88,7 @@ export function RatioSliderV2({
               <SelectItem
                 key={p.value}
                 value={p.value.toString()}
-                className={`text-caption ${p.value === SQRT_PHI ? 'text-primary font-medium' : ''}`}
+                className="text-caption"
               >
                 {p.name} ({p.value})
               </SelectItem>
@@ -127,49 +119,22 @@ export function HintWithStory({ hint }: { hint: string }) {
       {open && (
         <div className="text-caption leading-relaxed text-muted-foreground bg-muted/50 rounded-sm p-3 space-y-3">
           <p>
-            The classical typographic scale — from Nonpareille (6pt) to Imperial (72pt) — was
-            established during the Renaissance for metal typesetting. The full scale has 19 sizes,
-            but they fall into two groups:{' '}
-            <strong className="text-foreground">11 structural sizes</strong> for heading hierarchy,
-            and 8 fine-tuning sizes for body text legibility.
-          </p>
-          <p>The scale factors between the 11 hierarchical sizes:</p>
-          <div className="grid grid-cols-5 gap-x-3 gap-y-0.5 font-mono text-caption text-muted-foreground/80">
-            <span>6→8</span>
-            <span className="text-right">1.333</span>
-            <span className="col-start-4">8→10</span>
-            <span className="text-right">1.250</span>
-            <span>10→12</span>
-            <span className="text-right">1.200</span>
-            <span className="col-start-4">12→14</span>
-            <span className="text-right">1.167</span>
-            <span>14→16</span>
-            <span className="text-right">1.143</span>
-            <span className="col-start-4">16→20</span>
-            <span className="text-right">1.250</span>
-            <span>20→24</span>
-            <span className="text-right">1.200</span>
-            <span className="col-start-4">24→36</span>
-            <span className="text-right">1.500</span>
-            <span>36→48</span>
-            <span className="text-right">1.333</span>
-            <span className="col-start-4">48→72</span>
-            <span className="text-right">1.500</span>
-          </div>
-          <p>
-            The geometric mean — the correct average for compounding ratios — is{' '}
-            <strong className="text-foreground">1.282</strong>, remarkably close
-            to √φ ≈ 1.272.
+            Perceptual research shows that size differences between{' '}
+            <strong className="text-foreground">1.20× and 1.50×</strong> are perceived as natural
+            steps in a visual hierarchy. Below 1.20×, levels become hard to distinguish without
+            effort. Above 1.50×, elements lose their visual connection to the surrounding text.
           </p>
           <p>
-            The full 19-step scale averages at 1.148 — lower, because the fine-tuning steps
-            (10→10.5→11→12) optimise <em>legibility within a level</em>, not contrast between
-            levels. The typesetters intuitively distinguished between hierarchical jumps and fine
-            adjustments — and √φ lands right in the middle of the former.
+            The default ratio of 1.272 sits comfortably within this range — far enough above the
+            lower bound (1.20) for clear contrast, far enough below the upper bound (1.50) to
+            maintain cohesion. It also carries a mathematical rationale: at this factor, the{' '}
+            <em>perceived area</em> of each heading level scales by φ (the golden ratio), since
+            area grows with the square of the font size.
           </p>
           <p>
-            √φ formalises what typographers have felt for 500 years — the hierarchical
-            structure of the classical scale converges precisely on this ratio.
+            The classical typographic scale of the Renaissance (6pt to 72pt) averages a factor
+            of 1.282 across its hierarchical steps — landing in the same range, arrived at through
+            centuries of craft rather than calculation.
           </p>
         </div>
       )}

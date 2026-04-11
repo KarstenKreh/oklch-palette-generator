@@ -161,7 +161,7 @@ export const RATIO_PRESETS: { name: string; value: number }[] = [
   { name: 'Major Second', value: 1.125 },
   { name: 'Minor Third', value: 1.2 },
   { name: 'Major Third', value: 1.25 },
-  { name: 'Golden Ratio (sqrt)', value: 1.272 },
+  { name: 'Golden Ratio (area)', value: 1.272 },
   { name: 'Perfect Fourth', value: 1.333 },
   { name: 'Augmented Fourth', value: 1.414 },
   { name: 'Perfect Fifth', value: 1.5 },

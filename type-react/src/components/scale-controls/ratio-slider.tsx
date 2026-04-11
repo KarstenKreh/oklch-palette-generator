@@ -9,19 +9,10 @@ import {
 } from '@/components/ui/select';
 import { RATIO_PRESETS } from '@/lib/scale';
 
-const SQRT_PHI = 1.272;
 export const RATIO_MIN = 1.0;
 export const RATIO_MAX = 1.8;
-const SNAP_THRESHOLD = 0.015;
-
-const SNAP_POINTS = [
-  { value: SQRT_PHI, label: '√φ' },
-];
 
 export function snap(v: number): number {
-  for (const p of SNAP_POINTS) {
-    if (Math.abs(v - p.value) <= SNAP_THRESHOLD) return p.value;
-  }
   return Math.round(v * 1000) / 1000;
 }
 
@@ -79,7 +70,7 @@ export function RatioSlider({
                 <SelectItem
                   key={p.value}
                   value={p.value.toString()}
-                  className={`text-caption ${p.value === SQRT_PHI ? 'text-primary font-medium' : ''}`}
+                  className="text-caption"
                 >
                   {p.name} ({p.value})
                 </SelectItem>
@@ -98,23 +89,6 @@ export function RatioSlider({
           value={[value]}
           onValueChange={handleSlider}
         />
-        {SNAP_POINTS.map((p) => {
-          const pct = ((p.value - RATIO_MIN) / (RATIO_MAX - RATIO_MIN)) * 100;
-          const active = value === p.value;
-          return (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => onChange(p.value)}
-              className={`absolute -translate-x-1/2 text-caption font-semibold cursor-pointer transition-colors ${
-                active ? 'text-primary' : 'text-muted-foreground/60 hover:text-muted-foreground'
-              }`}
-              style={{ left: `${pct}%`, top: '-1.8rem' }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
       </div>
       {hint && <HintWithStory hint={hint} />}
     </div>
