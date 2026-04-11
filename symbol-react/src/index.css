@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "../../shared.css";
 
+@source "../../packages/core/src";
+
 @custom-variant dark (&:is(.dark *));
 
 body {

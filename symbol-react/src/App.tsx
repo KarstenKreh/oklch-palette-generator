@@ -96,7 +96,9 @@ function App() {
           </div>
 
           {/* Code Export */}
-          <CodeExport />
+          <div className="bg-card border border-border rounded-lg p-4 mb-6">
+            <CodeExport />
+          </div>
         </div>
       </div>
       <Toaster />

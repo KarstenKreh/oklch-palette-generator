@@ -19,6 +19,7 @@ import { ColorSummary } from '@/components/color-summary';
 import { TypeSummary } from '@/components/type-summary';
 import { CombinedExport } from '@/components/combined-export';
 import { AppPreview } from '@/components/app-preview';
+import { SymbolSummary } from '@/components/symbol-summary';
 import { PirateFooter } from '@/components/pirate-footer';
 import { SquarePen } from 'lucide-react';
 
@@ -342,8 +343,25 @@ function App() {
           </div>
         )}
 
+        {/* Symbol Summary */}
+        {symbolState && (
+          <div className="bg-card border border-border rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Icons</h2>
+              <a
+                href={`/symbol#${getCurrentHash()}`}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pr-1"
+              >
+                <SquarePen size={14} />
+                Edit
+              </a>
+            </div>
+            <SymbolSummary symbolState={symbolState} />
+          </div>
+        )}
+
         {/* Combined Export */}
-        {(hasColor || hasType || shapeState) && (
+        {(hasColor || hasType || shapeState || symbolState) && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
             <CombinedExport
               colorState={hasColor ? colorState : null}

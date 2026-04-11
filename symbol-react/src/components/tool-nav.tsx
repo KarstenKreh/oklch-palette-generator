@@ -19,9 +19,9 @@ function toolUrl(key: Tool): string {
 
 const tools: { key: Tool; label: string; icon: typeof Palette }[] = [
   { key: 'color', label: 'Color', icon: Palette },
-  { key: 'type', label: 'Type', icon: Type },
   { key: 'shape', label: 'Shape', icon: Box },
   { key: 'symbol', label: 'Symbol', icon: Hexagon },
+  { key: 'type', label: 'Type', icon: Type },
 ];
 
 function NavLink({ tool, activeTool, buildHash, className }: {

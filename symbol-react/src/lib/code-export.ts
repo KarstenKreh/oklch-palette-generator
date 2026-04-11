@@ -10,6 +10,7 @@ import { recommendSets, type SymbolPreferences } from '@core/recommend';
 interface ExportInput {
   iconBaseSize: number;
   iconScale: number;
+  snapTo4px: boolean;
   selectedSet: string | null;
   prefs: SymbolPreferences;
 }
@@ -22,7 +23,7 @@ function getTopSet(input: ExportInput): IconSetDefinition {
 
 function getTokens(input: ExportInput): { tokens: IconTokens; set: IconSetDefinition } {
   const set = getTopSet(input);
-  const tokens = computeIconTokens(input.iconBaseSize, input.iconScale, weightToStroke(set.strokeWeight));
+  const tokens = computeIconTokens(input.iconBaseSize, input.iconScale, weightToStroke(set.strokeWeight), input.snapTo4px);
   return { tokens, set };
 }
 

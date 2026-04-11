@@ -21,14 +21,15 @@ const CORNERS_MAP: Record<string, IconCorners> = { a: 'auto', s: 'sharp', n: 'ro
 
 export function decodeState(raw: string): SymbolState | null {
   const parts = raw.split(',');
-  if (parts.length < 5) return null;
+  if (parts.length < 6) return null;
 
   const style = STYLE_MAP[parts[0]];
   const weight = WEIGHT_MAP[parts[1]];
   const corners = CORNERS_MAP[parts[2]];
   const baseSize = parseInt(parts[3], 10) / 100;
   const scale = parseInt(parts[4], 10) / 1000;
-  const setId = parts[5] || null;
+  // parts[5] = snapTo4px (skipped — not relevant for export)
+  const setId = parts[6] || null;
 
   if (!style || !weight || !corners || isNaN(baseSize) || isNaN(scale)) {
     return null;

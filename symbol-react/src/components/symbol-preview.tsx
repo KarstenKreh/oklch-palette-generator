@@ -40,21 +40,49 @@ export function SymbolPreview() {
 
   if (!iconData) return <p className="text-muted-foreground text-caption">No icons for variant "{activeId}"</p>;
 
+  const cols = SAMPLE_ICON_NAMES.length;
+
   return (
-    <div className="space-y-6">
-      {tokens.sizes.map((size) => (
-        <div key={size.name}>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-caption font-mono text-muted-foreground">{size.name}</span>
-            <span className="text-[10px] font-mono text-muted-foreground/50">{size.px}px</span>
-          </div>
-          <div className="flex items-center gap-4 text-foreground flex-wrap">
-            {SAMPLE_ICON_NAMES.map((name: SampleIconName) => (
-              <SampleIcon key={name} def={iconData.icons[name]} size={size.px} viewBox={iconData.viewBox} />
-            ))}
-          </div>
+    <div className="overflow-x-auto">
+    <div
+      className="grid border-l border-t border-border/50"
+      style={{ gridTemplateColumns: `auto repeat(${cols}, minmax(2.5rem, 1fr))` }}
+    >
+      {/* Header row — icon names */}
+      <div className="border-r border-b border-border/50" />
+      {SAMPLE_ICON_NAMES.map((name) => (
+        <div
+          key={name}
+          className="border-r border-b border-border/50 flex items-center justify-center py-1.5"
+        >
+          <span className="text-[8px] font-mono text-muted-foreground/40">{name}</span>
         </div>
       ))}
+
+      {/* Size rows */}
+      {tokens.sizes.map((size) => (
+        <>
+          {/* Row label */}
+          <div
+            key={`${size.name}-label`}
+            className="border-r border-b border-border/50 flex items-center gap-1.5 px-2"
+          >
+            <span className="text-[10px] font-mono text-muted-foreground">{size.name}</span>
+            <span className="text-[9px] font-mono text-muted-foreground/40">{size.px}</span>
+          </div>
+
+          {/* Icon cells */}
+          {SAMPLE_ICON_NAMES.map((name: SampleIconName) => (
+            <div
+              key={`${size.name}-${name}`}
+              className="border-r border-b border-border/50 flex items-center justify-center py-2 text-foreground"
+            >
+              <SampleIcon def={iconData.icons[name]} size={size.px} viewBox={iconData.viewBox} />
+            </div>
+          ))}
+        </>
+      ))}
+    </div>
     </div>
   );
 }
