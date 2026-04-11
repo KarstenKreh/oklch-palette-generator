@@ -58,7 +58,7 @@ export function useUrlState(): OtherSegments {
     store.shadowColorMode, store.shadowCustomColor,
     store.borderEnabled, store.borderWidth, store.borderColorMode, store.borderCustomColor,
     store.borderRadius,
-    store.glassEnabled, store.glassBlur, store.glassOpacity,
+    store.shapeStyle, store.glassDepth, store.glassBlur, store.glassDispersion,
     store.ringWidth, store.ringOffset, store.ringColorMode, store.ringCustomColor,
     store.separationMode,
   ]);

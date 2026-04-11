@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 
+export type ShapeStyle = 'paper' | 'glass';
 export type ShadowType = 'normal' | 'neumorphic' | 'flat';
 export type ColorMode = 'auto' | 'custom';
 export type SeparationMode = 'shadow' | 'border' | 'contrast' | 'gap' | 'mixed';
 
 export interface ShapeState {
-  // Shadows
+  // Style (top-level mode)
+  shapeStyle: ShapeStyle;
+
+  // Shadows (paper)
   shadowEnabled: boolean;
   shadowType: ShadowType;
   shadowStrength: number;
@@ -23,10 +27,10 @@ export interface ShapeState {
   // Border Radius
   borderRadius: number;
 
-  // Backdrop Blur / Glass
-  glassEnabled: boolean;
+  // Glass (Liquid Glass via vaso — active when shapeStyle === 'glass')
+  glassDepth: number;
   glassBlur: number;
-  glassOpacity: number;
+  glassDispersion: number;
 
   // Ring / Focus
   ringWidth: number;
@@ -41,6 +45,7 @@ export interface ShapeState {
   surfaceHex: string;
 
   // Setters
+  setShapeStyle: (v: ShapeStyle) => void;
   setShadowEnabled: (v: boolean) => void;
   setShadowType: (v: ShadowType) => void;
   setShadowStrength: (v: number) => void;
@@ -53,9 +58,9 @@ export interface ShapeState {
   setBorderColorMode: (v: ColorMode) => void;
   setBorderCustomColor: (v: string) => void;
   setBorderRadius: (v: number) => void;
-  setGlassEnabled: (v: boolean) => void;
+  setGlassDepth: (v: number) => void;
   setGlassBlur: (v: number) => void;
-  setGlassOpacity: (v: number) => void;
+  setGlassDispersion: (v: number) => void;
   setRingWidth: (v: number) => void;
   setRingOffset: (v: number) => void;
   setRingColorMode: (v: ColorMode) => void;
@@ -66,6 +71,9 @@ export interface ShapeState {
 }
 
 export const useShapeStore = create<ShapeState>((set) => ({
+  // Style
+  shapeStyle: 'paper',
+
   // Shadows
   shadowEnabled: true,
   shadowType: 'normal',
@@ -85,9 +93,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   borderRadius: 8,
 
   // Glass
-  glassEnabled: false,
-  glassBlur: 12,
-  glassOpacity: 0.8,
+  glassDepth: 1.2,
+  glassBlur: 0.5,
+  glassDispersion: 0.5,
 
   // Ring
   ringWidth: 2,
@@ -102,6 +110,7 @@ export const useShapeStore = create<ShapeState>((set) => ({
   surfaceHex: '#335A7F',
 
   // Setters
+  setShapeStyle: (v) => set({ shapeStyle: v }),
   setShadowEnabled: (v) => set({ shadowEnabled: v }),
   setShadowType: (v) => set({ shadowType: v }),
   setShadowStrength: (v) => set({ shadowStrength: v }),
@@ -114,9 +123,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   setBorderColorMode: (v) => set({ borderColorMode: v }),
   setBorderCustomColor: (v) => set({ borderCustomColor: v }),
   setBorderRadius: (v) => set({ borderRadius: v }),
-  setGlassEnabled: (v) => set({ glassEnabled: v }),
+  setGlassDepth: (v) => set({ glassDepth: v }),
   setGlassBlur: (v) => set({ glassBlur: v }),
-  setGlassOpacity: (v) => set({ glassOpacity: v }),
+  setGlassDispersion: (v) => set({ glassDispersion: v }),
   setRingWidth: (v) => set({ ringWidth: v }),
   setRingOffset: (v) => set({ ringOffset: v }),
   setRingColorMode: (v) => set({ ringColorMode: v }),

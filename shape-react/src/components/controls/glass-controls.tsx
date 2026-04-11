@@ -1,5 +1,4 @@
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { useShapeStore } from '@/store/shape-store';
 
 function sliderVal(v: number | readonly number[]): number {
@@ -8,49 +7,64 @@ function sliderVal(v: number | readonly number[]): number {
 
 export function GlassControls() {
   const {
-    glassEnabled, setGlassEnabled,
+    glassDepth, setGlassDepth,
     glassBlur, setGlassBlur,
-    glassOpacity, setGlassOpacity,
+    glassDispersion, setGlassDispersion,
   } = useShapeStore();
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-body-s font-semibold">Glass / Blur</h3>
-        <Switch checked={glassEnabled} onCheckedChange={setGlassEnabled} />
-      </div>
+      <h3 className="text-body-s font-semibold">Liquid Glass</h3>
 
-      {glassEnabled && (
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-caption font-medium text-muted-foreground">Blur</span>
-              <span className="text-caption text-muted-foreground font-mono">{glassBlur}px</span>
-            </div>
-            <Slider
-              value={[glassBlur]}
-              onValueChange={(v) => setGlassBlur(sliderVal(v))}
-              min={0}
-              max={40}
-              step={1}
-            />
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-caption font-medium text-muted-foreground">Depth</span>
+            <span className="text-caption text-muted-foreground font-mono">{glassDepth.toFixed(1)}</span>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-caption font-medium text-muted-foreground">Opacity</span>
-              <span className="text-caption text-muted-foreground font-mono">{glassOpacity.toFixed(2)}</span>
-            </div>
-            <Slider
-              value={[glassOpacity]}
-              onValueChange={(v) => setGlassOpacity(sliderVal(v))}
-              min={0}
-              max={1}
-              step={0.05}
-            />
-          </div>
+          <Slider
+            value={[glassDepth]}
+            onValueChange={(v) => setGlassDepth(sliderVal(v))}
+            min={-2}
+            max={5}
+            step={0.1}
+          />
+          <p className="text-[10px] text-muted-foreground/60">
+            Negative = compression, positive = magnification
+          </p>
         </div>
-      )}
+
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-caption font-medium text-muted-foreground">Blur</span>
+            <span className="text-caption text-muted-foreground font-mono">{glassBlur.toFixed(1)}</span>
+          </div>
+          <Slider
+            value={[glassBlur]}
+            onValueChange={(v) => setGlassBlur(sliderVal(v))}
+            min={0}
+            max={10}
+            step={0.1}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-caption font-medium text-muted-foreground">Dispersion</span>
+            <span className="text-caption text-muted-foreground font-mono">{glassDispersion.toFixed(1)}</span>
+          </div>
+          <Slider
+            value={[glassDispersion]}
+            onValueChange={(v) => setGlassDispersion(sliderVal(v))}
+            min={0}
+            max={3}
+            step={0.1}
+          />
+          <p className="text-[10px] text-muted-foreground/60">
+            Chromatic aberration intensity
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

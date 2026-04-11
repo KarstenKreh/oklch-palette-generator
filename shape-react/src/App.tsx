@@ -81,7 +81,7 @@ function App() {
             </Button>
           </div>
           <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
-            Configure <strong>Shadows</strong>, <strong>Borders</strong>, <strong>Radius</strong> and <strong>Focus Rings</strong> &mdash; export production-ready design tokens for your UI.
+            Choose a visual style &mdash; configure its tokens &mdash; export production-ready code.
           </p>
 
           {/* Main layout: controls + preview */}

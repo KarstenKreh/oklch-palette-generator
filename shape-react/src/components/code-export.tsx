@@ -18,6 +18,7 @@ export function CodeExport() {
 
   const opts: ShapeExportOptions = useMemo(
     () => ({
+      shapeStyle: store.shapeStyle,
       shadowEnabled: store.shadowEnabled,
       shadowType: store.shadowType,
       shadowStrength: store.shadowStrength,
@@ -28,20 +29,20 @@ export function CodeExport() {
       borderEnabled: store.borderEnabled,
       borderWidth: store.borderWidth,
       borderRadius: store.borderRadius,
-      glassEnabled: store.glassEnabled,
+      glassDepth: store.glassDepth,
       glassBlur: store.glassBlur,
-      glassOpacity: store.glassOpacity,
+      glassDispersion: store.glassDispersion,
       ringWidth: store.ringWidth,
       ringOffset: store.ringOffset,
       separationMode: store.separationMode,
       surfaceHex: store.surfaceHex,
     }),
     [
-      store.shadowEnabled, store.shadowType, store.shadowStrength,
+      store.shapeStyle, store.shadowEnabled, store.shadowType, store.shadowStrength,
       store.shadowBlurScale, store.shadowScale, store.shadowColorMode,
       store.shadowCustomColor, store.borderEnabled, store.borderWidth,
-      store.borderRadius, store.glassEnabled, store.glassBlur,
-      store.glassOpacity, store.ringWidth, store.ringOffset,
+      store.borderRadius, store.glassDepth,
+      store.glassBlur, store.glassDispersion, store.ringWidth, store.ringOffset,
       store.separationMode, store.surfaceHex,
     ],
   );

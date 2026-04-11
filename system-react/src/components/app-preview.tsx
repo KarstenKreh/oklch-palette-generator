@@ -534,15 +534,15 @@ function ProfileScreen({ t }: { t: Tokens }) {
   const settingsGroups = [
     {
       items: [
-        { icon: Bell, label: 'Notifications', value: 'On', color: t.primary },
-        { icon: Moon, label: 'Appearance', value: 'System', color: t.accent },
-        { icon: Shield, label: 'Privacy', value: '', color: t.success },
+        { icon: Bell, label: 'Notifications', value: 'On', color: t.primary, bg: t.primarySecondary },
+        { icon: Moon, label: 'Appearance', value: 'System', color: t.accent, bg: t.accentSecondary },
+        { icon: Shield, label: 'Privacy', value: '', color: t.success, bg: t.successSecondary },
       ],
     },
     {
       items: [
-        { icon: HelpCircle, label: 'Help & Support', value: '', color: t.muted },
-        { icon: LogOut, label: 'Log Out', value: '', color: t.warning },
+        { icon: HelpCircle, label: 'Help & Support', value: '', color: t.muted, bg: t.border },
+        { icon: LogOut, label: 'Log Out', value: '', color: t.warning, bg: t.destructiveSecondary },
       ],
     },
   ];
@@ -620,7 +620,7 @@ function ProfileScreen({ t }: { t: Tokens }) {
                 }}>
                   <div style={{
                     width: '20px', height: '20px', borderRadius: Math.max(3, t.radius - 4),
-                    backgroundColor: item.color + '20',
+                    backgroundColor: item.bg,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
                     <Icon size={10} color={item.color} />

@@ -4,6 +4,7 @@ import type { ShapeState } from '@/store/shape-store';
 
 function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
   return {
+    shapeStyle: 'paper',
     shadowEnabled: true,
     shadowType: 'normal',
     shadowStrength: 1.0,
@@ -16,9 +17,9 @@ function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
     borderColorMode: 'auto',
     borderCustomColor: '#000000',
     borderRadius: 8,
-    glassEnabled: false,
-    glassBlur: 12,
-    glassOpacity: 0.8,
+    glassDepth: 1.2,
+    glassBlur: 0.5,
+    glassDispersion: 0.5,
     ringWidth: 2,
     ringOffset: 2,
     ringColorMode: 'auto',
@@ -26,6 +27,7 @@ function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
     separationMode: 'shadow',
     surfaceHex: '#335A7F',
     // Stubs for setter functions — not used in encode/decode
+    setShapeStyle: () => {},
     setShadowEnabled: () => {},
     setShadowType: () => {},
     setShadowStrength: () => {},
@@ -38,9 +40,9 @@ function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
     setBorderColorMode: () => {},
     setBorderCustomColor: () => {},
     setBorderRadius: () => {},
-    setGlassEnabled: () => {},
+    setGlassDepth: () => {},
     setGlassBlur: () => {},
-    setGlassOpacity: () => {},
+    setGlassDispersion: () => {},
     setRingWidth: () => {},
     setRingOffset: () => {},
     setRingColorMode: () => {},
@@ -58,6 +60,7 @@ describe('encodeState / decodeState round-trip', () => {
     const encoded = encodeState(state);
     const decoded = decodeState(encoded);
     expect(decoded).not.toBeNull();
+    expect(decoded!.shapeStyle).toBe('paper');
     expect(decoded!.shadowEnabled).toBe(true);
     expect(decoded!.shadowType).toBe('normal');
     expect(decoded!.shadowStrength).toBeCloseTo(1.0);
@@ -66,12 +69,18 @@ describe('encodeState / decodeState round-trip', () => {
     expect(decoded!.borderEnabled).toBe(true);
     expect(decoded!.borderWidth).toBeCloseTo(1);
     expect(decoded!.borderRadius).toBe(8);
-    expect(decoded!.glassEnabled).toBe(false);
-    expect(decoded!.glassBlur).toBe(12);
-    expect(decoded!.glassOpacity).toBeCloseTo(0.8);
+    expect(decoded!.glassDepth).toBeCloseTo(1.2);
+    expect(decoded!.glassBlur).toBeCloseTo(0.5);
+    expect(decoded!.glassDispersion).toBeCloseTo(0.5);
     expect(decoded!.ringWidth).toBe(2);
     expect(decoded!.ringOffset).toBe(2);
     expect(decoded!.separationMode).toBe('shadow');
+  });
+
+  it('round-trips glass style', () => {
+    const state = makeState({ shapeStyle: 'glass' });
+    const decoded = decodeState(encodeState(state));
+    expect(decoded!.shapeStyle).toBe('glass');
   });
 
   it('round-trips neumorphic shadow type', () => {
@@ -117,36 +126,56 @@ describe('encodeState / decodeState round-trip', () => {
     const state = makeState({
       shadowEnabled: false,
       borderEnabled: false,
-      glassEnabled: true,
     });
     const decoded = decodeState(encodeState(state));
     expect(decoded!.shadowEnabled).toBe(false);
     expect(decoded!.borderEnabled).toBe(false);
-    expect(decoded!.glassEnabled).toBe(true);
+  });
+
+  it('round-trips glass parameters', () => {
+    const state = makeState({
+      shapeStyle: 'glass',
+      glassDepth: -1.5,
+      glassBlur: 3.0,
+      glassDispersion: 2.0,
+    });
+    const decoded = decodeState(encodeState(state));
+    expect(decoded!.shapeStyle).toBe('glass');
+    expect(decoded!.glassDepth).toBeCloseTo(-1.5);
+    expect(decoded!.glassBlur).toBeCloseTo(3.0);
+    expect(decoded!.glassDispersion).toBeCloseTo(2.0);
   });
 });
 
 describe('decodeState edge cases', () => {
-  it('returns null for too few fields (< 20)', () => {
-    expect(decodeState('1,normal,100,100,1272,a,,1,10,a,,8')).toBeNull();
+  it('returns null for too few fields (< 21)', () => {
+    expect(decodeState('paper,1,normal,100,100,1272,a,,1,10,a,,8')).toBeNull();
   });
 
   it('returns null for empty string', () => {
     expect(decodeState('')).toBeNull();
   });
 
-  it('encodeState produces exactly 20 comma-separated fields', () => {
+  it('encodeState produces exactly 21 comma-separated fields', () => {
     const state = makeState();
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts).toHaveLength(20);
+    expect(parts).toHaveLength(21);
+  });
+
+  it('validates shape style against allowed set', () => {
+    const encoded = encodeState(makeState());
+    const parts = encoded.split(',');
+    parts[0] = 'invalidstyle';
+    const decoded = decodeState(parts.join(','));
+    expect(decoded).not.toBeNull();
+    expect(decoded!.shapeStyle).toBeUndefined();
   });
 
   it('validates shadow type against allowed set', () => {
     const encoded = encodeState(makeState());
-    // Replace shadow type with invalid value
     const parts = encoded.split(',');
-    parts[1] = 'invalidtype';
+    parts[2] = 'invalidtype';
     const decoded = decodeState(parts.join(','));
     expect(decoded).not.toBeNull();
     expect(decoded!.shadowType).toBeUndefined();
@@ -155,7 +184,7 @@ describe('decodeState edge cases', () => {
   it('validates separation mode against allowed set', () => {
     const encoded = encodeState(makeState());
     const parts = encoded.split(',');
-    parts[19] = 'invalidmode';
+    parts[20] = 'invalidmode';
     const decoded = decodeState(parts.join(','));
     expect(decoded).not.toBeNull();
     expect(decoded!.separationMode).toBeUndefined();
@@ -167,27 +196,48 @@ describe('scaling factors', () => {
     const state = makeState({ shadowStrength: 0.75 });
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts[2]).toBe('75');
+    expect(parts[3]).toBe('75');
   });
 
   it('borderWidth is encoded as width * 10', () => {
     const state = makeState({ borderWidth: 1.5 });
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts[8]).toBe('15');
+    expect(parts[9]).toBe('15');
   });
 
   it('shadowScale is encoded as scale * 1000', () => {
     const state = makeState({ shadowScale: 1.272 });
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts[4]).toBe('1272');
+    expect(parts[5]).toBe('1272');
   });
 
-  it('glassOpacity is encoded as opacity * 100', () => {
-    const state = makeState({ glassOpacity: 0.6 });
+  it('glassDepth is encoded as depth * 10', () => {
+    const state = makeState({ glassDepth: 1.2 });
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts[14]).toBe('60');
+    expect(parts[13]).toBe('12');
+  });
+
+  it('glassBlur is encoded as blur * 10', () => {
+    const state = makeState({ glassBlur: 0.5 });
+    const encoded = encodeState(state);
+    const parts = encoded.split(',');
+    expect(parts[14]).toBe('5');
+  });
+
+  it('glassDispersion is encoded as dispersion * 10', () => {
+    const state = makeState({ glassDispersion: 0.5 });
+    const encoded = encodeState(state);
+    const parts = encoded.split(',');
+    expect(parts[15]).toBe('5');
+  });
+
+  it('shapeStyle is encoded as first field', () => {
+    const state = makeState({ shapeStyle: 'glass' });
+    const encoded = encodeState(state);
+    const parts = encoded.split(',');
+    expect(parts[0]).toBe('glass');
   });
 });
