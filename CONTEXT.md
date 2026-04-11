@@ -203,9 +203,9 @@ Generates fluid typographic scales using CSS `clamp()` for responsive sizing, wi
 
 ### Three Scale Modes (`lib/scale.ts`)
 
-#### Golden Ratio (sqrt(phi) ≈ 1.272)
+#### Golden Ratio (area-based, ≈ 1.272)
 
-Based on the user's original research: scales the perceived **visual area** of letterforms by phi. Hard-coded lookup table of min/max rem values validated against Renaissance type foundry data.
+Design heuristic within the empirical perceptual corridor (1.20–1.50): at this factor, the perceived visual area of letterforms scales by φ. Hard-coded lookup table of min/max rem values.
 
 | Level | Min (rem) | Max (rem) |
 |-------|-----------|-----------|
@@ -231,7 +231,7 @@ Compound multiplication: `size = baseSize × ratio^step`
 
 Step mapping: Display=6, H1=5, H2=4, H3=3, H4=2, H5=1, H6=0, Caption=-1
 
-Preset ratios: Minor Second (1.067), Major Second (1.125), Minor Third (1.2), Major Third (1.25), **√φ (1.272)**, Perfect Fourth (1.333), Augmented Fourth (1.414), Perfect Fifth (1.5), Golden Ratio (1.618)
+Preset ratios: Minor Second (1.067), Major Second (1.125), Minor Third (1.2), Major Third (1.25), **Golden Ratio area (1.272)**, Perfect Fourth (1.333), Augmented Fourth (1.414), Perfect Fifth (1.5), Golden Ratio (1.618). Slider shows tick marks at 1.20 and 1.50 (empirical corridor boundaries).
 
 **Auto mobile ratio**: `effectiveRatio = 1 + (ratio - 1) × (1 - shrink/100)`
 
@@ -244,14 +244,6 @@ slope = (maxSize - minSize) / (120rem - 23.4375rem)
 intercept = minSize - slope × 23.4375rem
 → clamp(minRem, slope×100vw ± interceptRem, maxRem)
 ```
-
-### Weight Compensation (`lib/weight-compensation.ts`)
-
-Heavier fonts appear optically larger. Correction factors (relative to Regular 400 = 0%):
-- Thin 100: +6%, Light 300: +3%, Regular 400: 0%
-- Medium 500: -1.5%, Bold 700: -5%, Black 900: -8%
-
-Applied only to headings. Scales min/max rem by `1 + correction`.
 
 ### Typography Defaults (`lib/typography.ts`)
 
@@ -303,7 +295,7 @@ Format: `#mode,baseSize,customRatio,mobileRatio,headingFont,bodyFont,monoFont[,t
 
 ```
 User controls → Zustand store → useComputedScale() memoized
-  → applies weight compensation + typography overrides
+  → applies typography overrides
   → useComputedSpacing() derives spacing tokens
   → TypePreview (live viewport simulation)
   → ScaleTable + ScaleDiagram (visual tables)
@@ -382,7 +374,7 @@ No component tests, no E2E — only pure functions. Snapshot tests cover code-ex
 ## Design Decisions
 
 - **OKLCH color space**: Perceptually uniform, superior to HSL for palette generation. Binary search gamut clamping keeps all colors in sRGB.
-- **sqrt(phi) type scale**: Original research — golden ratio (phi=1.618) square root (~1.272) scales the perceived area of letterforms. Validated by Renaissance typesetting data.
+- **Type scale default (1.272)**: Rational design choice within the empirical perceptual corridor (1.20–1.50). At this factor, perceived area scales by φ. The classical Renaissance type scale (geometric mean 1.282) lands in the same range.
 - **No backend**: All tools are client-side. Server only serves static files + injects OG tags.
 - **URL-as-database**: Full configuration encoded in URL hash. No accounts, no persistence layer.
 - **No copyright**: "Take what you need, make it yours" — intentionally open.
