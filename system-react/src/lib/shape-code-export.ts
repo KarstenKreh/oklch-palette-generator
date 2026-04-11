@@ -4,9 +4,10 @@
 
 import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
 import { hexToOklch, oklchToHex } from '@core/color-math';
-import type { ColorMode, SeparationMode, ShapeState } from './shape-url-state';
+import type { ColorMode, SeparationMode, ShapeStyle, ShapeState } from './shape-url-state';
 
 export interface ShapeExportOptions {
+  shapeStyle: ShapeStyle;
   shadowEnabled: boolean;
   shadowType: ShadowType;
   shadowStrength: number;
@@ -17,9 +18,9 @@ export interface ShapeExportOptions {
   borderEnabled: boolean;
   borderWidth: number;
   borderRadius: number;
-  glassEnabled: boolean;
+  glassDepth: number;
   glassBlur: number;
-  glassOpacity: number;
+  glassDispersion: number;
   ringWidth: number;
   ringOffset: number;
   separationMode: SeparationMode;
@@ -27,6 +28,7 @@ export interface ShapeExportOptions {
 }
 
 const SHAPE_DEFAULTS: ShapeExportOptions = {
+  shapeStyle: 'paper',
   shadowEnabled: true,
   shadowType: 'normal',
   shadowStrength: 1.0,
@@ -37,9 +39,9 @@ const SHAPE_DEFAULTS: ShapeExportOptions = {
   borderEnabled: true,
   borderWidth: 1,
   borderRadius: 8,
-  glassEnabled: false,
-  glassBlur: 12,
-  glassOpacity: 0.8,
+  glassDepth: 0,
+  glassBlur: 0,
+  glassDispersion: 0,
   ringWidth: 2,
   ringOffset: 2,
   separationMode: 'shadow',
@@ -140,10 +142,11 @@ export function generateShapeCss(opts: ShapeExportOptions): string {
   css += `  --ring-offset: ${opts.ringOffset}px;\n`;
 
   // Glass
-  if (opts.glassEnabled) {
-    css += `\n  /* Glass / Blur */\n`;
-    css += `  --glass-blur: ${opts.glassBlur}px;\n`;
-    css += `  --glass-opacity: ${opts.glassOpacity};\n`;
+  if (opts.shapeStyle === 'glass') {
+    css += `\n  /* Liquid Glass (vaso) */\n`;
+    css += `  --glass-depth: ${opts.glassDepth};\n`;
+    css += `  --glass-blur: ${opts.glassBlur};\n`;
+    css += `  --glass-dispersion: ${opts.glassDispersion};\n`;
   }
 
   css += `}\n`;
@@ -189,9 +192,10 @@ export function generateShapeTailwind(opts: ShapeExportOptions): string {
   css += `\n  --ring-width: ${opts.ringWidth}px;\n`;
   css += `  --ring-offset: ${opts.ringOffset}px;\n`;
 
-  if (opts.glassEnabled) {
-    css += `\n  --glass-blur: ${opts.glassBlur}px;\n`;
-    css += `  --glass-opacity: ${opts.glassOpacity};\n`;
+  if (opts.shapeStyle === 'glass') {
+    css += `\n  --glass-depth: ${opts.glassDepth};\n`;
+    css += `  --glass-blur: ${opts.glassBlur};\n`;
+    css += `  --glass-dispersion: ${opts.glassDispersion};\n`;
   }
 
   css += `}\n`;
@@ -279,12 +283,14 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
   md += `- **Offset:** ${opts.ringOffset}px\n`;
 
   // Glass
-  md += `\n## Glass / Blur\n\n`;
-  if (opts.glassEnabled) {
-    md += `- **Blur:** ${opts.glassBlur}px\n`;
-    md += `- **Opacity:** ${opts.glassOpacity}\n`;
+  md += `\n## Liquid Glass\n\n`;
+  if (opts.shapeStyle === 'glass') {
+    md += `Uses the \`vaso\` library (liquid glass distortion effect).\n\n`;
+    md += `- **Depth:** ${opts.glassDepth} (displacement intensity)\n`;
+    md += `- **Blur:** ${opts.glassBlur} (backdrop blur amount)\n`;
+    md += `- **Dispersion:** ${opts.glassDispersion} (chromatic aberration)\n`;
   } else {
-    md += `Glass effect is **disabled**.\n`;
+    md += `Liquid glass effect is **disabled**.\n`;
   }
 
   // Separation
