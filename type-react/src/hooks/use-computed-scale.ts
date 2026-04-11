@@ -5,7 +5,6 @@ import {
   customScale,
   type ComputedLevel,
 } from '@/lib/scale';
-import { applyWeightCompensation } from '@/lib/weight-compensation';
 import { applyTypography } from '@/lib/typography';
 
 export function useComputedScale(): ComputedLevel[] {
@@ -18,8 +17,6 @@ export function useComputedScale(): ComputedLevel[] {
   const autoShrink = useTypeStore((s) => s.autoShrink);
   const traditionalAssignments = useTypeStore((s) => s.traditionalAssignments);
   const traditionalMobileAssignments = useTypeStore((s) => s.traditionalMobileAssignments);
-  const headingWeight = useTypeStore((s) => s.headingWeight);
-  const weightCompensation = useTypeStore((s) => s.weightCompensation);
   const lineHeightOverrides = useTypeStore((s) => s.lineHeightOverrides);
   const letterSpacingOverrides = useTypeStore((s) => s.letterSpacingOverrides);
 
@@ -38,10 +35,7 @@ export function useComputedScale(): ComputedLevel[] {
         break;
       }
     }
-    if (weightCompensation) {
-      scale = applyWeightCompensation(scale, headingWeight);
-    }
     scale = applyTypography(scale, lineHeightOverrides, letterSpacingOverrides);
     return scale;
-  }, [scaleMode, baseSize, mobileBaseSize, customRatio, mobileRatioMode, mobileRatio, autoShrink, traditionalAssignments, traditionalMobileAssignments, headingWeight, weightCompensation, lineHeightOverrides, letterSpacingOverrides]);
+  }, [scaleMode, baseSize, mobileBaseSize, customRatio, mobileRatioMode, mobileRatio, autoShrink, traditionalAssignments, traditionalMobileAssignments, lineHeightOverrides, letterSpacingOverrides]);
 }

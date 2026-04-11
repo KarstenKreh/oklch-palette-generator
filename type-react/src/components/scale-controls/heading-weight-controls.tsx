@@ -1,7 +1,5 @@
 import { useTypeStore } from '@/store/type-store';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { weightCorrectionFactor } from '@/lib/weight-compensation';
 
 const WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 const WEIGHT_LABELS: Record<number, string> = {
@@ -26,8 +24,6 @@ function snapWeight(v: number): number {
 
 export function HeadingWeightControls() {
   const store = useTypeStore();
-  const correction = weightCorrectionFactor(store.headingWeight);
-  const correctionPct = Math.round(correction * 100);
 
   return (
     <div className="space-y-2">
@@ -53,27 +49,6 @@ export function HeadingWeightControls() {
           }}
         />
       </div>
-
-      <div className="flex items-center gap-2">
-        <Switch
-          checked={store.weightCompensation}
-          onCheckedChange={store.setWeightCompensation}
-        />
-        <span className="text-caption text-muted-foreground">
-          Compensate for weight
-        </span>
-        {store.weightCompensation && correctionPct !== 0 && (
-          <span className="text-caption font-mono text-muted-foreground/60 ml-auto">
-            {correctionPct > 0 ? '+' : ''}{correctionPct}%
-          </span>
-        )}
-      </div>
-      {store.weightCompensation && (
-        <p className="text-caption leading-snug text-muted-foreground">
-          Adjusts heading sizes to preserve the perceived area ratio.
-          Heavier weights add optical density, so sizes are reduced to compensate.
-        </p>
-      )}
     </div>
   );
 }

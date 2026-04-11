@@ -10,7 +10,6 @@ import { decodeState as decodeShapeState, type ShapeState } from '@/lib/shape-ur
 import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@/lib/palette';
 import { hexToOklch } from '@/lib/color-math';
 import { customScale, traditionalScale, type ComputedLevel } from '@/lib/scale';
-import { applyWeightCompensation } from '@/lib/weight-compensation';
 import { applyTypography } from '@/lib/typography';
 import { computeSpacingTokens, type SpacingToken } from '@/lib/spacing';
 import type { AccentPalette } from '@/lib/color-code-export';
@@ -179,9 +178,6 @@ function App() {
     } else {
       const effectiveMobileRatio = typeState.mobileRatio;
       s = customScale(typeState.baseSize, typeState.customRatio, effectiveMobileRatio, typeState.mobileBaseSize ?? typeState.baseSize);
-    }
-    if (typeState.weightCompensation !== false) {
-      s = applyWeightCompensation(s, typeState.headingWeight ?? 500);
     }
     s = applyTypography(s, typeState.lineHeightOverrides ?? {}, typeState.letterSpacingOverrides ?? {});
     return s;

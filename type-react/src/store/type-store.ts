@@ -18,7 +18,6 @@ interface TypeState {
 
   headingFont: string;
   headingWeight: number;
-  weightCompensation: boolean;
   bodyFont: string;
   monoFont: string;
 
@@ -40,7 +39,6 @@ interface TypeState {
   setTraditionalMobileAssignment: (level: TypeLevel, px: number) => void;
   setHeadingFont: (slug: string) => void;
   setHeadingWeight: (w: number) => void;
-  setWeightCompensation: (on: boolean) => void;
   setBodyFont: (slug: string) => void;
   setMonoFont: (slug: string) => void;
   setLineHeightOverride: (level: TypeLevel, value: number | null) => void;
@@ -65,7 +63,6 @@ export const useTypeStore = create<TypeState>((set) => ({
 
   headingFont: 'satoshi',
   headingWeight: 500,
-  weightCompensation: true,
   bodyFont: 'satoshi',
   monoFont: 'system-mono',
 
@@ -99,7 +96,6 @@ export const useTypeStore = create<TypeState>((set) => ({
     })),
   setHeadingFont: (slug) => set({ headingFont: slug }),
   setHeadingWeight: (w) => set({ headingWeight: w }),
-  setWeightCompensation: (on) => set({ weightCompensation: on }),
   setBodyFont: (slug) => set({ bodyFont: slug }),
   setMonoFont: (slug) => set({ monoFont: slug }),
   setLineHeightOverride: (level, value) =>

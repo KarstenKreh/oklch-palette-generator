@@ -9,7 +9,6 @@
  *
  * Extended keys:
  *   hw  = headingWeight (100–900, default 500)
- *   wc  = weightCompensation (0|1, default 1)
  *   mbs = mobileBaseSize (rem, default = baseSize)
  *   mrm = mobileRatioMode ('auto'|'custom', default 'auto')
  *   as  = autoShrink (%, default 25)
@@ -31,7 +30,6 @@ export interface UrlState {
   bodyFont: string;
   monoFont: string;
   headingWeight: number;
-  weightCompensation: boolean;
   mobileBaseSize: number;
   mobileRatioMode: 'auto' | 'custom';
   autoShrink: number;
@@ -72,7 +70,6 @@ export function encodeState(state: UrlState): string {
   const ext: string[] = [];
 
   if (state.headingWeight !== 500) ext.push(`hw=${state.headingWeight}`);
-  if (!state.weightCompensation) ext.push(`wc=0`);
   if (state.mobileBaseSize !== state.baseSize) ext.push(`mbs=${state.mobileBaseSize}`);
   if (state.mobileRatioMode !== 'auto') ext.push(`mrm=${state.mobileRatioMode}`);
   if (state.autoShrink !== 25) ext.push(`as=${state.autoShrink}`);
@@ -135,7 +132,6 @@ export function decodeState(hash: string): UrlState | null {
     monoFont: parts[6],
     // Defaults for extended fields
     headingWeight: 500,
-    weightCompensation: true,
     mobileBaseSize: baseSize,
     mobileRatioMode: 'auto',
     autoShrink: 25,
@@ -168,8 +164,7 @@ export function decodeState(hash: string): UrlState | null {
     const hw = params.get('hw');
     if (hw) { const n = parseInt(hw); if (!isNaN(n)) state.headingWeight = n; }
 
-    const wc = params.get('wc');
-    if (wc === '0') state.weightCompensation = false;
+    // wc (weightCompensation) was removed — ignore if present in old URLs
 
     const mbs = params.get('mbs');
     if (mbs) { const n = parseFloat(mbs); if (!isNaN(n)) state.mobileBaseSize = n; }

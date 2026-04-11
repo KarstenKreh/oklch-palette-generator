@@ -12,7 +12,6 @@ function makeCustomState(overrides: Partial<UrlState> = {}): UrlState {
     bodyFont: 'satoshi',
     monoFont: 'system-mono',
     headingWeight: 500,
-    weightCompensation: true,
     mobileBaseSize: 1.0,
     mobileRatioMode: 'auto',
     autoShrink: 25,
@@ -36,19 +35,12 @@ describe('encodeState / decodeState round-trip', () => {
     expect(decoded!.bodyFont).toBe('satoshi');
     expect(decoded!.monoFont).toBe('system-mono');
     expect(decoded!.headingWeight).toBe(500);
-    expect(decoded!.weightCompensation).toBe(true);
   });
 
   it('round-trips headingWeight', () => {
     const state = makeCustomState({ headingWeight: 700 });
     const decoded = decodeState(encodeState(state));
     expect(decoded!.headingWeight).toBe(700);
-  });
-
-  it('round-trips weightCompensation=false', () => {
-    const state = makeCustomState({ weightCompensation: false });
-    const decoded = decodeState(encodeState(state));
-    expect(decoded!.weightCompensation).toBe(false);
   });
 
   it('round-trips mobileBaseSize', () => {
@@ -122,7 +114,6 @@ describe('backward compatibility', () => {
     const decoded = decodeState(oldHash);
     expect(decoded).not.toBeNull();
     expect(decoded!.headingWeight).toBe(500);
-    expect(decoded!.weightCompensation).toBe(true);
     expect(decoded!.mobileBaseSize).toBe(1.0);
     expect(decoded!.mobileRatioMode).toBe('auto');
     expect(decoded!.autoShrink).toBe(25);
