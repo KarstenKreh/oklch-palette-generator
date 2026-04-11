@@ -4,7 +4,7 @@ COPY color-react/package.json color-react/package-lock.json ./
 RUN npm ci
 COPY color-react/ ./
 COPY packages/core/ /app/packages/core/
-COPY shared.css /shared.css
+COPY shared.css /app/shared.css
 RUN npm run build
 
 FROM node:20-alpine AS build-type
@@ -13,7 +13,7 @@ COPY type-react/package.json type-react/package-lock.json ./
 RUN npm ci
 COPY type-react/ ./
 COPY packages/core/ /app/packages/core/
-COPY shared.css /shared.css
+COPY shared.css /app/shared.css
 RUN npm run build
 
 FROM node:20-alpine AS build-system
@@ -22,7 +22,7 @@ COPY system-react/package.json system-react/package-lock.json ./
 RUN npm ci
 COPY system-react/ ./
 COPY packages/core/ /app/packages/core/
-COPY shared.css /shared.css
+COPY shared.css /app/shared.css
 RUN npm run build
 
 FROM node:20-alpine AS build-shape
@@ -31,7 +31,7 @@ COPY shape-react/package.json shape-react/package-lock.json ./
 RUN npm ci
 COPY shape-react/ ./
 COPY packages/core/ /app/packages/core/
-COPY shared.css /shared.css
+COPY shared.css /app/shared.css
 RUN npm run build
 
 FROM node:20-alpine AS build-symbol
@@ -40,7 +40,7 @@ COPY symbol-react/package.json symbol-react/package-lock.json ./
 RUN npm ci
 COPY symbol-react/ ./
 COPY packages/core/ /app/packages/core/
-COPY shared.css /shared.css
+COPY shared.css /app/shared.css
 RUN npm run build
 
 FROM node:20-alpine
