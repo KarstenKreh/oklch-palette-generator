@@ -46,6 +46,14 @@ const SEPARATION_MODES = new Set(['shadow', 'border', 'contrast', 'gap', 'mixed'
 
 export function decodeState(raw: string): Partial<ShapeState> | null {
   const parts = raw.split(',');
+  if (parts.length < 20) return null;
+
+  // Detect legacy 20-field format: parts[0] is '0' or '1' (shadowEnabled), not a style name
+  const isLegacy = parts[0] === '0' || parts[0] === '1';
+  if (isLegacy) {
+    parts.unshift('paper');
+  }
+
   if (parts.length < 21) return null;
 
   const result: Partial<ShapeState> = {};

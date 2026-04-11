@@ -31,12 +31,14 @@ function App() {
     const s = otherSegments.s;
     if (!s) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
     const p = s.split(',');
-    if (p.length < 13) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
-    // Shape hash: shapeStyle(0), shadowEnabled(1), ..., borderEnabled(8), borderWidth(9), ..., borderRadius(12)
+    if (p.length < 12) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
+    // Detect legacy 20-field format vs new 21-field (shapeStyle at position 0)
+    const isLegacy = p[0] === '0' || p[0] === '1';
+    const off = isLegacy ? 0 : 1; // legacy: no shapeStyle prefix
     return {
-      borderEnabled: p[8] === '1',
-      borderWidth: !isNaN(parseInt(p[9])) ? parseInt(p[9]) / 10 : 1,
-      borderRadius: !isNaN(parseInt(p[12])) ? parseInt(p[12]) : 8,
+      borderEnabled: p[7 + off] === '1',
+      borderWidth: !isNaN(parseInt(p[8 + off])) ? parseInt(p[8 + off]) / 10 : 1,
+      borderRadius: !isNaN(parseInt(p[11 + off])) ? parseInt(p[11 + off]) : 8,
     };
   }, [otherSegments.s]);
 
