@@ -2,7 +2,6 @@ import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/hooks/use-palette';
 import type { FgContrastMode } from '@/store/theme-store';
 import { contrastRatio, invertHex } from '@core/color-math';
-import { generateShadowValues } from '@core/shadows';
 import { PanelSvg } from '@/components/panel-svg';
 import { Sun, Moon, SunDim, MoonStar } from 'lucide-react';
 
@@ -206,9 +205,6 @@ export function SurfacePanel({
   const secondaryFg = chooseFg(secondaryBg, fgContrastMode);
   const destructiveFg = chooseFg(destructiveBg, fgContrastMode);
 
-  // Shadows
-  const shadows = generateShadowValues(bgHex, isDark);
-
   // Accent items for mini badges
   const accentItems = accentPalettes.map((accent) => {
     const accentLookup: Record<number, PaletteEntry> = {};
@@ -350,24 +346,6 @@ export function SurfacePanel({
         ))}
       </div>
 
-      {/* Shadow circles */}
-      <div className="flex items-end gap-3 pt-1">
-        {shadows.map((s) => (
-          <div key={s.name} className="flex flex-col items-center gap-1">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: cardHex,
-                boxShadow: s.shadow,
-                color: textHex,
-                border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
-              }}
-            >
-              <span className="text-caption font-semibold" style={{ color: mutedFgHex }}>{s.name}</span>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

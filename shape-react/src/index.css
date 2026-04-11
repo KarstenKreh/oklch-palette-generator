@@ -1,9 +1,15 @@
 @import "tailwindcss";
+@source "../../packages/core/src";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "../../shared.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Override Vaso's auto-generated box-shadow on glass containers */
+[data-vaso] {
+  box-shadow: none !important;
+}
 
 body {
   margin: 0;

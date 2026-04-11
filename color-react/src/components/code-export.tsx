@@ -4,70 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePalette } from '@/hooks/use-palette';
 import { useThemeStore } from '@/store/theme-store';
 import { generatePrimitivesOklch, generatePrimitivesHex, generateSemantic, generateLlmBriefing } from '@/lib/code-export';
-
-function highlightCss(code: string) {
-  return code.split('\n').map((line, i) => {
-    if (line.trim().startsWith('/*')) {
-      return <span key={i} className="text-muted-foreground/60">{line}{'\n'}</span>;
-    }
-    const match = line.match(/^(\s*)(--[\w-]+)(:\s*)(.+)(;)$/);
-    if (match) {
-      return (
-        <span key={i}>
-          {match[1]}<span className="text-sky-400">{match[2]}</span>{match[3]}<span className="text-orange-300">{match[4]}</span>{match[5]}{'\n'}
-        </span>
-      );
-    }
-    return <span key={i}>{line}{'\n'}</span>;
-  });
-}
-
-function highlightMarkdown(code: string) {
-  return code.split('\n').map((line, i) => {
-    if (line.startsWith('# '))
-      return <span key={i} className="text-foreground font-bold text-caption">{line}{'\n'}</span>;
-    if (line.startsWith('## '))
-      return <span key={i} className="text-foreground font-semibold text-caption">{line}{'\n'}</span>;
-    if (line.startsWith('### '))
-      return <span key={i} className="text-muted-foreground font-semibold">{line}{'\n'}</span>;
-    if (line.startsWith('|'))
-      return <span key={i} className="text-sky-400/80">{line}{'\n'}</span>;
-    if (line.startsWith('- '))
-      return <span key={i} className="text-orange-300/80">{line}{'\n'}</span>;
-    if (line.match(/^\d+\./))
-      return <span key={i} className="text-orange-300/80">{line}{'\n'}</span>;
-    return <span key={i}>{line}{'\n'}</span>;
-  });
-}
-
-function CodeBlock({ code, id, highlight = 'css' }: { code: string; id: string; highlight?: 'css' | 'markdown' }) {
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(code).then(() => toast('Copied to clipboard'));
-  }, [code]);
-
-  return (
-    <div className="relative">
-      <Button
-        variant="outline"
-        size="sm"
-        className="absolute top-2 right-2 z-10"
-        onClick={handleCopy}
-      >
-        Copy
-      </Button>
-      <pre
-        id={id}
-        className="bg-black/30 border border-border rounded-lg p-4 pt-12 overflow-x-auto text-caption font-mono leading-relaxed max-h-[600px] overflow-y-auto"
-      >
-        <code>{highlight === 'markdown' ? highlightMarkdown(code) : highlightCss(code)}</code>
-      </pre>
-    </div>
-  );
-}
+import { CodeBlock } from '@core/code-block';
 
 export function CodeExport() {
   const {
@@ -130,7 +72,7 @@ export function CodeExport() {
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              <Copy className="h-3.5 w-3.5" />
               Copy All
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </Button>
@@ -187,10 +129,10 @@ export function CodeExport() {
           <TabsTrigger value="llm">LLM Briefing</TabsTrigger>
         </TabsList>
         <TabsContent value="oklch">
-          <CodeBlock code={oklchCode} id="code-oklch" />
+          <CodeBlock code={oklchCode} mode="css" />
         </TabsContent>
         <TabsContent value="hex">
-          <CodeBlock code={hexCode} id="code-hex" />
+          <CodeBlock code={hexCode} mode="css" />
         </TabsContent>
         <TabsContent value="semantic">
           <div className="flex items-center gap-2 mb-3">
@@ -199,7 +141,7 @@ export function CodeExport() {
               References Primitive Tokens — paste after your :root block
             </span>
           </div>
-          <CodeBlock code={semanticCode} id="code-semantic" />
+          <CodeBlock code={semanticCode} mode="css" />
         </TabsContent>
         <TabsContent value="llm">
           <div className="flex items-center gap-2 mb-3">
@@ -208,7 +150,7 @@ export function CodeExport() {
               Paste into your AI prompt to explain your design system tokens
             </span>
           </div>
-          <CodeBlock code={llmCode} id="code-llm" highlight="markdown" />
+          <CodeBlock code={llmCode} mode="markdown" />
         </TabsContent>
       </Tabs>
     </div>

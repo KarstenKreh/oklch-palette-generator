@@ -1,7 +1,11 @@
 import { useMemo, useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Copy, Check } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CodeBlock } from '@core/code-block';
 import type { DecodedColorState } from '@/lib/color-url-state';
 import type { UrlState } from '@/lib/type-url-state';
 import type { PaletteEntry } from '@core/palette';
@@ -19,6 +23,7 @@ import {
   generateCssExport as generateTypeCss,
   generateTailwindV4Export as generateTypeTailwind,
   generateFontEmbed,
+  generateLlmBriefing as generateTypeLlmBriefing,
 } from '@/lib/type-code-export';
 import {
   generateShapeCss,
@@ -26,6 +31,10 @@ import {
   generateLlmBriefing as generateShapeLlmBriefing,
   optsFromState as shapeOptsFromState,
 } from '@/lib/shape-code-export';
+import type { SymbolState } from '@/lib/symbol-url-state';
+import { computeIconTokens, weightToStroke } from '@core/icon-tokens';
+import { ICON_SETS, getSetById } from '@core/icon-sets';
+import { recommendSets } from '@core/recommend';
 
 interface PaletteResult {
   brand: PaletteEntry[];
@@ -47,6 +56,7 @@ interface CombinedExportProps {
   scale: ComputedLevel[] | null;
   spacing: SpacingToken[] | null;
   shapeState: Partial<ShapeState> | null;
+  symbolState: SymbolState | null;
   surfaceHex?: string;
 }
 
@@ -58,9 +68,67 @@ function getScaleLabel(typeState: UrlState | null): string {
   return `Custom Ratio (${r})`;
 }
 
-export function CombinedExport({ colorState, palette, typeState, scale, spacing, shapeState, surfaceHex }: CombinedExportProps) {
+function generateSymbolCss(sym: SymbolState): string {
+  const set = sym.selectedSet ? getSetById(sym.selectedSet) || ICON_SETS[0] : (() => {
+    const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
+    return r[0]?.set || ICON_SETS[0];
+  })();
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  const lines = [
+    `/* Icon Tokens — standby.design/symbol */`,
+    `/* Recommended: ${set.name} (${set.id}) */`,
+    `:root {`,
+    ...tokens.sizes.map((s) => `  --icon-${s.name}: ${s.rem}rem;`),
+    `  --icon-stroke: ${tokens.strokeWidth}px;`,
+    `}`,
+  ];
+  return lines.join('\n');
+}
+
+function generateSymbolTailwind(sym: SymbolState): string {
+  const set = sym.selectedSet ? getSetById(sym.selectedSet) || ICON_SETS[0] : (() => {
+    const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
+    return r[0]?.set || ICON_SETS[0];
+  })();
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  const lines = [
+    `/* Icon Tokens — standby.design/symbol */`,
+    `/* Recommended: ${set.name} (${set.id}) */`,
+    `@theme {`,
+    ...tokens.sizes.map((s) => `  --icon-${s.name}: ${s.rem}rem;`),
+    `  --icon-stroke: ${tokens.strokeWidth}px;`,
+    `}`,
+  ];
+  return lines.join('\n');
+}
+
+function generateSymbolLlmBriefing(sym: SymbolState): string {
+  const set = sym.selectedSet ? getSetById(sym.selectedSet) || ICON_SETS[0] : (() => {
+    const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
+    return r[0]?.set || ICON_SETS[0];
+  })();
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  return [
+    `# Icon System — standby.design/symbol`,
+    ``,
+    `**Recommended:** ${set.name} — ${set.description}`,
+    `- Install: \`npm install ${set.npmPackage}\``,
+    `- Style: ${set.style}, Weight: ${set.strokeWeight}, Corners: ${set.cornerStyle}`,
+    ``,
+    `| Token | Value |`,
+    `|-------|-------|`,
+    ...tokens.sizes.map((s) => `| --icon-${s.name} | ${s.rem}rem (${s.px}px) |`),
+    `| --icon-stroke | ${tokens.strokeWidth}px |`,
+  ].join('\n');
+}
+
+export function CombinedExport({ colorState, palette, typeState, scale, spacing, shapeState, symbolState, surfaceHex }: CombinedExportProps) {
   const [activeTab, setActiveTab] = useState('css');
-  const [copied, setCopied] = useState(false);
+
+  // Copy All state
+  const [copyFormat, setCopyFormat] = useState<'css' | 'tailwind'>('css');
+  const [copyEmbed, setCopyEmbed] = useState(true);
+  const [copyLlm, setCopyLlm] = useState(true);
 
   const colorCss = useMemo(() => {
     if (!colorState || !palette) return '';
@@ -126,6 +194,16 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
     return generateShapeTailwind(opts);
   }, [shapeState, surfaceHex]);
 
+  const symbolCss = useMemo(() => {
+    if (!symbolState) return '';
+    return generateSymbolCss(symbolState);
+  }, [symbolState]);
+
+  const symbolTailwind = useMemo(() => {
+    if (!symbolState) return '';
+    return generateSymbolTailwind(symbolState);
+  }, [symbolState]);
+
   const fontEmbed = useMemo(() => {
     if (!typeState) return '';
     return generateFontEmbed(typeState.headingFont, typeState.bodyFont, typeState.monoFont);
@@ -150,6 +228,19 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
       );
     }
 
+    // Type briefing
+    if (typeState && scale && spacing) {
+      if (md) md += '\n---\n\n';
+      md += generateTypeLlmBriefing({
+        levels: scale,
+        spacingTokens: spacing,
+        headingFont: typeState.headingFont,
+        bodyFont: typeState.bodyFont,
+        monoFont: typeState.monoFont,
+        scaleLabel: getScaleLabel(typeState),
+      });
+    }
+
     // Shape briefing
     if (shapeState) {
       const opts = shapeOptsFromState(shapeState, surfaceHex);
@@ -157,37 +248,85 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
       md += generateShapeLlmBriefing(opts);
     }
 
+    // Symbol briefing
+    if (symbolState) {
+      if (md) md += '\n---\n\n';
+      md += generateSymbolLlmBriefing(symbolState);
+    }
+
     return md || '<!-- No configuration available -->';
-  }, [colorState, palette, shapeState, surfaceHex]);
+  }, [colorState, palette, typeState, scale, spacing, shapeState, surfaceHex, symbolState]);
 
   const outputs = useMemo(() => {
-    const css = [colorCss, typeCss, shapeCss].filter(Boolean).join('\n') || '/* No configuration available */';
-    const tailwind = [colorCss, typeTailwind, shapeTailwind].filter(Boolean).join('\n') || '/* No configuration available */';
+    const css = [colorCss, typeCss, shapeCss, symbolCss].filter(Boolean).join('\n') || '/* No configuration available */';
+    const tailwind = [colorCss, typeTailwind, shapeTailwind, symbolTailwind].filter(Boolean).join('\n') || '/* No configuration available */';
     const embed = fontEmbed || '<!-- No fonts selected -->';
     return { css, tailwind, embed, llm: llmBriefing };
-  }, [colorCss, typeCss, typeTailwind, shapeCss, shapeTailwind, fontEmbed, llmBriefing]);
+  }, [colorCss, typeCss, typeTailwind, shapeCss, shapeTailwind, symbolCss, symbolTailwind, fontEmbed, llmBriefing]);
 
-  const currentOutput = outputs[activeTab as keyof typeof outputs] ?? outputs.css;
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(currentOutput).then(() => {
-      setCopied(true);
-      toast('Copied to clipboard!');
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }, [currentOutput]);
+  const handleCopyAll = useCallback(() => {
+    const parts: string[] = [];
+    parts.push(copyFormat === 'css' ? outputs.css : outputs.tailwind);
+    if (copyEmbed) parts.push(outputs.embed);
+    if (copyLlm) parts.push(outputs.llm);
+    const combined = parts.join('\n\n');
+    navigator.clipboard.writeText(combined).then(() => toast('All selected sections copied!'));
+  }, [copyFormat, copyEmbed, copyLlm, outputs]);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-body-s font-semibold">Combined Export</h2>
-        <button
-          onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
-        >
-          {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-          {copied ? 'Copied' : 'Copy'}
-        </button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Copy className="h-3.5 w-3.5" />
+              Copy All
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-3">
+            <div className="space-y-3">
+              <div>
+                <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wider">Format</span>
+                <div className="flex gap-1 mt-1.5">
+                  <Button
+                    variant={copyFormat === 'css' ? 'default' : 'outline'}
+                    size="sm"
+                    className="flex-1 h-7 text-caption"
+                    onClick={() => setCopyFormat('css')}
+                  >
+                    CSS
+                  </Button>
+                  <Button
+                    variant={copyFormat === 'tailwind' ? 'default' : 'outline'}
+                    size="sm"
+                    className="flex-1 h-7 text-caption"
+                    onClick={() => setCopyFormat('tailwind')}
+                  >
+                    Tailwind
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-2 space-y-2">
+                <span className="text-caption font-semibold text-muted-foreground uppercase tracking-wider">Include</span>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox checked={copyEmbed} onCheckedChange={(v) => setCopyEmbed(!!v)} />
+                  <span className="text-caption">Font Embed</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox checked={copyLlm} onCheckedChange={(v) => setCopyLlm(!!v)} />
+                  <span className="text-caption">LLM Briefing</span>
+                </label>
+              </div>
+
+              <Button size="sm" className="w-full" onClick={handleCopyAll}>
+                Copy Selected
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -207,34 +346,18 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
         </TabsList>
 
         <TabsContent value="css">
-          <CodeBlock code={outputs.css} onCopy={() => { navigator.clipboard.writeText(outputs.css).then(() => toast('Copied!')); }} />
+          <CodeBlock code={outputs.css} mode="css" />
         </TabsContent>
         <TabsContent value="tailwind">
-          <CodeBlock code={outputs.tailwind} onCopy={() => { navigator.clipboard.writeText(outputs.tailwind).then(() => toast('Copied!')); }} />
+          <CodeBlock code={outputs.tailwind} mode="css" />
         </TabsContent>
         <TabsContent value="embed">
-          <CodeBlock code={outputs.embed} onCopy={() => { navigator.clipboard.writeText(outputs.embed).then(() => toast('Copied!')); }} />
+          <CodeBlock code={outputs.embed} mode="html" />
         </TabsContent>
         <TabsContent value="llm">
-          <CodeBlock code={outputs.llm} onCopy={() => { navigator.clipboard.writeText(outputs.llm).then(() => toast('Copied!')); }} />
+          <CodeBlock code={outputs.llm} mode="markdown" />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function CodeBlock({ code, onCopy }: { code: string; onCopy: () => void }) {
-  return (
-    <div className="relative">
-      <button
-        onClick={onCopy}
-        className="absolute top-2 right-2 h-7 w-7 p-0 z-10 inline-flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <Copy className="h-3.5 w-3.5" />
-      </button>
-      <pre className="bg-background border border-border rounded-md p-4 pr-10 overflow-x-auto max-h-[500px] overflow-y-auto text-xs font-mono leading-relaxed whitespace-pre">
-        <code>{code}</code>
-      </pre>
     </div>
   );
 }
