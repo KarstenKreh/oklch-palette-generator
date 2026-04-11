@@ -20,6 +20,10 @@ describe('isUnifiedHash', () => {
     expect(isUnifiedHash('s=123')).toBe(true);
   });
 
+  it('detects unified format with y= segment', () => {
+    expect(isUnifiedHash('y=symbol')).toBe(true);
+  });
+
   it('detects unified format with leading #', () => {
     expect(isUnifiedHash('#c=abc&t=xyz')).toBe(true);
   });
@@ -42,29 +46,29 @@ describe('isUnifiedHash', () => {
 });
 
 describe('parseUnifiedHash', () => {
-  it('parses all three segments', () => {
-    const result = parseUnifiedHash('c=colordata&t=typedata&s=shapedata');
-    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: 'shapedata' });
+  it('parses all four segments', () => {
+    const result = parseUnifiedHash('c=colordata&t=typedata&s=shapedata&y=symboldata');
+    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: 'shapedata', y: 'symboldata' });
   });
 
   it('parses with leading #', () => {
     const result = parseUnifiedHash('#c=colordata&t=typedata');
-    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: null });
+    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: null, y: null });
   });
 
   it('returns null for missing segments', () => {
     const result = parseUnifiedHash('c=only-color');
-    expect(result).toEqual({ c: 'only-color', t: null, s: null });
+    expect(result).toEqual({ c: 'only-color', t: null, s: null, y: null });
   });
 
   it('returns all null for legacy hash', () => {
     const result = parseUnifiedHash('335A7F,335A7F,1');
-    expect(result).toEqual({ c: null, t: null, s: null });
+    expect(result).toEqual({ c: null, t: null, s: null, y: null });
   });
 
   it('returns null value for empty segment (c= without value)', () => {
     const result = parseUnifiedHash('c=&t=data');
-    expect(result).toEqual({ c: null, t: 'data', s: null });
+    expect(result).toEqual({ c: null, t: 'data', s: null, y: null });
   });
 
   it('handles segments with special characters (commas, colons)', () => {
@@ -145,10 +149,17 @@ describe('setMySegment', () => {
 
 describe('round-trips', () => {
   it('build → parse returns same values', () => {
-    const segments = { c: 'color-hash', t: 'type-hash', s: 'shape-hash' };
-    const built = buildUnifiedHash(segments);
+    const segments = { c: 'color-hash', t: 'type-hash', s: 'shape-hash', y: null };
+    const built = buildUnifiedHash({ c: 'color-hash', t: 'type-hash', s: 'shape-hash' });
     const parsed = parseUnifiedHash(built);
     expect(parsed).toEqual(segments);
+  });
+
+  it('build → parse round-trips with symbol segment', () => {
+    const built = buildUnifiedHash({ c: 'color', t: 'type', s: 'shape', y: 'a,50,a,a,125,1250,' });
+    const parsed = parseUnifiedHash(built);
+    expect(parsed.y).toBe('a,50,a,a,125,1250,');
+    expect(parsed.c).toBe('color');
   });
 
   it('survives special characters in color hash (commas, colons, exclamations)', () => {

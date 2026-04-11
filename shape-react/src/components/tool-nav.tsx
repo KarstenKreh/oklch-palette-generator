@@ -1,13 +1,13 @@
-import { Home, Palette, Type, Box, Layers } from 'lucide-react';
+import { Home, Palette, Type, Box, Hexagon, Layers } from 'lucide-react';
 
-type Tool = 'home' | 'system' | 'color' | 'type' | 'shape';
+type Tool = 'home' | 'system' | 'color' | 'type' | 'shape' | 'symbol';
 
 interface ToolNavProps {
   activeTool: Tool;
   buildHash: () => string;
 }
 
-const DEV_PORTS: Record<string, number> = { color: 5177, type: 5174, system: 5175, shape: 5176 };
+const DEV_PORTS: Record<string, number> = { color: 5177, type: 5174, system: 5175, shape: 5176, symbol: 5178 };
 
 function toolUrl(key: Tool): string {
   if (key === 'home') return import.meta.env.DEV ? 'https://standby.design/' : '/';
@@ -21,6 +21,7 @@ const tools: { key: Tool; label: string; icon: typeof Palette }[] = [
   { key: 'color', label: 'Color', icon: Palette },
   { key: 'type', label: 'Type', icon: Type },
   { key: 'shape', label: 'Shape', icon: Box },
+  { key: 'symbol', label: 'Symbol', icon: Hexagon },
 ];
 
 function NavLink({ tool, activeTool, buildHash, className }: {

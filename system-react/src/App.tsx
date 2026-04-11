@@ -7,6 +7,7 @@ import { ToolNav } from '@/components/tool-nav';
 import { decodeState as decodeColorState, encodeState as encodeColorState, type DecodedColorState } from '@/lib/color-url-state';
 import { decodeState as decodeTypeState } from '@/lib/type-url-state';
 import { decodeState as decodeShapeState, type ShapeState } from '@/lib/shape-url-state';
+import { decodeState as decodeSymbolState, type SymbolState } from '@/lib/symbol-url-state';
 import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@core/palette';
 import { hexToOklch } from '@core/color-math';
 import { customScale, traditionalScale, type ComputedLevel } from '@core/scale';
@@ -91,9 +92,11 @@ function App() {
   const [colorState, setColorState] = useState<DecodedColorState | null>(null);
   const [typeState, setTypeState] = useState<ReturnType<typeof decodeTypeState>>(null);
   const [shapeState, setShapeState] = useState<Partial<ShapeState> | null>(null);
+  const [symbolState, setSymbolState] = useState<SymbolState | null>(null);
   const [colorSegment, setColorSegment] = useState<string | null>(null);
   const [typeSegment, setTypeSegment] = useState<string | null>(null);
   const [shapeSegment, setShapeSegment] = useState<string | null>(null);
+  const [symbolSegment, setSymbolSegment] = useState<string | null>(null);
   const [themeName, setThemeName] = useState('');
 
   useEffect(() => {
@@ -105,9 +108,11 @@ function App() {
     const cs = getMySegment(raw, 'c');
     const ts = getMySegment(raw, 't');
     const ss = getMySegment(raw, 's');
+    const ys = getMySegment(raw, 'y');
     setColorSegment(cs);
     setTypeSegment(ts);
     setShapeSegment(ss);
+    setSymbolSegment(ys);
 
     if (cs) {
       const decoded = decodeColorState(cs);
@@ -116,6 +121,7 @@ function App() {
     }
     if (ts) setTypeState(decodeTypeState(ts));
     if (ss) setShapeState(decodeShapeState(ss));
+    if (ys) setSymbolState(decodeSymbolState(ys));
 
     // Fill in defaults for any missing segments
     if (!cs) setColorState(DEFAULT_COLOR_STATE);
@@ -196,14 +202,14 @@ function App() {
       const newColorSegment = encodeColorState(updated);
       setColorSegment(newColorSegment);
       history.replaceState(null, '', '#' + buildUnifiedHash({
-        c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined,
+        c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined,
       }));
     }
-  }, [colorState, typeSegment, shapeSegment]);
+  }, [colorState, typeSegment, shapeSegment, symbolSegment]);
 
   const getCurrentHash = useCallback(() => {
-    return buildUnifiedHash({ c: colorSegment || undefined, t: typeSegment || undefined, s: shapeSegment || undefined });
-  }, [colorSegment, typeSegment, shapeSegment]);
+    return buildUnifiedHash({ c: colorSegment || undefined, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined });
+  }, [colorSegment, typeSegment, shapeSegment, symbolSegment]);
 
   const handleShare = useCallback(() => {
     const hash = getCurrentHash();
@@ -346,6 +352,7 @@ function App() {
               scale={scale}
               spacing={spacing}
               shapeState={shapeState}
+              symbolState={symbolState}
               surfaceHex={palette?.effectiveBgHex}
             />
           </div>

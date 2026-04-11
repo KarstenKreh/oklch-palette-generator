@@ -14,6 +14,7 @@ const COLOR_INDEX = path.join(STATIC_ROOT, 'color', 'index.html');
 const TYPE_INDEX = path.join(STATIC_ROOT, 'type', 'index.html');
 const SYSTEM_INDEX = path.join(STATIC_ROOT, 'system', 'index.html');
 const SHAPE_INDEX = path.join(STATIC_ROOT, 'shape', 'index.html');
+const SYMBOL_INDEX = path.join(STATIC_ROOT, 'symbol', 'index.html');
 const ROOT_INDEX = path.join(STATIC_ROOT, 'index.html');
 
 const MIME_TYPES = {
@@ -57,6 +58,13 @@ try {
   shapeHtmlTemplate = fs.readFileSync(SHAPE_INDEX, 'utf-8');
 } catch (e) {
   console.error('Could not read shape index.html:', e.message);
+}
+
+let symbolHtmlTemplate = '';
+try {
+  symbolHtmlTemplate = fs.readFileSync(SYMBOL_INDEX, 'utf-8');
+} catch (e) {
+  console.error('Could not read symbol index.html:', e.message);
 }
 
 const HEX_RE = /^[0-9a-fA-F]{6}$/;
@@ -184,14 +192,15 @@ const server = http.createServer((req, res) => {
 
   // Tool name mapping for OG descriptions
   const TOOL_META = {
-    color: { template: colorHtmlTemplate, label: 'OKLCH Theme Generator', desc: 'color theme' },
-    type:  { template: typeHtmlTemplate,  label: 'Type Scale Generator',  desc: 'typographic scale' },
-    shape: { template: shapeHtmlTemplate, label: 'Shape Token Generator', desc: 'shape token set' },
-    system:{ template: systemHtmlTemplate,label: 'Design System',         desc: 'design system' },
+    color:  { template: colorHtmlTemplate,  label: 'OKLCH Theme Generator',    desc: 'color theme' },
+    type:   { template: typeHtmlTemplate,   label: 'Type Scale Generator',    desc: 'typographic scale' },
+    shape:  { template: shapeHtmlTemplate,  label: 'Shape Token Generator',   desc: 'shape token set' },
+    symbol: { template: symbolHtmlTemplate, label: 'Icon Style Recommender',  desc: 'icon style recommendation' },
+    system: { template: systemHtmlTemplate, label: 'Design System',           desc: 'design system' },
   };
 
   // SPA fallback for all tools — inject OG tags when ?t= or ?c= present
-  const toolMatch = pathname.match(/^\/(color|type|shape|system)(\/|$)/);
+  const toolMatch = pathname.match(/^\/(color|type|shape|symbol|system)(\/|$)/);
   if (toolMatch && !path.extname(pathname)) {
     const tool = toolMatch[1];
     const meta = TOOL_META[tool];

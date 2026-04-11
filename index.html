@@ -53,6 +53,14 @@
       },
       {
         "@type": "WebApplication",
+        "name": "Icon Style Recommender",
+        "url": "https://standby.design/symbol",
+        "applicationCategory": "DesignApplication",
+        "description": "Find icon sets that match your brand. Get sizing tokens and export recommendations as CSS custom properties.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "WebApplication",
         "name": "Design System Viewer",
         "url": "https://standby.design/system",
         "applicationCategory": "DesignApplication",
@@ -217,6 +225,7 @@
     .tool-card--color { --card-accent: var(--color-accent); }
     .tool-card--type  { --card-accent: var(--type-accent); }
     .tool-card--shape  { --card-accent: oklch(0.6 0.12 50); }
+    .tool-card--symbol { --card-accent: oklch(0.6 0.12 320); }
     .tool-card--system { --card-accent: oklch(0.6 0.1 160); }
 
     footer {
@@ -281,6 +290,18 @@
       <span class="label">Shape</span>
       <h2>Shape Token Generator</h2>
       <p>Shadows, borders, radii, glass effects, and focus rings &mdash; export as CSS custom properties.</p>
+    </a>
+
+    <a href="/symbol" class="tool-card tool-card--symbol">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--card-accent)">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+        </svg>
+      </div>
+      <span class="label">Symbol</span>
+      <h2>Icon Style Recommender</h2>
+      <p>Find icon sets that match your brand personality &mdash; get sizing tokens and export recommendations.</p>
     </a>
 
     <a href="/system" class="tool-card tool-card--system" style="grid-column: 1 / -1;">
