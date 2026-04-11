@@ -30,20 +30,21 @@ standby.design/              Hub landing page (static HTML)
 
 ### Shared Stack
 
-All three React apps share identical dependencies:
+All four React apps share identical dependencies:
 - **React 18.3** + **Vite 5.4** + **TypeScript 5.6**
 - **Tailwind CSS v4.2** (with `@tailwindcss/vite` plugin)
 - **Zustand 5** (state management)
 - **Base UI React 1.3** (headless components)
 - **Lucide React** (icons), **Sonner** (toasts), **next-themes** (dark mode)
 - **shared.css** — full Standby.Design theme: primitive tokens (Brand/Surface/Error/Neutral/Success/Warning/Info), semantic tokens (light+dark, shadcn/ui compatible), Tailwind v4 `@theme inline` bridge
+- **packages/core/** — shared pure utility modules, imported via `@core` alias. Contains: color-math, palette, shadows, scale, spacing, clamp, typography, fontshare, unified-hash, math, syntax-highlight, code-block
 
 ### Shared Patterns
 
 - **State**: Zustand stores with `setFullState()` for bulk updates from URL decode (Color + Type). System app is read-only (no store).
 - **Unified URL persistence**: All tools share a unified hash format: `#c=<color-hash>&t=<type-hash>&s=<shape-hash>`. Each tool reads/writes only its own segment, preserves the rest. Legacy hashes are auto-detected for backward compatibility. See `lib/unified-hash.ts`.
 - **Cross-tool navigation**: Color → Type → System flow via links that carry the full hash. Each link encodes the current tool's state and passes through the other segments.
-- **Export**: CSS custom properties, Tailwind v4 `@theme`, design tokens JSON. System app provides a merged export combining color + type tokens.
+- **Export**: CSS custom properties, Tailwind v4 `@theme`, design tokens JSON, LLM Briefing (Markdown). System app provides a merged export combining color + type + shape tokens. All code blocks use shared syntax highlighting (`@core/syntax-highlight`) and a shared `CodeBlock` component (`@core/code-block`). "Copy All" dropdown bundles multiple export sections (format choice + checkboxes).
 - **UI**: shadcn/ui-style components in `components/ui/` (Button, Tabs, Slider, etc.)
 - **Dark-only UI**: All apps force dark mode for their own chrome
 
@@ -156,7 +157,7 @@ Also supports `?t=ThemeName&c=HEX` query params for server-side OG tag injection
 
 **UI Components**: `ui/tooltip.tsx` (Base UI tooltip with zero delay, TooltipProvider in App root), `ui/toggle.tsx`, `ui/button.tsx`, etc.
 
-**Preview**: `surface-preview.tsx` (2×2 grid), `surface-panel.tsx` (one theme mode with cards, buttons, shadows, badges)
+**Preview**: `surface-preview.tsx` (2×2 grid), `surface-panel.tsx` (one theme mode with cards, buttons, accent badges)
 
 **Export**: `code-export.tsx` (4-tab code viewer + "Copy All" dropdown), `palette-table.tsx` (step/hex/oklch table), `primitive-tabs.tsx` (tabbed palettes: Brand/Error/Accents/Neutral)
 
@@ -276,6 +277,7 @@ Rounded to grid: <1rem → 0.25rem grid, <4rem → 0.5rem grid, else 1rem.
 | Tailwind v4 | Same tokens in `@theme { }` block |
 | W3C Design Tokens | DTCG JSON (compatible with Figma, Style Dictionary) |
 | Fontshare Embed | `<link>` snippet for selected fonts |
+| LLM Briefing | Markdown doc: fonts, type scale (min/max/clamp), line heights, letter spacing, spacing tokens |
 
 ### URL State (`lib/url-state.ts`)
 
@@ -312,7 +314,7 @@ Lightweight Node.js HTTP server (no framework) running on port 80 inside Docker.
 
 **Responsibilities**:
 1. **Static file serving** with content-type detection and immutable caching
-2. **SPA fallback** — `/color/*` and `/type/*` without file extension serve respective `index.html`
+2. **SPA fallback** — `/color/*`, `/type/*`, `/shape/*`, `/system/*` without file extension serve respective `index.html`
 3. **OG tag injection** — `/color/?t=Name&c=HEX` rewrites HTML with dynamic meta tags for social sharing
 4. **OG image generation** — `/color/og-image?c=HEX` renders 1200×630 SVG → PNG via sharp
 5. **Fontshare proxy** — `/api/fonts` proxies the Fontshare catalog with 1h cache (CORS workaround)
@@ -353,18 +355,20 @@ Stage 5 (runtime):      node:20-alpine, sharp, copies all four dists + static as
 ### Local Dev
 
 ```bash
-cd color-react && npm run dev   # localhost:5173
-cd type-react && npm run dev    # localhost:5174
+cd color-react  && npm run dev  # localhost:5177
+cd type-react   && npm run dev  # localhost:5174
+cd shape-react  && npm run dev  # localhost:5176
+cd system-react && npm run dev  # localhost:5175
 ```
 
 ### Testing
 
-**Vitest** unit tests for all pure lib functions. Each app has its own `vitest.config.ts`.
+**Vitest** unit tests for all pure lib functions. Each app has its own `vitest.config.ts`. Tests in `packages/core/` are run by each app that imports them.
 
 ```bash
-cd color-react && npm test      # 112 tests — unified-hash, url-state, color-math, palette, shadows, code-export
-cd type-react  && npm test      #  48 tests — url-state, scale, spacing, clamp, code-export
-cd shape-react && npm test      #  15 tests — url-state
+cd color-react && npm test      # 158 tests — unified-hash, url-state, color-math, palette, shadows, code-export, scale, spacing, clamp
+cd type-react  && npm test      # 162 tests — url-state, scale, spacing, clamp, code-export
+cd shape-react && npm test      # 153 tests — url-state, scale, spacing, clamp, shadows
 ```
 
 No component tests, no E2E — only pure functions. Snapshot tests cover code-export output stability. `npm run test:watch` for dev mode.
@@ -388,4 +392,4 @@ Legacy references to "oklch-palette" remain in Docker labels, deploy paths (`/op
 
 ## Planned: Brand Identity Layer
 
-Next major feature: A brand generator that maps brand descriptions (industry, tonality, energy, density) to complete design systems using the existing color + type engines. Intended to make the tools accessible to non-experts. Will live at `/` or `/brand`, with deep links into `/color` and `/type` for expert tweaking.
+Next major feature: A brand generator that maps brand descriptions (industry, tonality, energy, density) to complete design systems using the existing color + type + shape engines. Intended to make the tools accessible to non-experts. Will live at `/` or `/brand`, with deep links into `/color`, `/type`, and `/shape` for expert tweaking.
