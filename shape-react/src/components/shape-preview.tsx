@@ -141,7 +141,7 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       </div>
 
       {/* Elevation Cards */}
-      <div className="relative space-y-2">
+      <div className="relative flex gap-2">
         {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((level) => {
           const radiusMap: Record<string, number> = {
             xs: Math.round(radius / 4),
@@ -155,7 +155,7 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
 
           if (isGlass) {
             return (
-              <div key={level} className="overflow-hidden" style={{ borderRadius: `${levelRadius}px` }}>
+              <div key={level} className="flex-1 overflow-hidden" style={{ borderRadius: `${levelRadius}px` }}>
                 <Vaso
                   className="w-full"
                   px={0}
@@ -165,10 +165,10 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                   blur={store.glassBlur}
                   dispersion={store.glassDispersion}
                 >
-                  <div className="relative z-10 px-3 py-2 flex items-center justify-between">
+                  <div className="relative z-10 p-2 flex flex-col items-center gap-1">
                     <span className="text-caption font-semibold">{level}</span>
                     <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
-                      depth {store.glassDepth.toFixed(1)}
+                      {levelRadius}px
                     </span>
                   </div>
                 </Vaso>
@@ -179,16 +179,17 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
           return (
             <div
               key={level}
-              className="px-3 py-2 flex items-center justify-between"
+              className="flex-1 p-2 flex flex-col items-center gap-1"
               style={{
                 backgroundColor: colors.card,
                 boxShadow: [shadow?.shadow, borderShadow].filter(Boolean).join(', ') || undefined,
                 borderRadius: `${levelRadius}px`,
+                ...(store.borderEnabled && { border: `${store.borderWidth}px solid ${colors.borderMuted}` }),
               }}
             >
               <span className="text-caption font-semibold">{level}</span>
-              <span className="text-[9px] font-mono truncate ml-2 max-w-[60%] text-right" style={{ color: colors.textMuted }}>
-                {shadow ? (shadow.shadow.length > 60 ? shadow.shadow.slice(0, 57) + '…' : shadow.shadow) : 'none'}
+              <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
+                {levelRadius}px
               </span>
             </div>
           );
@@ -209,13 +210,16 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
             >
               Primary
             </button>
-            <div className="overflow-hidden" style={{ borderRadius: `${radius}px` }}>
-              <Vaso px={0} py={0} radius={radius} depth={store.glassDepth * 0.5} blur={store.glassBlur * 0.7} dispersion={store.glassDispersion * 0.5}>
-                <span className="relative z-10 text-caption font-medium px-3 py-1.5 block" style={{ color: colors.text }}>
-                  Secondary
-                </span>
-              </Vaso>
-            </div>
+            <button
+              className="px-3 py-1.5 text-caption font-medium"
+              style={{
+                backgroundColor: colors.secondary,
+                color: colors.secondaryFg,
+                borderRadius: `${radius}px`,
+              }}
+            >
+              Secondary
+            </button>
             <button
               className="px-3 py-1.5 text-caption font-medium"
               style={{

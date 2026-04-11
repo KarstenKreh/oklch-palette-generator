@@ -1,5 +1,8 @@
 import { Slider } from '@/components/ui/slider';
 import { useShapeStore } from '@/store/shape-store';
+import { RotateCcw } from 'lucide-react';
+
+const GLASS_DEFAULTS = { glassDepth: 1.0, glassBlur: 2.0, glassDispersion: 0.4 };
 
 function sliderVal(v: number | readonly number[]): number {
   return Array.isArray(v) ? v[0] : v;
@@ -12,9 +15,30 @@ export function GlassControls() {
     glassDispersion, setGlassDispersion,
   } = useShapeStore();
 
+  const isDefault = glassDepth === GLASS_DEFAULTS.glassDepth
+    && glassBlur === GLASS_DEFAULTS.glassBlur
+    && glassDispersion === GLASS_DEFAULTS.glassDispersion;
+
+  const resetDefaults = () => {
+    setGlassDepth(GLASS_DEFAULTS.glassDepth);
+    setGlassBlur(GLASS_DEFAULTS.glassBlur);
+    setGlassDispersion(GLASS_DEFAULTS.glassDispersion);
+  };
+
   return (
     <div className="space-y-3">
-      <h3 className="text-body-s font-semibold">Liquid Glass</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-body-s font-semibold">Liquid Glass</h3>
+        {!isDefault && (
+          <button
+            onClick={resetDefaults}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            title="Reset to defaults"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
 
       <div className="space-y-3">
         <div className="space-y-1">

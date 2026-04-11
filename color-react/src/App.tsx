@@ -31,11 +31,12 @@ function App() {
     const s = otherSegments.s;
     if (!s) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
     const p = s.split(',');
-    if (p.length < 12) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
+    if (p.length < 13) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
+    // Shape hash: shapeStyle(0), shadowEnabled(1), ..., borderEnabled(8), borderWidth(9), ..., borderRadius(12)
     return {
-      borderEnabled: p[7] === '1',
-      borderWidth: !isNaN(parseInt(p[8])) ? parseInt(p[8]) / 10 : 1,
-      borderRadius: !isNaN(parseInt(p[11])) ? parseInt(p[11]) : 8,
+      borderEnabled: p[8] === '1',
+      borderWidth: !isNaN(parseInt(p[9])) ? parseInt(p[9]) / 10 : 1,
+      borderRadius: !isNaN(parseInt(p[12])) ? parseInt(p[12]) : 8,
     };
   }, [otherSegments.s]);
 

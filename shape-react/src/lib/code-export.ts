@@ -85,16 +85,14 @@ export function generateCssExport(opts: ShapeExportOptions): string {
   let css = `/* Shape Tokens — standby.design/shape */\n`;
   css += `:root {\n`;
 
-  // Shadows (light)
-  if (opts.shadowEnabled) {
+  // Shadows (light) — only for paper style
+  if (opts.shapeStyle !== 'glass' && opts.shadowEnabled) {
     const lightBg = deriveBgHex(opts.surfaceHex, false);
     const lightShadows = generateShadows(lightBg, false, config);
     css += `  /* Shadows — ${shadowTypeLabel(opts.shadowType)}, scale ${scaleLabel(opts.shadowScale)} */\n`;
     for (const s of lightShadows) {
       css += `  --shadow-${s.name}: ${s.shadow};\n`;
     }
-  } else {
-    css += `  /* Shadows: disabled */\n`;
   }
 
   // Border Radius
@@ -125,8 +123,8 @@ export function generateCssExport(opts: ShapeExportOptions): string {
 
   css += `}\n`;
 
-  // Dark overrides (only shadows change)
-  if (opts.shadowEnabled) {
+  // Dark overrides (only shadows, only for paper style)
+  if (opts.shapeStyle !== 'glass' && opts.shadowEnabled) {
     const darkBg = deriveBgHex(opts.surfaceHex, true);
     const darkShadows = generateShadows(darkBg, true, config);
     css += `\n.dark {\n`;
@@ -180,8 +178,8 @@ export function generateTailwindV4Export(opts: ShapeExportOptions): string {
 
   css += `}\n`;
 
-  // Shadows are mode-dependent → CSS custom properties
-  if (opts.shadowEnabled) {
+  // Shadows are mode-dependent → CSS custom properties (paper only)
+  if (opts.shapeStyle !== 'glass' && opts.shadowEnabled) {
     const lightBg = deriveBgHex(opts.surfaceHex, false);
     const darkBg = deriveBgHex(opts.surfaceHex, true);
     const lightShadows = generateShadows(lightBg, false, config);
@@ -216,8 +214,8 @@ export function generateDesignTokensExport(opts: ShapeExportOptions): string {
 
   const tokens: Record<string, unknown> = {};
 
-  // Shadows
-  if (opts.shadowEnabled) {
+  // Shadows (paper only)
+  if (opts.shapeStyle !== 'glass' && opts.shadowEnabled) {
     const lightBg = deriveBgHex(opts.surfaceHex, false);
     const darkBg = deriveBgHex(opts.surfaceHex, true);
     const lightShadows = generateShadows(lightBg, false, config);
@@ -288,7 +286,8 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
 
   let md = `# Shape Tokens — standby.design/shape\n\n`;
 
-  // Shadows
+  // Shadows (paper only)
+  if (opts.shapeStyle !== 'glass') {
   md += `## Shadows\n\n`;
   if (opts.shadowEnabled) {
     md += `- **Style:** ${shadowTypeLabel(opts.shadowType)}\n`;
@@ -312,6 +311,7 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
   } else {
     md += `Shadows are **disabled**.\n`;
   }
+  } // end paper-only shadows
 
   // Border Radius
   md += `\n## Border Radius\n\n`;

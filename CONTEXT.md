@@ -24,7 +24,7 @@ standby.design/              Hub landing page (static HTML)
 |-----|-----|-------|---------|
 | **Color** | `color-react/` | `/color` | OKLCH palette generation: 18-step scales, semantic tokens, shadows, light/dark/HC modes, shadcn/ui export |
 | **Type** | `type-react/` | `/type` | Fluid type scales with `clamp()`, three scale modes, Fontshare font preview, spacing derivation |
-| **Shape** | `shape-react/` | `/shape` | Shape tokens: shadows, borders, radii, glass effects, focus rings |
+| **Shape** | `shape-react/` | `/shape` | Shape tokens with style selector (Paper/Glass): shadows, borders, radii, liquid glass (vaso), focus rings |
 | **Symbol** | `symbol-react/` | `/symbol` | Icon style recommender: curated sets (Material/Lucide/Phosphor) with style variants, sizing tokens |
 | **System** | `system-react/` | `/system` | Combined design system viewer: merges color + type + shape + symbol into a single export |
 | **Hub** | `index.html` | `/` | Landing page linking to all tools |
@@ -306,6 +306,95 @@ User controls → Zustand store → useComputedScale() memoized
   → SpacingTable (spacing tokens)
   → CodeExport (on-demand generation)
   → useUrlState() (hash sync)
+```
+
+---
+
+## Shape App — Shape Token Generator
+
+### Core Concept
+
+Generates production-ready shape tokens (shadows, borders, radii, focus rings) with a **style selector** that switches between visual paradigms. Currently supports **Paper** (classic surfaces with shadows) and **Glass** (liquid glass distortion via the `vaso` library).
+
+### Style System
+
+The `shapeStyle` field (`'paper' | 'glass'`) is the top-level mode. It determines which controls are visible, how the preview renders, and what tokens are exported.
+
+| Style | Visual | Controls | Export |
+|-------|--------|----------|--------|
+| **Paper** | Solid surfaces, box-shadows, borders | Shadow type/strength/blur/scale, Border, Radius, Ring | `--shadow-*`, `--radius-*`, `--border-width`, `--ring-*` |
+| **Glass** | Liquid glass distortion (vaso library) | Depth, Blur, Dispersion, Radius, Ring | `--glass-depth`, `--glass-blur`, `--glass-dispersion`, `--radius-*`, `--ring-*` |
+
+### State (`store/shape-store.ts`)
+
+| Field | Type | Default | Purpose |
+|-------|------|---------|---------|
+| `shapeStyle` | `'paper' \| 'glass'` | `'paper'` | Top-level visual style |
+| `shadowEnabled` | boolean | true | Enable shadows (paper) |
+| `shadowType` | `'normal' \| 'neumorphic' \| 'flat'` | `'normal'` | Shadow rendering style |
+| `shadowStrength` | number | 1.0 | Shadow alpha multiplier |
+| `shadowBlurScale` | number | 1.0 | Shadow blur multiplier |
+| `shadowScale` | number | 1.272 (√φ) | Level spread ratio |
+| `borderEnabled` | boolean | true | Show borders |
+| `borderWidth` | number | 1 | Border width in px |
+| `borderRadius` | number | 8 | Base radius in px (scales to xs/sm/md/lg/xl) |
+| `glassDepth` | number | 1.0 | Glass displacement intensity (-2 to 5) |
+| `glassBlur` | number | 2.0 | Glass backdrop blur amount |
+| `glassDispersion` | number | 0.4 | Chromatic aberration intensity |
+| `ringWidth` | number | 2 | Focus ring width in px |
+| `ringOffset` | number | 2 | Focus ring offset in px |
+| `surfaceHex` | string | `'#335A7F'` | Brand color (read from color hash) |
+| `paletteMode` | `'balanced' \| 'exact'` | `'balanced'` | Palette generation mode (from color hash) |
+| `chromaScale` | number | 1.0 | Surface chroma scale (from color hash) |
+| `brandPin` | boolean | false | Use exact brand hex for primary (from color hash) |
+
+### Glass Effect (`vaso` library)
+
+The Glass style uses the [vaso](https://github.com/huozhi/vaso) React component for liquid glass distortion. Vaso renders an SVG `feDisplacementMap` filter with `backdrop-filter: blur()`.
+
+**Architecture**: Vaso wraps UI elements as a container. The glass overlay sits behind children in the DOM. Children need `relative z-10` to avoid being affected by the displacement filter.
+
+**Known limitation**: Dispersion (chromatic aberration) creates colored edge artifacts (cyan top-left, yellow bottom-right) due to `feOffset` clipping at element boundaries. Mitigated with `clip-path: inset(1px)` on `[data-vaso]` elements. The `vaso` library has only 5% filter padding vs. 35% in `liquid-glass-react`. A future React 19 upgrade would enable switching to `liquid-glass-react` for proper edge masking.
+
+### Preview — Palette Integration
+
+The preview uses `@core/palette` (shared with Color app) for accurate colors. On mount, the Shape app reads from the color URL hash segment:
+
+| Hash Position | Field | Usage |
+|---------------|-------|-------|
+| 0 | `brandHex` | `surfaceHex` — input for palette generation |
+| 5 | `chromaScale` | Surface palette saturation |
+| 6 | `paletteMode` | `balanced` or `exact` — palette algorithm |
+| 7 | `brandPin` | If true, primary = exact input hex |
+
+Colors are derived via `deriveSurface()`:
+- **Brand palette**: `generatePalette(hex, 1.0, mode)` — full chroma
+- **Surface palette**: `generatePalette(hex, chromaScale * 0.15, mode)` — neutral
+- **Error palette**: `generatePalette(computeAutoErrorHex(hex), 1.0, mode)`
+
+Semantic mapping matches the Color app exactly: `primary` = brand-600/400, `secondary` = brand-200/800, `destructive` = error-600/400. Foreground picked via `pickFgFromPalette()` comparing `contrastRatio('#FFFFFF', bg)` vs `contrastRatio('#1A1A1A', bg)`, then returning the palette step (brand-50 or brand-975).
+
+### URL State
+
+Format: `shapeStyle,shadowEnabled,shadowType,strength,blurScale,scale,shadowColorMode,shadowCustomHex,borderEnabled,borderWidth,borderColorMode,borderCustomHex,borderRadius,glassDepth,glassBlur,glassDispersion,ringWidth,ringOffset,ringColorMode,ringCustomHex,separationMode` (21 fields)
+
+### Components
+
+**Controls**: `style-selector.tsx` (Paper/Glass segmented control), `shadow-controls.tsx`, `border-controls.tsx`, `radius-controls.tsx`, `ring-controls.tsx`, `glass-controls.tsx` (depth/blur/dispersion sliders + reset button)
+
+**Preview**: `shape-preview.tsx` — unified `PreviewPanel` for both styles. Paper uses `backgroundColor` + `boxShadow`. Glass uses `<Vaso>` wrappers with `overflow-hidden` containers. Shows elevation cards (xs–xl horizontal), buttons (Primary/Secondary/Destructive), and input with focus ring.
+
+**Export**: `code-export.tsx` (CSS / Tailwind v4 / Design Tokens / LLM Briefing). Glass mode suppresses shadow export.
+
+### Data Flow
+
+```
+User controls → Zustand store → PreviewPanel (style-conditional rendering)
+  → deriveSurface() uses @core/palette (real palette engine)
+  → Paper: backgroundColor + boxShadow
+  → Glass: <Vaso> with depth/blur/dispersion
+  → CodeExport (style-conditional token generation)
+  → useUrlState() (hash sync, 21-field format)
 ```
 
 ---

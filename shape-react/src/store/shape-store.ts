@@ -100,9 +100,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   borderRadius: 8,
 
   // Glass
-  glassDepth: 1.2,
-  glassBlur: 0.5,
-  glassDispersion: 0.5,
+  glassDepth: 1.0,
+  glassBlur: 2.0,
+  glassDispersion: 0.4,
 
   // Ring
   ringWidth: 2,
