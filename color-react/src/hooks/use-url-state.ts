@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useThemeStore } from '@/store/theme-store';
 import { encodeState, decodeState } from '@/lib/url-state';
-import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@/lib/unified-hash';
+import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
 
 interface OtherSegments { t?: string; s?: string }
 

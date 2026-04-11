@@ -12,7 +12,7 @@ import { useThemeCss } from '@/hooks/use-theme-css';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useThemeStore } from '@/store/theme-store';
 import { encodeState } from '@/lib/url-state';
-import { buildUnifiedHash } from '@/lib/unified-hash';
+import { buildUnifiedHash } from '@core/unified-hash';
 import { useFavicon } from '@/hooks/use-favicon';
 import { PirateFooter } from '@/components/pirate-footer';
 import { ToolNav } from '@/components/tool-nav';

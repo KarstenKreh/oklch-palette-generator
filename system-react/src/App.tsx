@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback, type CSSProperties } from 'r
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { getMySegment, buildUnifiedHash } from '@/lib/unified-hash';
+import { getMySegment, buildUnifiedHash } from '@core/unified-hash';
 import { ToolNav } from '@/components/tool-nav';
 import { decodeState as decodeColorState, encodeState as encodeColorState, type DecodedColorState } from '@/lib/color-url-state';
 import { decodeState as decodeTypeState } from '@/lib/type-url-state';

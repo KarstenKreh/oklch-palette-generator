@@ -12,7 +12,7 @@ import { useFontLoader } from '@/hooks/use-font-loader';
 import { useUrlState } from '@/hooks/use-url-state';
 import { useTypeStore } from '@/store/type-store';
 import { encodeState } from '@/lib/url-state';
-import { buildUnifiedHash } from '@/lib/unified-hash';
+import { buildUnifiedHash } from '@core/unified-hash';
 import { PirateFooter } from '@/components/pirate-footer';
 import { ToolNav } from '@/components/tool-nav';
 

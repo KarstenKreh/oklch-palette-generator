@@ -9,7 +9,7 @@ import { CodeExport } from '@/components/code-export';
 import { ToolNav } from '@/components/tool-nav';
 import { useShapeStore } from '@/store/shape-store';
 import { encodeState } from '@/lib/url-state';
-import { buildUnifiedHash, getMySegment } from '@/lib/unified-hash';
+import { buildUnifiedHash, getMySegment } from '@core/unified-hash';
 import { useUrlState } from '@/hooks/use-url-state';
 
 function App() {
