@@ -6,14 +6,16 @@ import { hexToOklch, oklchToHex } from '@/lib/color-math';
 
 /** Derive a set of surface colors from a single hex for preview. */
 function deriveSurface(hex: string, isDark: boolean) {
-  const [, , H] = hexToOklch(hex);
-  const C = 0.015;
+  const [, C_brand, H] = hexToOklch(hex);
+  const C = 0.015; // surface chroma
   if (isDark) {
     return {
       bg: oklchToHex(0.15, C, H),
       card: oklchToHex(0.20, C, H),
       elevated: oklchToHex(0.24, C, H),
       muted: oklchToHex(0.18, C, H),
+      secondary: oklchToHex(0.25, C_brand * 0.3, H),      // brand-800 equivalent
+      secondaryFg: oklchToHex(0.92, C * 0.3, H),
       border: oklchToHex(0.28, C * 0.8, H),
       borderMuted: oklchToHex(0.24, C * 0.5, H),
       text: oklchToHex(0.92, C * 0.3, H),
@@ -27,6 +29,8 @@ function deriveSurface(hex: string, isDark: boolean) {
     card: oklchToHex(0.99, C * 0.1, H),
     elevated: oklchToHex(1.0, 0, H),
     muted: oklchToHex(0.94, C * 0.4, H),
+    secondary: oklchToHex(0.90, C_brand * 0.25, H),       // brand-200 equivalent
+    secondaryFg: oklchToHex(0.25, C_brand * 0.3, H),
     border: oklchToHex(0.85, C * 0.6, H),
     borderMuted: oklchToHex(0.90, C * 0.3, H),
     text: oklchToHex(0.15, C * 0.3, H),
@@ -64,59 +68,19 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
   const borderShadow = store.borderEnabled ? `inset 0 0 0 ${store.borderWidth}px ${colors.border}` : '';
   const ringColor = store.ringColorMode === 'custom' ? store.ringCustomColor : colors.primary;
 
-  /** Wrap children in Vaso (glass) or a plain div (paper) */
-  function CardSurface({ level, children }: { level: string; children: React.ReactNode }) {
-    const radiusMap: Record<string, number> = {
-      xs: Math.round(radius / 4),
-      sm: Math.round(radius / 2),
-      md: radius,
-      lg: Math.round(radius * 1.5),
-      xl: Math.round(radius * 2),
-    };
-    const levelRadius = radiusMap[level] ?? radius;
-    const shadow = shadows.find(s => s.name === level);
-
-    if (isGlass) {
-      return (
-        <Vaso
-          px={12}
-          py={8}
-          radius={levelRadius}
-          depth={store.glassDepth}
-          blur={store.glassBlur}
-          dispersion={store.glassDispersion}
-        >
-          {children}
-        </Vaso>
-      );
-    }
-
-    return (
-      <div
-        style={{
-          backgroundColor: colors.card,
-          boxShadow: [shadow?.shadow, borderShadow].filter(Boolean).join(', ') || undefined,
-          borderRadius: `${levelRadius}px`,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
   return (
     <div
       className="relative rounded-lg p-4 space-y-4 flex-1 min-w-0 overflow-hidden"
       style={{ backgroundColor: colors.bg, color: colors.text }}
     >
-      {/* Decorative background */}
+      {/* Decorative background — aspect-ratio: 1 keeps circle round */}
       <div
         className="absolute pointer-events-none"
         style={{
-          top: '0%',
-          left: '50%',
-          width: '120%',
-          height: '120%',
+          top: '-10%',
+          right: '-20%',
+          width: '80%',
+          aspectRatio: '1',
           borderRadius: '50%',
           background: `radial-gradient(circle at 30% 30%, ${colors.primary}${isGlass ? '35' : '20'}, ${colors.primary}${isGlass ? '12' : '08'})`,
         }}
@@ -149,19 +113,54 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       {/* Elevation Cards */}
       <div className="relative space-y-2">
         {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((level) => {
+          const radiusMap: Record<string, number> = {
+            xs: Math.round(radius / 4),
+            sm: Math.round(radius / 2),
+            md: radius,
+            lg: Math.round(radius * 1.5),
+            xl: Math.round(radius * 2),
+          };
+          const levelRadius = radiusMap[level];
           const shadow = shadows.find(s => s.name === level);
-          return (
-            <CardSurface key={level} level={level}>
-              <div className="px-3 py-2 flex items-center justify-between">
-                <span className="text-caption font-semibold">{level}</span>
-                <span className="text-[9px] font-mono truncate ml-2 max-w-[60%] text-right" style={{ color: colors.textMuted }}>
-                  {isGlass
-                    ? `depth ${store.glassDepth.toFixed(1)}`
-                    : shadow ? (shadow.shadow.length > 60 ? shadow.shadow.slice(0, 57) + '…' : shadow.shadow) : 'none'
-                  }
-                </span>
+
+          if (isGlass) {
+            return (
+              <div key={level} className="overflow-hidden" style={{ borderRadius: `${levelRadius}px` }}>
+                <Vaso
+                  className="w-full"
+                  px={0}
+                  py={0}
+                  radius={levelRadius}
+                  depth={store.glassDepth}
+                  blur={store.glassBlur}
+                  dispersion={store.glassDispersion}
+                >
+                  <div className="relative z-10 px-3 py-2 flex items-center justify-between">
+                    <span className="text-caption font-semibold">{level}</span>
+                    <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
+                      depth {store.glassDepth.toFixed(1)}
+                    </span>
+                  </div>
+                </Vaso>
               </div>
-            </CardSurface>
+            );
+          }
+
+          return (
+            <div
+              key={level}
+              className="px-3 py-2 flex items-center justify-between"
+              style={{
+                backgroundColor: colors.card,
+                boxShadow: [shadow?.shadow, borderShadow].filter(Boolean).join(', ') || undefined,
+                borderRadius: `${levelRadius}px`,
+              }}
+            >
+              <span className="text-caption font-semibold">{level}</span>
+              <span className="text-[9px] font-mono truncate ml-2 max-w-[60%] text-right" style={{ color: colors.textMuted }}>
+                {shadow ? (shadow.shadow.length > 60 ? shadow.shadow.slice(0, 57) + '…' : shadow.shadow) : 'none'}
+              </span>
+            </div>
           );
         })}
       </div>
@@ -170,16 +169,23 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       <div className="relative flex items-center gap-2">
         {isGlass ? (
           <>
-            <Vaso px={8} py={4} radius={radius} depth={store.glassDepth} blur={store.glassBlur} dispersion={store.glassDispersion}>
-              <span className="text-caption font-medium px-3 py-1.5 block" style={{ color: colors.text }}>
-                Primary
-              </span>
-            </Vaso>
-            <Vaso px={8} py={4} radius={radius} depth={store.glassDepth * 0.5} blur={store.glassBlur * 0.7} dispersion={store.glassDispersion * 0.5}>
-              <span className="text-caption font-medium px-3 py-1.5 block" style={{ color: colors.textMuted }}>
-                Secondary
-              </span>
-            </Vaso>
+            <button
+              className="px-3 py-1.5 text-caption font-medium"
+              style={{
+                backgroundColor: colors.primary,
+                color: colors.primaryFg,
+                borderRadius: `${radius}px`,
+              }}
+            >
+              Primary
+            </button>
+            <div className="overflow-hidden" style={{ borderRadius: `${radius}px` }}>
+              <Vaso px={0} py={0} radius={radius} depth={store.glassDepth * 0.5} blur={store.glassBlur * 0.7} dispersion={store.glassDispersion * 0.5}>
+                <span className="relative z-10 text-caption font-medium px-3 py-1.5 block" style={{ color: colors.text }}>
+                  Secondary
+                </span>
+              </Vaso>
+            </div>
           </>
         ) : (
           <>
@@ -197,8 +203,8 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
             <button
               className="px-3 py-1.5 text-caption font-medium"
               style={{
-                backgroundColor: colors.muted,
-                color: colors.text,
+                backgroundColor: colors.secondary,
+                color: colors.secondaryFg,
                 borderRadius: `${radius}px`,
                 boxShadow: borderShadow || undefined,
               }}
@@ -212,19 +218,31 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       {/* Input with focus ring */}
       <div className="relative">
         {isGlass ? (
-          <Vaso px={10} py={6} radius={radius} depth={store.glassDepth * 0.3} blur={store.glassBlur} dispersion={store.glassDispersion * 0.3}>
-            <div
-              className="px-3 py-1.5 text-caption"
-              style={{
-                color: colors.textMuted,
-                outline: `${store.ringWidth}px solid ${ringColor}`,
-                outlineOffset: `${store.ringOffset}px`,
-                borderRadius: `${radius}px`,
-              }}
+          <div
+            style={{
+              outline: `${store.ringWidth}px solid ${ringColor}`,
+              outlineOffset: `${store.ringOffset}px`,
+              borderRadius: `${radius}px`,
+              overflow: 'hidden',
+            }}
+          >
+            <Vaso
+              className="w-full"
+              px={0}
+              py={0}
+              radius={radius}
+              depth={store.glassDepth * 0.3}
+              blur={store.glassBlur}
+              dispersion={store.glassDispersion * 0.3}
             >
-              Input with focus ring
-            </div>
-          </Vaso>
+              <div
+                className="relative z-10 px-3 py-1.5 text-caption"
+                style={{ color: colors.textMuted }}
+              >
+                Input with focus ring
+              </div>
+            </Vaso>
+          </div>
         ) : (
           <div
             className="px-3 py-1.5 text-caption"
