@@ -10,7 +10,7 @@ interface ToolNavProps {
 const DEV_PORTS: Record<string, number> = { color: 5177, type: 5174, system: 5175, shape: 5176, symbol: 5178 };
 
 function toolUrl(key: Tool): string {
-  if (key === 'home') return import.meta.env.DEV ? 'https://standby.design/' : '/';
+  if (key === 'home') return '/';
   if (import.meta.env.DEV) {
     return `http://localhost:${DEV_PORTS[key]}/${key}/`;
   }

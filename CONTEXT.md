@@ -11,6 +11,7 @@ standby.design/              Hub landing page (static HTML)
 ├── /color                    OKLCH Palette Generator (React SPA)
 ├── /type                     Fluid Type Scale Generator (React SPA)
 ├── /shape                    Shape Token Generator (React SPA)
+├── /symbol                   Icon Style Recommender (React SPA)
 ├── /system                   Design System Viewer (React SPA)
 ├── /api/fonts                Fontshare catalog proxy (CORS workaround)
 ├── /color/og-image?c=HEX    Dynamic OG image endpoint (SVG → PNG via sharp)
@@ -24,7 +25,8 @@ standby.design/              Hub landing page (static HTML)
 | **Color** | `color-react/` | `/color` | OKLCH palette generation: 18-step scales, semantic tokens, shadows, light/dark/HC modes, shadcn/ui export |
 | **Type** | `type-react/` | `/type` | Fluid type scales with `clamp()`, three scale modes, Fontshare font preview, spacing derivation |
 | **Shape** | `shape-react/` | `/shape` | Shape tokens: shadows, borders, radii, glass effects, focus rings |
-| **System** | `system-react/` | `/system` | Combined design system viewer: merges color + type + shape into a single export |
+| **Symbol** | `symbol-react/` | `/symbol` | Icon style recommender: curated sets (Material/Lucide/Phosphor) with style variants, sizing tokens |
+| **System** | `system-react/` | `/system` | Combined design system viewer: merges color + type + shape + symbol into a single export |
 | **Hub** | `index.html` | `/` | Landing page linking to all tools |
 | **Legacy** | `color/` | — | Original vanilla JS color tool (superseded, kept for reference only — never edit) |
 
@@ -42,7 +44,7 @@ All four React apps share identical dependencies:
 ### Shared Patterns
 
 - **State**: Zustand stores with `setFullState()` for bulk updates from URL decode (Color + Type). System app is read-only (no store).
-- **Unified URL persistence**: All tools share a unified hash format: `#c=<color-hash>&t=<type-hash>&s=<shape-hash>`. Each tool reads/writes only its own segment, preserves the rest. Legacy hashes are auto-detected for backward compatibility. See `lib/unified-hash.ts`.
+- **Unified URL persistence**: All tools share a unified hash format: `#c=<color-hash>&t=<type-hash>&s=<shape-hash>&y=<symbol-hash>`. Each tool reads/writes only its own segment, preserves the rest. Legacy hashes are auto-detected for backward compatibility. See `packages/core/src/unified-hash.ts`.
 - **Cross-tool navigation**: Color → Type → System flow via links that carry the full hash. Each link encodes the current tool's state and passes through the other segments.
 - **Export**: CSS custom properties, Tailwind v4 `@theme`, design tokens JSON, LLM Briefing (Markdown). System app provides a merged export combining color + type + shape tokens. All code blocks use shared syntax highlighting (`@core/syntax-highlight`) and a shared `CodeBlock` component (`@core/code-block`). "Copy All" dropdown bundles multiple export sections (format choice + checkboxes).
 - **UI**: shadcn/ui-style components in `components/ui/` (Button, Tabs, Slider, etc.)
@@ -308,6 +310,56 @@ User controls → Zustand store → useComputedScale() memoized
 
 ---
 
+## Symbol App — Icon Style Recommender
+
+### Core Concept
+
+Recommends curated icon sets based on visual personality. Three families (Material Symbols, Lucide, Phosphor) with style variants. Generates icon sizing tokens derived from a scale ratio.
+
+### Icon Families (`packages/core/src/icon-sets.ts`)
+
+| Family | Variants | Corners | Mood |
+|--------|----------|---------|------|
+| **Material Symbols** | Outlined, Filled | Sharp | Corporate/serious |
+| **Lucide** | Outlined | Rounded | Friendly/balanced |
+| **Phosphor** | Regular, Bold, Thin, Fill | Rounded | Warm/versatile |
+
+### Icon Sizing Tokens (`packages/core/src/icon-tokens.ts`)
+
+6 size levels derived from `baseSize × scale^step`: xs, sm, md, lg, xl, 2xl. Optional 4px grid snapping.
+
+### Sample Icons (`packages/core/src/sample-icons.ts`)
+
+12 bundled SVG icon paths per variant (home, search, settings, user, heart, arrow-right, mail, star, bookmark, bell, chat, eye). Material uses `viewBox="0 -960 960 960"` (native Google format), Lucide/Phosphor use `viewBox="0 0 24 24"`.
+
+### State (`store/symbol-store.ts`)
+
+| Field | Type | Default | Purpose |
+|-------|------|---------|---------|
+| `preferredStyle` | `'outlined' \| 'filled' \| 'duotone' \| 'auto'` | `'auto'` | Style preference (for future Brand Layer) |
+| `preferredWeight` | `'thin' \| 'regular' \| 'bold' \| 'auto'` | `'auto'` | Weight preference (for future Brand Layer) |
+| `preferredCorners` | `'sharp' \| 'rounded' \| 'auto'` | `'auto'` | Corner preference (for future Brand Layer) |
+| `iconBaseSize` | number | 1.25 | Base icon size in rem |
+| `iconScale` | number | 1.272 | Scale ratio (√φ default) |
+| `snapTo4px` | boolean | true | Round sizes to 4px grid |
+| `selectedSet` | string \| null | null | Active variant ID |
+
+### URL State (`lib/url-state.ts`)
+
+Format: `style,weight,corners,baseSize100,scale1000,snap,setId`
+Example: `a,a,a,125,1272,1,material-outlined`
+
+### Code Export
+
+| Format | Content |
+|--------|---------|
+| CSS Custom Properties | `--icon-xs` through `--icon-2xl`, `--icon-stroke` |
+| Tailwind v4 | Same tokens in `@theme { }` block |
+| Design Tokens (DTCG) | W3C standard JSON format |
+| LLM Briefing | Markdown with set recommendation, sizing tokens, install command |
+
+---
+
 ## Server (`og-server.js`)
 
 Lightweight Node.js HTTP server (no framework) running on port 80 inside Docker.
@@ -340,7 +392,8 @@ Stage 1 (build-color):  node:20-alpine, npm ci + build color-react
 Stage 2 (build-type):   node:20-alpine, npm ci + build type-react
 Stage 3 (build-system): node:20-alpine, npm ci + build system-react
 Stage 4 (build-shape):  node:20-alpine, npm ci + build shape-react
-Stage 5 (runtime):      node:20-alpine, sharp, copies all four dists + static assets
+Stage 5 (build-symbol): node:20-alpine, npm ci + build symbol-react
+Stage 6 (runtime):      node:20-alpine, sharp, copies all five dists + static assets
                         Runs og-server.js on port 80
 ```
 
@@ -355,10 +408,11 @@ Stage 5 (runtime):      node:20-alpine, sharp, copies all four dists + static as
 ### Local Dev
 
 ```bash
-cd color-react  && npm run dev  # localhost:5177
-cd type-react   && npm run dev  # localhost:5174
-cd shape-react  && npm run dev  # localhost:5176
-cd system-react && npm run dev  # localhost:5175
+cd color-react  && npm run dev   # localhost:5177
+cd type-react   && npm run dev   # localhost:5174
+cd shape-react  && npm run dev   # localhost:5176
+cd symbol-react && npm run dev   # localhost:5178
+cd system-react && npm run dev   # localhost:5175
 ```
 
 ### Testing
@@ -366,9 +420,10 @@ cd system-react && npm run dev  # localhost:5175
 **Vitest** unit tests for all pure lib functions. Each app has its own `vitest.config.ts`. Tests in `packages/core/` are run by each app that imports them.
 
 ```bash
-cd color-react && npm test      # 158 tests — unified-hash, url-state, color-math, palette, shadows, code-export, scale, spacing, clamp
-cd type-react  && npm test      # 162 tests — url-state, scale, spacing, clamp, code-export
-cd shape-react && npm test      # 153 tests — url-state, scale, spacing, clamp, shadows
+cd color-react  && npm test      # 158 tests — unified-hash, url-state, color-math, palette, shadows, code-export, scale, spacing, clamp
+cd type-react   && npm test      # 162 tests — url-state, scale, spacing, clamp, code-export
+cd shape-react  && npm test      # 153 tests — url-state, scale, spacing, clamp, shadows
+cd symbol-react && npm test      # 140 tests — url-state, recommend, icon-tokens, unified-hash
 ```
 
 No component tests, no E2E — only pure functions. Snapshot tests cover code-export output stability. `npm run test:watch` for dev mode.
