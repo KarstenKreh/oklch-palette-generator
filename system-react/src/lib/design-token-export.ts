@@ -7,7 +7,7 @@
 
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
-import { fontFamily } from './fontshare';
+import { fontFamily } from '@core/fontshare';
 
 interface DesignTokenOptions {
   levels: ComputedLevel[];

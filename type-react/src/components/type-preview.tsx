@@ -1,6 +1,6 @@
 import { useComputedScale } from '@/hooks/use-computed-scale';
 import { useTypeStore } from '@/store/type-store';
-import { fontFamily } from '@/lib/fontshare';
+import { fontFamily } from '@core/fontshare';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

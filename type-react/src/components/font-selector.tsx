@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronsUpDown, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getFontEntry, loadFont, type FontEntry } from '@/lib/fontshare';
+import { getFontEntry, loadFont, type FontEntry } from '@core/fontshare';
 import { useFontCatalog } from '@/hooks/use-font-loader';
 
 interface FontSelectorProps {

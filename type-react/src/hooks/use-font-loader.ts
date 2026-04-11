@@ -5,7 +5,7 @@ import {
   getCatalog,
   loadFont,
   type FontEntry,
-} from '@/lib/fontshare';
+} from '@core/fontshare';
 import { useTypeStore } from '@/store/type-store';
 
 /**

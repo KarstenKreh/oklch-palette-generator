@@ -4,7 +4,7 @@
 
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
-import { fontFamily, buildFontshareEmbed } from './fontshare';
+import { fontFamily, buildFontshareEmbed } from '@core/fontshare';
 
 interface ExportOptions {
   levels: ComputedLevel[];
