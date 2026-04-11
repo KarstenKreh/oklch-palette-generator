@@ -1,4 +1,4 @@
-import { Home, Palette, Type, Box, Hexagon, Layers } from 'lucide-react';
+import { Home, Palette, Type, Box, Star, Layers } from 'lucide-react';
 
 type Tool = 'home' | 'system' | 'color' | 'type' | 'shape' | 'symbol';
 
@@ -20,7 +20,7 @@ function toolUrl(key: Tool): string {
 const tools: { key: Tool; label: string; icon: typeof Palette }[] = [
   { key: 'color', label: 'Color', icon: Palette },
   { key: 'shape', label: 'Shape', icon: Box },
-  { key: 'symbol', label: 'Symbol', icon: Hexagon },
+  { key: 'symbol', label: 'Symbol', icon: Star },
   { key: 'type', label: 'Type', icon: Type },
 ];
 
