@@ -3,10 +3,10 @@ import { useThemeStore } from '@/store/theme-store';
 import { encodeState, decodeState } from '@/lib/url-state';
 import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
 
-interface OtherSegments { t?: string; s?: string }
+interface OtherSegments { t?: string; s?: string; y?: string }
 
 /**
- * Returns the other tools' hash segments (t=, s=), captured at mount.
+ * Returns the other tools' hash segments (t=, s=, y=), captured at mount.
  * Uses state so it triggers a re-render for nav links.
  */
 export function useUrlState() {
@@ -23,6 +23,7 @@ export function useUrlState() {
     const captured: OtherSegments = {
       t: unified ? (getMySegment(raw, 't') || undefined) : undefined,
       s: unified ? (getMySegment(raw, 's') || undefined) : undefined,
+      y: unified ? (getMySegment(raw, 'y') || undefined) : undefined,
     };
     othersRef.current = captured;
     setOthers(captured);
@@ -40,7 +41,7 @@ export function useUrlState() {
     const currentStore = useThemeStore.getState();
     const encoded = encodeState(currentStore);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: encoded, t: captured.t, s: captured.s,
+      c: encoded, t: captured.t, s: captured.s, y: captured.y,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -50,7 +51,7 @@ export function useUrlState() {
     if (skipNextWrite.current) { skipNextWrite.current = false; return; }
     const encoded = encodeState(store);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: encoded, t: othersRef.current.t, s: othersRef.current.s,
+      c: encoded, t: othersRef.current.t, s: othersRef.current.s, y: othersRef.current.y,
     }));
   }, [
     store.brandHex, store.bgColorHex, store.bgAutoMatch,

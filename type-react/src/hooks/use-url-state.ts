@@ -3,7 +3,7 @@ import { useTypeStore } from '@/store/type-store';
 import { encodeState, decodeState } from '@/lib/url-state';
 import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
 
-interface OtherSegments { c?: string; s?: string }
+interface OtherSegments { c?: string; s?: string; y?: string }
 
 /**
  * Returns the other tools' hash segments (c=, s=), captured at mount.
@@ -44,6 +44,7 @@ export function useUrlState() {
     const captured: OtherSegments = {
       c: unified ? (getMySegment(raw, 'c') || undefined) : undefined,
       s: unified ? (getMySegment(raw, 's') || undefined) : undefined,
+      y: unified ? (getMySegment(raw, 'y') || undefined) : undefined,
     };
     othersRef.current = captured;
     setOthers(captured);
@@ -86,7 +87,7 @@ export function useUrlState() {
     const currentStore = useTypeStore.getState();
     const encoded = encodeStore(currentStore);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: captured.c, t: encoded, s: captured.s,
+      c: captured.c, t: encoded, s: captured.s, y: captured.y,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -96,7 +97,7 @@ export function useUrlState() {
     if (skipNextWrite.current) { skipNextWrite.current = false; return; }
     const encoded = encodeStore(store);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: othersRef.current.c, t: encoded, s: othersRef.current.s,
+      c: othersRef.current.c, t: encoded, s: othersRef.current.s, y: othersRef.current.y,
     }));
   }, [
     store.scaleMode, store.baseSize, store.mobileBaseSize, store.customRatio,

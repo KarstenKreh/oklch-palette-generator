@@ -54,7 +54,7 @@ function App() {
 
   const getCurrentHash = useCallback(() => {
     const typeEncoded = getTypeEncoded();
-    return buildUnifiedHash({ c: otherSegments.c, t: typeEncoded, s: otherSegments.s });
+    return buildUnifiedHash({ c: otherSegments.c, t: typeEncoded, s: otherSegments.s, y: otherSegments.y });
   }, [getTypeEncoded, otherSegments]);
 
   const handleShare = useCallback(() => {

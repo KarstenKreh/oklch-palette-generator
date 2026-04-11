@@ -24,6 +24,7 @@ function App() {
       c: otherSegments.c || undefined,
       t: otherSegments.t || undefined,
       s: shapeEncoded,
+      y: otherSegments.y || undefined,
     });
   }, [store, otherSegments]);
 
