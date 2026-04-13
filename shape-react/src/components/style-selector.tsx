@@ -1,10 +1,11 @@
 import { cn } from '@/lib/utils';
 import { useShapeStore, type ShapeStyle } from '@/store/shape-store';
-import { Layers, Gem } from 'lucide-react';
+import { Layers, Gem, Squircle } from 'lucide-react';
 
 const STYLES: { value: ShapeStyle; label: string; icon: typeof Layers }[] = [
   { value: 'paper', label: 'Paper', icon: Layers },
   { value: 'glass', label: 'Glass', icon: Gem },
+  { value: 'neomorph', label: 'Neomorph', icon: Squircle },
 ];
 
 export function StyleSelector() {
