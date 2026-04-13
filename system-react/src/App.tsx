@@ -3,7 +3,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getMySegment, buildUnifiedHash } from '@core/unified-hash';
-import { ToolNav } from '@/components/tool-nav';
+import { AppShell } from '@core/app-shell';
 import { decodeState as decodeColorState, encodeState as encodeColorState, type DecodedState as DecodedColorState } from '@core/url-state/color';
 import { decodeState as decodeTypeState } from '@core/url-state/type';
 import { decodeState as decodeShapeState, type ShapeUrlState as ShapeState } from '@core/url-state/shape';
@@ -20,7 +20,6 @@ import { TypeSummary } from '@/components/type-summary';
 import { CombinedExport } from '@/components/combined-export';
 import { AppPreview } from '@/components/app-preview';
 import { SymbolSummary } from '@/components/symbol-summary';
-import { PirateFooter } from '@/components/pirate-footer';
 import { SquarePen } from 'lucide-react';
 
 function accentCssName(name: string): string {
@@ -100,10 +99,6 @@ function App() {
   const [shapeSegment, setShapeSegment] = useState<string | null>(null);
   const [symbolSegment, setSymbolSegment] = useState<string | null>(null);
   const [themeName, setThemeName] = useState('');
-
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
 
   useEffect(() => {
     const raw = window.location.hash.slice(1);
@@ -232,15 +227,8 @@ function App() {
   const hasType = !!typeState && !!scale;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      <div className="hidden md:flex sticky top-0 h-screen p-3 border-r border-border">
-        <ToolNav activeTool="system" buildHash={getCurrentHash} />
-      </div>
-      <div className="md:hidden">
-        <ToolNav activeTool="system" buildHash={getCurrentHash} />
-      </div>
-      <div className="flex-1 min-w-0 pb-16 md:pb-0">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
+    <>
+      <AppShell activeTool="system" buildHash={getCurrentHash}>
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex-1 min-w-0">
@@ -376,11 +364,9 @@ function App() {
             />
           </div>
         )}
-        </div>
-        <PirateFooter />
-      </div>
+      </AppShell>
       <Toaster />
-    </div>
+    </>
   );
 }
 

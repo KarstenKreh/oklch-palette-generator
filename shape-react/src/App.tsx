@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ShapeControls } from '@/components/shape-controls';
 import { ShapePreview } from '@/components/shape-preview';
 import { CodeExport } from '@/components/code-export';
-import { ToolNav } from '@/components/tool-nav';
+import { AppShell } from '@core/app-shell';
 import { useShapeStore } from '@/store/shape-store';
 import { encodeState } from '@/lib/url-state';
 import { buildUnifiedHash, getMySegment } from '@core/unified-hash';
@@ -69,53 +69,39 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
   return (
     <TooltipProvider>
-    <div className="min-h-screen bg-background text-foreground flex">
-      <div className="hidden md:flex sticky top-0 h-screen p-3 border-r border-border">
-        <ToolNav activeTool="shape" buildHash={getCurrentHash} />
-      </div>
-      <div className="md:hidden">
-        <ToolNav activeTool="shape" buildHash={getCurrentHash} />
-      </div>
-      <div className="flex-1 min-w-0 pb-16 md:pb-0">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
-              Shape
-            </h1>
-            <Button variant="default" onClick={handleShare}>
-              Share Config
-            </Button>
-          </div>
-          <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
-            Choose a visual style &mdash; configure its tokens &mdash; export production-ready code.
-          </p>
+      <AppShell activeTool="shape" buildHash={getCurrentHash}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
+            Shape
+          </h1>
+          <Button variant="default" onClick={handleShare}>
+            Share Config
+          </Button>
+        </div>
+        <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
+          Choose a visual style &mdash; configure its tokens &mdash; export production-ready code.
+        </p>
 
-          {/* Main layout: controls + preview */}
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)] gap-6 mb-8">
-            <div>
-              <ShapeControls />
-            </div>
-            <div>
-              <h3 className="text-body-s font-semibold mb-3">Preview</h3>
-              <ShapePreview />
-            </div>
+        {/* Main layout: controls + preview */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)] gap-6 mb-8">
+          <div>
+            <ShapeControls />
           </div>
-
-          {/* Code Export */}
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <CodeExport />
+          <div>
+            <h3 className="text-body-s font-semibold mb-3">Preview</h3>
+            <ShapePreview />
           </div>
         </div>
-      </div>
+
+        {/* Code Export */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <CodeExport />
+        </div>
+      </AppShell>
       <Toaster />
-    </div>
     </TooltipProvider>
   );
 }

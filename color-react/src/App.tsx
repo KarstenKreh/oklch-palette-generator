@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -14,8 +14,7 @@ import { useThemeStore } from '@/store/theme-store';
 import { encodeState } from '@/lib/url-state';
 import { buildUnifiedHash } from '@core/unified-hash';
 import { useFavicon } from '@/hooks/use-favicon';
-import { PirateFooter } from '@/components/pirate-footer';
-import { ToolNav } from '@/components/tool-nav';
+import { AppShell } from '@core/app-shell';
 
 function App() {
   const palette = usePalette();
@@ -60,63 +59,48 @@ function App() {
   }, [store, getCurrentHash]);
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  useEffect(() => {
     document.title = themeName ? `${themeName} — OKLCH Theme Generator` : 'OKLCH Theme Generator';
   }, [themeName]);
 
   return (
     <TooltipProvider>
-    <div className="min-h-screen bg-background text-foreground flex">
-      <div className="hidden md:flex sticky top-0 h-screen p-3 border-r border-border">
-        <ToolNav activeTool="color" buildHash={getCurrentHash} />
-      </div>
-      <div className="md:hidden">
-        <ToolNav activeTool="color" buildHash={getCurrentHash} />
-      </div>
-      <div className="flex-1 min-w-0 pb-16 md:pb-0">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
-              OKLCH Theme Generator
-            </h1>
-            <Button variant="default" onClick={handleShare}>
-              Share Theme
-            </Button>
-          </div>
-          <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
-            Define <strong>Brand</strong>, <strong>Surface</strong> and <strong>Error</strong> seed colors &rarr; generates perceptually uniform <strong>Primitive Token</strong> scales in the OKLCH color space, maps them to ready-to-use <strong>Semantic Tokens</strong> (shadcn/ui compatible), and previews your theme across Light, Dark and High Contrast modes.
-          </p>
+      <AppShell activeTool="color" buildHash={getCurrentHash}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
+            OKLCH Theme Generator
+          </h1>
+          <Button variant="default" onClick={handleShare}>
+            Share Theme
+          </Button>
+        </div>
+        <p className="text-muted-foreground mb-6" style={{ fontSize: 'var(--text-body-s)' }}>
+          Define <strong>Brand</strong>, <strong>Surface</strong> and <strong>Error</strong> seed colors &rarr; generates perceptually uniform <strong>Primitive Token</strong> scales in the OKLCH color space, maps them to ready-to-use <strong>Semantic Tokens</strong> (shadcn/ui compatible), and previews your theme across Light, Dark and High Contrast modes.
+        </p>
 
-          {/* Main layout: controls + preview */}
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-6 mb-8">
-            <div>
-              <SeedColors />
-            </div>
-            <div>
-              <h3 className="text-body-s font-semibold mb-3">Theme Preview</h3>
-              <SurfacePreview shapeTokens={shapeTokens} />
-            </div>
+        {/* Main layout: controls + preview */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-6 mb-8">
+          <div>
+            <SeedColors />
           </div>
-
-          {/* Primitive Tokens */}
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <h2 className="text-body-s font-semibold mb-3">Primitive Tokens</h2>
-            <PrimitiveTabs />
-          </div>
-
-          {/* Code Export */}
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <CodeExport />
+          <div>
+            <h3 className="text-body-s font-semibold mb-3">Theme Preview</h3>
+            <SurfacePreview shapeTokens={shapeTokens} />
           </div>
         </div>
-        <PirateFooter />
-      </div>
+
+        {/* Primitive Tokens */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <h2 className="text-body-s font-semibold mb-3">Primitive Tokens</h2>
+          <PrimitiveTabs />
+        </div>
+
+        {/* Code Export */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <CodeExport />
+        </div>
+      </AppShell>
       <Toaster />
-    </div>
     </TooltipProvider>
   );
 }

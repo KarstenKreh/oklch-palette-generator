@@ -39,7 +39,7 @@ All four React apps share identical dependencies:
 - **Base UI React 1.3** (headless components)
 - **Lucide React** (icons), **Sonner** (toasts), **next-themes** (dark mode)
 - **shared.css** — full Standby.Design theme: primitive tokens (Brand/Surface/Error/Neutral/Success/Warning/Info), semantic tokens (light+dark, shadcn/ui compatible), Tailwind v4 `@theme inline` bridge
-- **packages/core/** — shared pure utility modules, imported via `@core` alias. Contains: color-math, palette, shadows, scale, spacing, clamp, typography, fontshare, unified-hash, math, syntax-highlight, code-block
+- **packages/core/** — shared pure utility modules + a few shared React components, imported via `@core` alias. Contains: color-math, palette, shadows, scale, spacing, clamp, typography, fontshare, unified-hash, math, syntax-highlight, code-block, pirate-footer, tool-nav, app-shell
 
 ### Shared Patterns
 
