@@ -110,10 +110,10 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 blur={store.glassBlur}
                 dispersion={store.glassDispersion}
                 cornerRadius={levelRadius}
+                onDark={isDark}
                 className="flex-1"
-                style={{ height: 64 }}
               >
-                <div className="p-2 flex flex-col items-center gap-1 h-full justify-center">
+                <div className="p-2 flex flex-col items-center gap-1">
                   <span className="text-caption font-semibold">{level}</span>
                   <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
                     {levelRadius}px
@@ -173,14 +173,14 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
             blur={store.glassBlur}
             dispersion={store.glassDispersion * 0.3}
             cornerRadius={radius}
+            onDark={isDark}
             style={{
-              height: 32,
               outline: `${store.ringWidth}px solid ${ringColor}`,
               outlineOffset: `${store.ringOffset}px`,
             }}
           >
             <div
-              className="px-3 py-1.5 text-caption h-full flex items-center"
+              className="px-3 py-1.5 text-caption"
               style={{ color: colors.textMuted }}
             >
               Input with focus ring

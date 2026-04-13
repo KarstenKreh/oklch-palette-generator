@@ -60,6 +60,7 @@ interface Tokens {
   shadowInset: string;
   isNeomorph: boolean;
   isGlass: boolean;
+  isDark: boolean;
   glassDepth: number;
   glassBlur: number;
   glassDispersion: number;
@@ -174,6 +175,7 @@ function buildTokens(
     border: dark ? p(surface, 700) : p(surface, 200),
     radius, borderW, shadow, shadowSm, shadowInset, isNeomorph,
     isGlass,
+    isDark: dark,
     glassDepth: shape?.glassDepth ?? 0.2,
     glassBlur: shape?.glassBlur ?? 2,
     glassDispersion: shape?.glassDispersion ?? 0.5,
@@ -202,7 +204,7 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
         overflow: 'hidden',
         ...style,
       }}>
-        <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius}>
+        <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius} onDark={t.isDark}>
           <div style={{ padding: '8px 10px' }}>{children}</div>
         </LiquidGlass>
       </div>
@@ -289,7 +291,7 @@ function DashboardScreen({ t }: { t: Tokens }) {
                 border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
                 overflow: 'hidden',
               }}>
-                <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius}>
+                <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius} onDark={t.isDark}>
                   <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     {statContent}
                   </div>
@@ -477,7 +479,7 @@ function MessengerScreen({ t }: { t: Tokens }) {
           <Plus size={14} color={t.muted} style={{ cursor: 'pointer', flexShrink: 0 }} />
           {t.isGlass ? (
             <div style={{ flex: 1, position: 'relative', backgroundColor: t.bg, borderRadius: `${btnR}px`, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', overflow: 'hidden' }}>
-              <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR}>
+              <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR} onDark={t.isDark}>
                 <div style={{ padding: '4px 8px', fontSize: fsCaption, color: t.muted }}>Message...</div>
               </LiquidGlass>
             </div>
@@ -507,7 +509,7 @@ function MessengerScreen({ t }: { t: Tokens }) {
         {/* Search bar */}
         {t.isGlass ? (
           <div style={{ position: 'relative', backgroundColor: t.bgCard, borderRadius: `${btnR}px`, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', overflow: 'hidden' }}>
-            <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR}>
+            <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR} onDark={t.isDark}>
               <div style={{ padding: '4px 8px', fontSize: fsCaption, color: t.muted, display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Search size={10} /> Search
               </div>

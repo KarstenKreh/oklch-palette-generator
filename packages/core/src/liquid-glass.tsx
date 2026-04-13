@@ -13,6 +13,8 @@ export interface LiquidGlassProps {
   cornerRadius: number;
   /** Saturation boost percent, default 160. */
   saturation?: number;
+  /** Backdrop is dark — subtler edge highlights to avoid harsh glowing lines. */
+  onDark?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -24,6 +26,7 @@ export function LiquidGlass({
   dispersion,
   cornerRadius,
   saturation = 160,
+  onDark = false,
   className,
   style,
 }: LiquidGlassProps) {
@@ -128,8 +131,9 @@ export function LiquidGlass({
           borderRadius: `${cornerRadius}px`,
           backdropFilter: `url(#${filterId}) blur(${blurPx}px) saturate(${saturation}%)`,
           WebkitBackdropFilter: `url(#${filterId}) blur(${blurPx}px) saturate(${saturation}%)`,
-          boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.22), inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.08)',
+          boxShadow: onDark
+            ? 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 2px rgba(255,255,255,0.1), 0 1px 4px rgba(0,0,0,0.3)'
+            : 'inset 0 0 0 1px rgba(255,255,255,0.22), inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.08)',
           pointerEvents: 'none',
         }}
       />

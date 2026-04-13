@@ -312,7 +312,7 @@ export function SurfacePanel({
                   borderRadius: br,
                 }}
               >
-                <LiquidGlass depth={glassDepth} blur={glassBlur} dispersion={glassDispersion} cornerRadius={br}>
+                <LiquidGlass depth={glassDepth} blur={glassBlur} dispersion={glassDispersion} cornerRadius={br} onDark={isDark}>
                   <div className="p-2.5 text-caption flex flex-col justify-between min-h-20" style={{ color: textHex }}>
                     <span className="font-medium">{card.name}</span>
                     <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
