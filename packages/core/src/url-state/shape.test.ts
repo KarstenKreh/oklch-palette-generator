@@ -57,16 +57,26 @@ describe('encodeState / decodeState round-trip', () => {
     expect(decoded!.shapeStyle).toBe('glass');
   });
 
-  it('round-trips neumorphic shadow type', () => {
-    const state = makeState({ shadowType: 'neumorphic' });
+  it('round-trips neomorph style', () => {
+    const state = makeState({ shapeStyle: 'neomorph' });
     const decoded = decodeState(encodeState(state));
-    expect(decoded!.shadowType).toBe('neumorphic');
+    expect(decoded!.shapeStyle).toBe('neomorph');
   });
 
   it('round-trips flat shadow type', () => {
     const state = makeState({ shadowType: 'flat' });
     const decoded = decodeState(encodeState(state));
     expect(decoded!.shadowType).toBe('flat');
+  });
+
+  it('migrates legacy shadowType="neumorphic" to shapeStyle="neomorph"', () => {
+    // Build a legacy hash by forcing 'neumorphic' into the shadowType slot.
+    const parts = encodeState(makeState()).split(',');
+    parts[2] = 'neumorphic';
+    const decoded = decodeState(parts.join(','));
+    expect(decoded).not.toBeNull();
+    expect(decoded!.shapeStyle).toBe('neomorph');
+    expect(decoded!.shadowType).toBe('normal');
   });
 
   it('round-trips custom color modes', () => {

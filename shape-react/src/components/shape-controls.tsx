@@ -30,6 +30,15 @@ export function ShapeControls() {
             <div className="p-3"><RingControls /></div>
           </>
         )}
+
+        {shapeStyle === 'neomorph' && (
+          <>
+            <div className="p-3"><ShadowControls /></div>
+            <div className="p-3"><BorderControls /></div>
+            <div className="p-3"><RadiusControls /></div>
+            <div className="p-3"><RingControls /></div>
+          </>
+        )}
       </div>
     </div>
   );

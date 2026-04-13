@@ -31,9 +31,13 @@ export interface ShapeExportOptions {
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
+function effectiveShadowType(opts: ShapeExportOptions): ShadowType {
+  return opts.shapeStyle === 'neomorph' ? 'neumorphic' : opts.shadowType;
+}
+
 function buildShadowConfig(opts: ShapeExportOptions): ShadowConfig {
   return {
-    type: opts.shadowType,
+    type: effectiveShadowType(opts),
     strength: opts.shadowStrength,
     blurScale: opts.shadowBlurScale,
     scale: opts.shadowScale,
@@ -89,7 +93,7 @@ export function generateCssExport(opts: ShapeExportOptions): string {
   if (opts.shapeStyle !== 'glass' && opts.shadowEnabled) {
     const lightBg = deriveBgHex(opts.surfaceHex, false);
     const lightShadows = generateShadows(lightBg, false, config);
-    css += `  /* Shadows — ${shadowTypeLabel(opts.shadowType)}, scale ${scaleLabel(opts.shadowScale)} */\n`;
+    css += `  /* Shadows — ${shadowTypeLabel(effectiveShadowType(opts))}, scale ${scaleLabel(opts.shadowScale)} */\n`;
     for (const s of lightShadows) {
       css += `  --shadow-${s.name}: ${s.shadow};\n`;
     }
@@ -185,7 +189,7 @@ export function generateTailwindV4Export(opts: ShapeExportOptions): string {
     const lightShadows = generateShadows(lightBg, false, config);
     const darkShadows = generateShadows(darkBg, true, config);
 
-    css += `\n/* Shadows — ${shadowTypeLabel(opts.shadowType)}, scale ${scaleLabel(opts.shadowScale)} */\n`;
+    css += `\n/* Shadows — ${shadowTypeLabel(effectiveShadowType(opts))}, scale ${scaleLabel(opts.shadowScale)} */\n`;
     css += `/* Mode-dependent: use CSS custom properties with darkMode: "class" */\n`;
     css += `:root {\n`;
     for (const s of lightShadows) {
@@ -286,11 +290,21 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
 
   let md = `# Shape Tokens — standby.design/shape\n\n`;
 
-  // Shadows (paper only)
+  md += `**Style:** ${opts.shapeStyle === 'paper' ? 'Paper' : opts.shapeStyle === 'glass' ? 'Glass (Liquid Glass)' : 'Neomorph (Soft UI)'}\n\n`;
+
+  if (opts.shapeStyle === 'neomorph') {
+    md += `## Neomorph Notes\n\n`;
+    md += `- **Monochromatic surface:** Cards, muted, and elevated layers share the parent background color. Depth comes from dual shadows (light top-left + dark bottom-right), not color contrast.\n`;
+    md += `- **Accessibility:** Low surface/background contrast is inherent to the style. Ensure text and interactive elements meet WCAG AA (4.5:1) against their own backgrounds — the preview flags sub-threshold buttons.\n`;
+    md += `- **Pressed states:** Mirror the same shadow values with \`inset\` to create a depressed effect for active/pressed buttons.\n`;
+    md += `- **Border default:** 0 by design. Raise \`--border-width\` only if you need extra separation.\n\n`;
+  }
+
+  // Shadows (paper + neomorph — skipped for glass)
   if (opts.shapeStyle !== 'glass') {
   md += `## Shadows\n\n`;
   if (opts.shadowEnabled) {
-    md += `- **Style:** ${shadowTypeLabel(opts.shadowType)}\n`;
+    md += `- **Style:** ${shadowTypeLabel(effectiveShadowType(opts))}\n`;
     md += `- **Scale:** ${scaleLabel(opts.shadowScale)} (5 levels: xs, sm, md, lg, xl)\n`;
     md += `- **Strength:** ${opts.shadowStrength}\n`;
     md += `- **Blur scale:** ${opts.shadowBlurScale}\n`;

@@ -109,11 +109,12 @@ function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: str
 
 function PreviewPanel({ isDark }: { isDark: boolean }) {
   const store = useShapeStore();
-  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin]);
+  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle]);
   const isGlass = store.shapeStyle === 'glass';
+  const isNeomorph = store.shapeStyle === 'neomorph';
 
   const shadowConfig: ShadowConfig = {
-    type: store.shadowType,
+    type: isNeomorph ? 'neumorphic' : store.shadowType,
     strength: store.shadowStrength,
     blurScale: store.shadowBlurScale,
     scale: store.shadowScale,
@@ -124,7 +125,7 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
   const shadows = useMemo(
     () => store.shadowEnabled ? generateShadows(colors.bg, isDark, shadowConfig) : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [colors.bg, isDark, store.shadowEnabled, store.shadowType, store.shadowStrength, store.shadowBlurScale, store.shadowScale, store.shadowColorMode, store.shadowCustomColor],
+    [colors.bg, isDark, store.shadowEnabled, store.shadowType, store.shapeStyle, store.shadowStrength, store.shadowBlurScale, store.shadowScale, store.shadowColorMode, store.shadowCustomColor],
   );
 
   const radius = store.borderRadius;
@@ -194,10 +195,22 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 style={{
                   height: 64,
                   borderRadius: `${levelRadius}px`,
-                  backgroundColor: colors.card,
                   boxShadow: `inset 0 0 0 1px ${colors.borderMuted}`,
                 }}
               >
+                {/* Refraction backdrop — colored stripes give LiquidGlass something to distort */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `
+                      linear-gradient(135deg,
+                        ${colors.primary}55 0%,
+                        ${colors.primary}15 35%,
+                        ${colors.secondary}30 65%,
+                        ${colors.primary}45 100%)
+                    `,
+                  }}
+                />
                 <LiquidGlass {...glassProps(store.glassDepth, store.glassBlur, store.glassDispersion, levelRadius)}>
                   <div className="p-2 flex flex-col items-center gap-1">
                     <span className="text-caption font-semibold">{level}</span>
@@ -232,73 +245,21 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
 
       {/* Buttons */}
       <div className="relative flex items-center gap-2">
-        {isGlass ? (
-          <>
+        {([
+          { label: 'Primary', bg: colors.primary, fg: colors.primaryFg },
+          { label: 'Secondary', bg: colors.secondary, fg: colors.secondaryFg },
+          { label: 'Destructive', bg: colors.destructive, fg: colors.destructiveFg },
+        ] as const).map(({ label, bg, fg }) => (
+          <div key={label} className="relative inline-flex items-center">
             <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.primary,
-                color: colors.primaryFg,
-                borderRadius: `${radius}px`,
-              }}
+              className="px-3 py-1.5 text-caption font-medium inline-flex items-center gap-1.5"
+              style={{ backgroundColor: bg, color: fg, borderRadius: `${radius}px` }}
             >
-              Primary
+              {label}
+              <ContrastWarning fg={fg} bg={bg} label={`${label}-Button`} />
             </button>
-            <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.secondary,
-                color: colors.secondaryFg,
-                borderRadius: `${radius}px`,
-              }}
-            >
-              Secondary
-            </button>
-            <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.destructive,
-                color: colors.destructiveFg,
-                borderRadius: `${radius}px`,
-              }}
-            >
-              Destructive
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.primary,
-                color: colors.primaryFg,
-                borderRadius: `${radius}px`,
-              }}
-            >
-              Primary
-            </button>
-            <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.secondary,
-                color: colors.secondaryFg,
-                borderRadius: `${radius}px`,
-              }}
-            >
-              Secondary
-            </button>
-            <button
-              className="px-3 py-1.5 text-caption font-medium"
-              style={{
-                backgroundColor: colors.destructive,
-                color: colors.destructiveFg,
-                borderRadius: `${radius}px`,
-              }}
-            >
-              Destructive
-            </button>
-          </>
-        )}
+          </div>
+        ))}
       </div>
 
       {/* Input with focus ring */}
@@ -312,9 +273,19 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
               outlineOffset: `${store.ringOffset}px`,
               borderRadius: `${radius}px`,
               overflow: 'hidden',
-              backgroundColor: colors.card,
             }}
           >
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `
+                  linear-gradient(90deg,
+                    ${colors.primary}40 0%,
+                    ${colors.secondary}30 50%,
+                    ${colors.primary}40 100%)
+                `,
+              }}
+            />
             <LiquidGlass {...glassProps(store.glassDepth * 0.3, store.glassBlur, store.glassDispersion * 0.3, radius)}>
               <div
                 className="px-3 py-1.5 text-caption"
