@@ -4,10 +4,10 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getMySegment, buildUnifiedHash } from '@core/unified-hash';
 import { ToolNav } from '@/components/tool-nav';
-import { decodeState as decodeColorState, encodeState as encodeColorState, type DecodedColorState } from '@/lib/color-url-state';
-import { decodeState as decodeTypeState } from '@/lib/type-url-state';
-import { decodeState as decodeShapeState, type ShapeState } from '@/lib/shape-url-state';
-import { decodeState as decodeSymbolState, type SymbolState } from '@/lib/symbol-url-state';
+import { decodeState as decodeColorState, encodeState as encodeColorState, type DecodedState as DecodedColorState } from '@core/url-state/color';
+import { decodeState as decodeTypeState } from '@core/url-state/type';
+import { decodeState as decodeShapeState, type ShapeUrlState as ShapeState } from '@core/url-state/shape';
+import { decodeState as decodeSymbolState, type UrlState as SymbolState } from '@core/url-state/symbol';
 import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@core/palette';
 import { hexToOklch } from '@core/color-math';
 import { customScale, traditionalScale, type ComputedLevel } from '@core/scale';
@@ -51,6 +51,7 @@ const DEFAULT_COLOR_STATE: DecodedColorState = {
 const DEFAULT_TYPE_HASH = 'custom,1,1.272,1.19,satoshi,satoshi,system-mono';
 
 const DEFAULT_SHAPE_STATE: Partial<ShapeState> = {
+  shapeStyle: 'paper',
   shadowEnabled: true,
   shadowType: 'normal',
   shadowStrength: 1.0,
@@ -63,9 +64,9 @@ const DEFAULT_SHAPE_STATE: Partial<ShapeState> = {
   borderColorMode: 'auto',
   borderCustomColor: '#000000',
   borderRadius: 8,
-  glassEnabled: false,
-  glassBlur: 12,
-  glassOpacity: 0.8,
+  glassDepth: 1.0,
+  glassBlur: 2.0,
+  glassDispersion: 0.4,
   ringWidth: 2,
   ringOffset: 2,
   ringColorMode: 'auto',
