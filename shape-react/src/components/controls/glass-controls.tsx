@@ -2,7 +2,7 @@ import { Slider } from '@/components/ui/slider';
 import { useShapeStore } from '@/store/shape-store';
 import { RotateCcw } from 'lucide-react';
 
-const GLASS_DEFAULTS = { glassDepth: 1.0, glassBlur: 2.0, glassDispersion: 0.4 };
+const GLASS_DEFAULTS = { glassDepth: 0.2, glassBlur: 2.0, glassDispersion: 0.4 };
 
 function sliderVal(v: number | readonly number[]): number {
   return Array.isArray(v) ? v[0] : v;

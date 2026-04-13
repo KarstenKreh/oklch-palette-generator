@@ -62,14 +62,20 @@ function generateNormal(bgHex: string, isDark: boolean, config: ShadowConfig): S
   });
 }
 
-/** Generate neumorphic (inner + outer) shadows. */
-function generateNeumorphic(bgHex: string, isDark: boolean, config: ShadowConfig): ShadowValue[] {
+/** Derive the light/dark companion hex values for a neumorphic surface. */
+function neumorphicColors(bgHex: string, isDark: boolean): { lightHex: string; darkHex: string } {
   const [bgL, bgC, bgH] = hexToOklch(bgHex);
   const lightL = Math.min(1, bgL + (isDark ? 0.12 : 0.25));
   const darkL = Math.max(0, bgL - (isDark ? 0.15 : 0.12));
+  return {
+    lightHex: oklchToHex(lightL, bgC * 0.3, bgH),
+    darkHex: oklchToHex(darkL, bgC * 0.3, bgH),
+  };
+}
 
-  const lightHex = oklchToHex(lightL, bgC * 0.3, bgH);
-  const darkHex = oklchToHex(darkL, bgC * 0.3, bgH);
+/** Generate neumorphic (raised / extruded) shadows — dual light/dark outer pair. */
+function generateNeumorphic(bgHex: string, isDark: boolean, config: ShadowConfig): ShadowValue[] {
+  const { lightHex, darkHex } = neumorphicColors(bgHex, isDark);
 
   return buildLevels(config.scale).map(({ name, factor }) => {
     const dist = (factor * 0.25).toFixed(2);
@@ -80,6 +86,23 @@ function generateNeumorphic(bgHex: string, isDark: boolean, config: ShadowConfig
     const shadow =
       `-${dist}rem -${dist}rem ${blur}rem ${lightHex}${alphaHex(parseFloat(aLight))}, ` +
       `${dist}rem ${dist}rem ${blur}rem ${darkHex}${alphaHex(parseFloat(aDark))}`;
+    return { name, shadow };
+  });
+}
+
+/** Generate neumorphic INSET (pressed / depressed / concave) shadows — dark top-left inside, light bottom-right inside. */
+export function generateNeumorphicInset(bgHex: string, isDark: boolean, config: ShadowConfig): ShadowValue[] {
+  const { lightHex, darkHex } = neumorphicColors(bgHex, isDark);
+
+  return buildLevels(config.scale).map(({ name, factor }) => {
+    const dist = (factor * 0.25).toFixed(2);
+    const blur = (factor * 0.5 * config.blurScale).toFixed(2);
+    const aLight = Math.min(1, 0.5 * factor * config.strength).toFixed(2);
+    const aDark = Math.min(1, 0.6 * factor * config.strength).toFixed(2);
+
+    const shadow =
+      `inset ${dist}rem ${dist}rem ${blur}rem ${darkHex}${alphaHex(parseFloat(aDark))}, ` +
+      `inset -${dist}rem -${dist}rem ${blur}rem ${lightHex}${alphaHex(parseFloat(aLight))}`;
     return { name, shadow };
   });
 }

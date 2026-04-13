@@ -98,9 +98,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   borderRadius: 8,
 
   // Glass
-  glassDepth: 1.0,
+  glassDepth: 0.2,
   glassBlur: 2.0,
-  glassDispersion: 0.4,
+  glassDispersion: 0.5,
 
   // Ring
   ringWidth: 2,
@@ -119,7 +119,7 @@ export const useShapeStore = create<ShapeState>((set) => ({
 
   // Setters
   setShapeStyle: (v) => set((prev) => v === 'neomorph' && prev.shapeStyle !== 'neomorph'
-    ? { shapeStyle: v, borderWidth: 0 }
+    ? { shapeStyle: v, borderWidth: 0, ringWidth: 3, ringOffset: 0 }
     : { shapeStyle: v }),
   setShadowEnabled: (v) => set({ shadowEnabled: v }),
   setShadowType: (v) => set({ shadowType: v }),

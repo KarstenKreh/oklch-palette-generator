@@ -1,7 +1,10 @@
 import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/hooks/use-palette';
 import type { FgContrastMode } from '@/store/theme-store';
+import type { ShapeUrlState } from '@core/url-state/shape';
 import { contrastRatio, invertHex } from '@core/color-math';
+import { generateShadows, type ShadowConfig } from '@core/shadows';
+import { LiquidGlass } from '@core/liquid-glass';
 import { PanelSvg } from '@/components/panel-svg';
 import { Sun, Moon, SunDim, MoonStar } from 'lucide-react';
 
@@ -19,6 +22,7 @@ export interface SurfacePanelProps {
   accentPalettes: AccentPalette[];
   fgContrastMode: FgContrastMode;
   shapeTokens?: { borderEnabled: boolean; borderWidth: number; borderRadius: number };
+  shape?: Partial<ShapeUrlState> | null;
 }
 
 const DARK_FG = '#1A1A1A';
@@ -181,12 +185,32 @@ export function SurfacePanel({
   accentPalettes,
   fgContrastMode,
   shapeTokens,
+  shape,
 }: SurfacePanelProps) {
   const config = getPanelConfig(panelType, palette, neutral);
   const { label, bgHex, textHex, isDark, cardHex, elevatedHex, activeHex, mutedHex, mutedFgHex, borderHex, borderMutedHex } = config;
 
   const bw = shapeTokens?.borderEnabled !== false ? (shapeTokens?.borderWidth ?? 1) : 0;
   const br = shapeTokens?.borderRadius ?? 8;
+
+  // Neomorph / Glass only for Standard panels — HC panels stay paper-like by constraint.
+  const isStandardPanel = panelType === 'light' || panelType === 'dark';
+  const isNeomorph = isStandardPanel && shape?.shapeStyle === 'neomorph';
+  const isGlass = isStandardPanel && shape?.shapeStyle === 'glass';
+  const glassDepth = shape?.glassDepth ?? 0.2;
+  const glassBlur = shape?.glassBlur ?? 2;
+  const glassDispersion = shape?.glassDispersion ?? 0.5;
+
+  const neomorphShadows = isNeomorph ? generateShadows(bgHex, isDark, {
+    type: 'neumorphic',
+    strength: shape?.shadowStrength ?? 1,
+    blurScale: shape?.shadowBlurScale ?? 1,
+    scale: shape?.shadowScale ?? 1.272,
+    colorMode: 'auto',
+    customColor: '#000000',
+  } as ShadowConfig) : [];
+  const shadowSm = neomorphShadows.find(s => s.name === 'sm')?.shadow;
+  const shadowMd = neomorphShadows.find(s => s.name === 'md')?.shadow;
 
   const surfaceCards = getSurfaceCards(panelType, config, brand);
 
@@ -275,41 +299,64 @@ export function SurfacePanel({
       </div>
 
       {/* Surface cards — full width */}
-      <div className="grid grid-cols-4 gap-2">
-        {surfaceCards.map((card) => (
-          <div
-            key={card.name}
-            className="p-2.5 text-caption flex flex-col justify-between min-h-20"
-            style={{
-              backgroundColor: card.bg,
-              color: textHex,
-              border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
-              borderRadius: br,
-            }}
-          >
-            <span className="font-medium">{card.name}</span>
-            <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-4 gap-4">
+        {surfaceCards.map((card) => {
+          if (isGlass) {
+            return (
+              <div
+                key={card.name}
+                className="relative min-h-20 overflow-hidden"
+                style={{
+                  backgroundColor: card.bg,
+                  border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
+                  borderRadius: br,
+                }}
+              >
+                <LiquidGlass depth={glassDepth} blur={glassBlur} dispersion={glassDispersion} cornerRadius={br}>
+                  <div className="p-2.5 text-caption flex flex-col justify-between min-h-20" style={{ color: textHex }}>
+                    <span className="font-medium">{card.name}</span>
+                    <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
+                  </div>
+                </LiquidGlass>
+              </div>
+            );
+          }
+          return (
+            <div
+              key={card.name}
+              className="p-2.5 text-caption flex flex-col justify-between min-h-20"
+              style={{
+                backgroundColor: card.bg,
+                color: textHex,
+                border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
+                borderRadius: br,
+                boxShadow: shadowMd,
+              }}
+            >
+              <span className="font-medium">{card.name}</span>
+              <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Buttons */}
       <div className="flex gap-2">
         <div
           className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: primaryBg, color: primaryFg, borderRadius: Math.max(4, br - 2) }}
+          style={{ backgroundColor: primaryBg, color: primaryFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
         >
           Primary
         </div>
         <div
           className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: secondaryBg, color: secondaryFg, borderRadius: Math.max(4, br - 2) }}
+          style={{ backgroundColor: secondaryBg, color: secondaryFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
         >
           Secondary
         </div>
         <div
           className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: destructiveBg, color: destructiveFg, borderRadius: Math.max(4, br - 2) }}
+          style={{ backgroundColor: destructiveBg, color: destructiveFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
         >
           Destructive
         </div>

@@ -2,6 +2,7 @@ import { usePalette } from '@/hooks/use-palette';
 import { useThemeStore } from '@/store/theme-store';
 import { SurfacePanel } from '@/components/surface-panel';
 import type { PaletteEntry } from '@core/palette';
+import type { ShapeUrlState } from '@core/url-state/shape';
 
 function toLookup(palette: PaletteEntry[]): Record<number, PaletteEntry> {
   const map: Record<number, PaletteEntry> = {};
@@ -17,7 +18,7 @@ export interface ShapeTokens {
   borderRadius: number;
 }
 
-export function SurfacePreview({ shapeTokens }: { shapeTokens?: ShapeTokens }) {
+export function SurfacePreview({ shapeTokens, shape }: { shapeTokens?: ShapeTokens; shape?: Partial<ShapeUrlState> | null }) {
   const {
     brand,
     surface,
@@ -55,10 +56,10 @@ export function SurfacePreview({ shapeTokens }: { shapeTokens?: ShapeTokens }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <SurfacePanel panelType="light" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
-      <SurfacePanel panelType="dark" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
-      <SurfacePanel panelType="light-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
-      <SurfacePanel panelType="dark-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} />
+      <SurfacePanel panelType="light" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} shape={shape} />
+      <SurfacePanel panelType="dark" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} shape={shape} />
+      <SurfacePanel panelType="light-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} shape={shape} />
+      <SurfacePanel panelType="dark-hc" palette={surfaceMap} {...shared} shapeTokens={shapeTokens} shape={shape} />
     </div>
   );
 }

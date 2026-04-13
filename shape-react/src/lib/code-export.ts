@@ -352,11 +352,11 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
   // Glass
   md += `\n## Liquid Glass\n\n`;
   if (opts.shapeStyle === 'glass') {
-    md += `Uses the \`liquid-glass-react\` library (liquid glass distortion effect).\n\n`;
-    md += `- **Depth:** ${opts.glassDepth} (displacement intensity, negative = compression)\n`;
-    md += `- **Blur:** ${opts.glassBlur} (backdrop blur amount)\n`;
+    md += `Implemented as a self-contained SVG filter + \`backdrop-filter\` component (no external runtime dependency).\n\n`;
+    md += `- **Depth:** ${opts.glassDepth} (displacement intensity)\n`;
+    md += `- **Blur:** ${opts.glassBlur} (backdrop blur multiplier)\n`;
     md += `- **Dispersion:** ${opts.glassDispersion} (chromatic aberration)\n`;
-    md += `\n\`\`\`tsx\nimport LiquidGlass from 'liquid-glass-react'\n\n<LiquidGlass\n  displacementScale={${(opts.glassDepth * 40).toFixed(0)}}\n  blurAmount={${(opts.glassBlur * 0.03).toFixed(3)}}\n  aberrationIntensity={${(opts.glassDispersion * 4).toFixed(2)}}\n  cornerRadius={${opts.borderRadius}}\n  elasticity={0}\n>\n  {children}\n</LiquidGlass>\n\`\`\`\n`;
+    md += `\nDisplacement is driven by an SVG \`<feDisplacementMap>\` with 35% filter padding (no edge clipping). Backdrop blur and saturation use the native CSS \`backdrop-filter\`. Chromatic aberration is produced by three \`feDisplacementMap\` passes with per-channel scale offsets.\n`;
   } else {
     md += `Liquid glass effect is **disabled**.\n`;
   }

@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useThemeStore } from '@/store/theme-store';
 import { encodeState, decodeState } from '@/lib/url-state';
 import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
+import { decodeState as decodeShapeState, type ShapeUrlState } from '@core/url-state/shape';
 
 interface OtherSegments { t?: string; s?: string; y?: string }
+
+export interface UrlStateResult extends OtherSegments {
+  shape: Partial<ShapeUrlState> | null;
+}
 
 /**
  * Returns the other tools' hash segments (t=, s=, y=), captured at mount.
@@ -60,5 +65,10 @@ export function useUrlState() {
     store.fgContrastMode, store.themeName, store.extraAccents,
   ]);
 
-  return others;
+  const shape = useMemo<Partial<ShapeUrlState> | null>(
+    () => others.s ? decodeShapeState(others.s) : null,
+    [others.s],
+  );
+
+  return { ...others, shape };
 }

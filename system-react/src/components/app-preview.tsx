@@ -7,6 +7,8 @@ import type { SpacingToken } from '@core/spacing';
 import type { ShapeUrlState as ShapeState } from '@core/url-state/shape';
 import { PhoneMockup } from '@/components/phone-mockup';
 import { contrastRatio } from '@core/color-math';
+import { generateShadows, generateNeumorphicInset, type ShadowConfig, type ShadowType } from '@core/shadows';
+import { LiquidGlass } from '@core/liquid-glass';
 import type { FgContrastMode } from '@core/url-state/color';
 
 interface PaletteResult {
@@ -54,6 +56,13 @@ interface Tokens {
   border: string;
   radius: number; borderW: number;
   shadow: string;
+  shadowSm: string;
+  shadowInset: string;
+  isNeomorph: boolean;
+  isGlass: boolean;
+  glassDepth: number;
+  glassBlur: number;
+  glassDispersion: number;
   fs: (name: string) => string | undefined;
   lh: (name: string) => number | undefined;
   ls: (name: string) => string | undefined;
@@ -83,11 +92,32 @@ function buildTokens(
 
   const radius = shape?.borderRadius ?? 8;
   const borderW = (shape?.borderEnabled ?? true) ? (shape?.borderWidth ?? 1) : 0;
-  const shadowStr = shape?.shadowStrength ?? 1;
-  const shadowBlur = shape?.shadowBlurScale ?? 1;
-  const shadow = (shape?.shadowEnabled ?? true)
-    ? `0 ${Math.round(2 * shadowStr)}px ${Math.round(8 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.2 : 0.06) * shadowStr}), 0 ${Math.round(1 * shadowStr)}px ${Math.round(3 * shadowBlur)}px rgba(0,0,0,${(dark ? 0.15 : 0.04) * shadowStr})`
-    : 'none';
+  const isNeomorph = shape?.shapeStyle === 'neomorph';
+  const isGlass = shape?.shapeStyle === 'glass';
+
+  // Surface base (overall app bg) — neomorph & paper both compute this the same;
+  // neomorph re-uses it for card/elevated to achieve the monochromatic effect below.
+  const baseBg = dark ? p(surface, 875) : p(surface, 50);
+
+  // Shadow engine — route neomorph → 'neumorphic', paper → user's shadowType (default 'normal').
+  // Glass stays without shadow in this preview (user is actively iterating the real Glass elsewhere).
+  const resolvedShadowType: ShadowType = isNeomorph ? 'neumorphic' : (shape?.shadowType ?? 'normal');
+  const shadowConfig: ShadowConfig = {
+    type: resolvedShadowType,
+    strength: shape?.shadowStrength ?? 1,
+    blurScale: shape?.shadowBlurScale ?? 1,
+    scale: shape?.shadowScale ?? 1.272,
+    colorMode: shape?.shadowColorMode ?? 'auto',
+    customColor: shape?.shadowCustomColor ?? '#000000',
+  };
+  const shadowsEnabled = (shape?.shadowEnabled ?? true) && !isGlass;
+  const shadowSet = shadowsEnabled ? generateShadows(baseBg, dark, shadowConfig) : [];
+  const insetSet = shadowsEnabled && isNeomorph ? generateNeumorphicInset(baseBg, dark, shadowConfig) : [];
+  const pickShadow = (name: string) => shadowSet.find(s => s.name === name)?.shadow ?? 'none';
+  const pickInset = (name: string) => insetSet.find(s => s.name === name)?.shadow ?? 'none';
+  const shadow = pickShadow('md');
+  const shadowSm = pickShadow('sm');
+  const shadowInset = pickInset('sm');
 
   const findAccent = (name: string) =>
     palette?.accentPalettes?.find(a => a.cssName === name);
@@ -111,10 +141,14 @@ function buildTokens(
 
   const l = (name: string) => scale ? lvl(scale, name) : undefined;
 
+  // Neomorph collapses bg/card/elevated to the same surface — dual shadows carry depth.
+  const bgCardHex = isNeomorph ? baseBg : (dark ? p(surface, 825) : p(surface, 25));
+  const bgElevatedHex = isNeomorph ? baseBg : (dark ? p(surface, 800) : p(surface, 25));
+
   return {
-    bg: dark ? p(surface, 875) : p(surface, 50),
-    bgCard: dark ? p(surface, 825) : p(surface, 25),
-    bgElevated: dark ? p(surface, 800) : p(surface, 25),
+    bg: baseBg,
+    bgCard: bgCardHex,
+    bgElevated: bgElevatedHex,
     fg: dark ? p(surface, 25) : p(surface, 975),
     muted: dark ? p(surface, 300) : p(surface, 700),
     primary: palette?.brandSwatchOverride ? palette.brandSwatchOverride.hex : (dark ? p(brand, 400) : p(brand, 600)),
@@ -138,7 +172,11 @@ function buildTokens(
     accentSecondary: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     destructiveSecondary: dark ? p(error, 800) : p(error, 200),
     border: dark ? p(surface, 700) : p(surface, 200),
-    radius, borderW, shadow,
+    radius, borderW, shadow, shadowSm, shadowInset, isNeomorph,
+    isGlass,
+    glassDepth: shape?.glassDepth ?? 0.2,
+    glassBlur: shape?.glassBlur ?? 2,
+    glassDispersion: shape?.glassDispersion ?? 0.5,
     fs: (name: string) => { const v = l(name); return v ? `${v.maxRem}rem` : undefined; },
     lh: (name: string) => l(name)?.lineHeight,
     ls: (name: string) => { const v = l(name); return v?.letterSpacing ? `${v.letterSpacing}em` : undefined; },
@@ -154,6 +192,22 @@ function buildTokens(
 
 /* ─── Card helper ─── */
 function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; style?: React.CSSProperties }) {
+  if (t.isGlass) {
+    return (
+      <div style={{
+        position: 'relative',
+        backgroundColor: t.bgCard,
+        borderRadius: t.radius,
+        border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
+        overflow: 'hidden',
+        ...style,
+      }}>
+        <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius}>
+          <div style={{ padding: '8px 10px' }}>{children}</div>
+        </LiquidGlass>
+      </div>
+    );
+  }
   return (
     <div style={{
       backgroundColor: t.bgCard,
@@ -207,32 +261,56 @@ function DashboardScreen({ t }: { t: Tokens }) {
       </div>
 
       {/* Widget 2: Stat Cards */}
-      <div style={{ display: 'flex', gap: '6px' }}>
+      <div style={{ display: 'flex', gap: '10px' }}>
         {([
           { label: 'Revenue', value: '$12.4k', change: '+12%', color: t.success, secondaryBg: t.successSecondary },
           { label: 'Users', value: '3,842', change: '+8%', color: t.accent, secondaryBg: t.accentSecondary },
           { label: 'Errors', value: '23', change: '+3', color: t.destructive, secondaryBg: t.destructiveSecondary },
-        ]).map((stat) => (
-          <div key={stat.label} style={{
-            flex: 1,
-            backgroundColor: t.bgCard,
-            borderRadius: t.radius,
-            boxShadow: t.shadow,
-            border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
-            padding: '6px 8px',
-            display: 'flex', flexDirection: 'column', gap: '2px',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.5rem', color: t.muted }}>{stat.label}</span>
-              <span style={{
-                fontSize: '0.4rem', fontWeight: 600,
-                padding: '1px 4px', borderRadius: Math.max(2, t.radius - 4),
-                backgroundColor: stat.secondaryBg, color: pickFg(stat.secondaryBg, stat.color, t.fg, 'best'),
-              }}>{stat.change}</span>
+        ]).map((stat) => {
+          const statContent = (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.5rem', color: t.muted }}>{stat.label}</span>
+                <span style={{
+                  fontSize: '0.4rem', fontWeight: 600,
+                  padding: '1px 4px', borderRadius: Math.max(2, t.radius - 4),
+                  backgroundColor: stat.secondaryBg, color: pickFg(stat.secondaryBg, stat.color, t.fg, 'best'),
+                }}>{stat.change}</span>
+              </div>
+              <div style={{ fontSize: t.fs('h5') || '0.95rem', fontWeight: t.headingFw, fontFamily: hFf, letterSpacing: t.ls('h5'), color: t.fg }}>{stat.value}</div>
+            </>
+          );
+          if (t.isGlass) {
+            return (
+              <div key={stat.label} style={{
+                flex: 1, position: 'relative',
+                backgroundColor: t.bgCard,
+                borderRadius: t.radius,
+                border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
+                overflow: 'hidden',
+              }}>
+                <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius}>
+                  <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    {statContent}
+                  </div>
+                </LiquidGlass>
+              </div>
+            );
+          }
+          return (
+            <div key={stat.label} style={{
+              flex: 1,
+              backgroundColor: t.bgCard,
+              borderRadius: t.radius,
+              boxShadow: t.shadow,
+              border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
+              padding: '6px 8px',
+              display: 'flex', flexDirection: 'column', gap: '2px',
+            }}>
+              {statContent}
             </div>
-            <div style={{ fontSize: t.fs('h5') || '0.95rem', fontWeight: t.headingFw, fontFamily: hFf, letterSpacing: t.ls('h5'), color: t.fg }}>{stat.value}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Widget 3: Bar Chart */}
@@ -397,9 +475,17 @@ function MessengerScreen({ t }: { t: Tokens }) {
         {/* Input bar */}
         <div style={{ backgroundColor: t.bgCard, borderTop: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', padding: '4px 10px', display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
           <Plus size={14} color={t.muted} style={{ cursor: 'pointer', flexShrink: 0 }} />
-          <div style={{ flex: 1, backgroundColor: t.bg, color: t.muted, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', borderRadius: `${btnR}px`, padding: '4px 8px', fontSize: fsCaption }}>
-            Message...
-          </div>
+          {t.isGlass ? (
+            <div style={{ flex: 1, position: 'relative', backgroundColor: t.bg, borderRadius: `${btnR}px`, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', overflow: 'hidden' }}>
+              <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR}>
+                <div style={{ padding: '4px 8px', fontSize: fsCaption, color: t.muted }}>Message...</div>
+              </LiquidGlass>
+            </div>
+          ) : (
+            <div style={{ flex: 1, backgroundColor: t.bg, color: t.muted, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', borderRadius: `${btnR}px`, padding: '4px 8px', fontSize: fsCaption, boxShadow: t.isNeomorph ? t.shadowInset : undefined }}>
+              Message...
+            </div>
+          )}
           <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: t.primary, color: t.primaryFg, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
             <ArrowUp size={12} />
           </div>
@@ -419,14 +505,25 @@ function MessengerScreen({ t }: { t: Tokens }) {
           <SquarePen size={14} color={t.primary} style={{ cursor: 'pointer' }} />
         </div>
         {/* Search bar */}
-        <div style={{
-          backgroundColor: t.bgCard, borderRadius: `${btnR}px`,
-          border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
-          padding: '4px 8px', fontSize: fsCaption, color: t.muted,
-          display: 'flex', alignItems: 'center', gap: '4px',
-        }}>
-          <Search size={10} /> Search
-        </div>
+        {t.isGlass ? (
+          <div style={{ position: 'relative', backgroundColor: t.bgCard, borderRadius: `${btnR}px`, border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none', overflow: 'hidden' }}>
+            <LiquidGlass depth={t.glassDepth * 0.3} blur={t.glassBlur} dispersion={t.glassDispersion * 0.3} cornerRadius={btnR}>
+              <div style={{ padding: '4px 8px', fontSize: fsCaption, color: t.muted, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Search size={10} /> Search
+              </div>
+            </LiquidGlass>
+          </div>
+        ) : (
+          <div style={{
+            backgroundColor: t.bgCard, borderRadius: `${btnR}px`,
+            border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
+            padding: '4px 8px', fontSize: fsCaption, color: t.muted,
+            display: 'flex', alignItems: 'center', gap: '4px',
+            boxShadow: t.isNeomorph ? t.shadowInset : undefined,
+          }}>
+            <Search size={10} /> Search
+          </div>
+        )}
       </div>
 
       {/* Contact list */}

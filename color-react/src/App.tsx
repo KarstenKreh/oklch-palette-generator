@@ -25,21 +25,12 @@ function App() {
   const otherSegments = useUrlState();
   useFavicon(brandHex);
 
-  // Decode shape tokens from s= segment for preview
-  const shapeTokens = useMemo(() => {
-    const s = otherSegments.s;
-    if (!s) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
-    const p = s.split(',');
-    if (p.length < 12) return { borderEnabled: true, borderWidth: 1, borderRadius: 8 };
-    // Detect legacy 20-field format vs new 21-field (shapeStyle at position 0)
-    const isLegacy = p[0] === '0' || p[0] === '1';
-    const off = isLegacy ? 0 : 1; // legacy: no shapeStyle prefix
-    return {
-      borderEnabled: p[7 + off] === '1',
-      borderWidth: !isNaN(parseInt(p[8 + off])) ? parseInt(p[8 + off]) / 10 : 1,
-      borderRadius: !isNaN(parseInt(p[11 + off])) ? parseInt(p[11 + off]) : 8,
-    };
-  }, [otherSegments.s]);
+  // Derive shapeTokens (border + radius) from the decoded shape state for preview.
+  const shapeTokens = useMemo(() => ({
+    borderEnabled: otherSegments.shape?.borderEnabled ?? true,
+    borderWidth: otherSegments.shape?.borderWidth ?? 1,
+    borderRadius: otherSegments.shape?.borderRadius ?? 8,
+  }), [otherSegments.shape]);
 
   const getCurrentHash = useCallback(() => {
     const colorEncoded = encodeState(store);
@@ -85,7 +76,7 @@ function App() {
           </div>
           <div>
             <h3 className="text-body-s font-semibold mb-3">Theme Preview</h3>
-            <SurfacePreview shapeTokens={shapeTokens} />
+            <SurfacePreview shapeTokens={shapeTokens} shape={otherSegments.shape} />
           </div>
         </div>
 
