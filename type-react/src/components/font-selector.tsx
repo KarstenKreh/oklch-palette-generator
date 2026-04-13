@@ -149,9 +149,10 @@ export function FontSelector({ label, value, onChange, categories }: FontSelecto
         {/* Input trigger */}
         <div
           className={cn(
-            'flex items-center gap-1 h-7 w-full rounded-sm border border-input bg-transparent dark:bg-input/30 px-2 text-caption transition-colors',
+            'flex items-center gap-1 h-7 w-full rounded-sm border border-input bg-transparent dark:bg-input/30 px-2 text-caption transition-colors cursor-pointer',
             open && 'border-ring ring-2 ring-ring/50',
           )}
+          onClick={() => inputRef.current?.focus()}
         >
           <input
             ref={inputRef}
