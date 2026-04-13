@@ -101,6 +101,14 @@ export function SeedColors() {
     [setErrorColorHex],
   );
 
+  const handleErrorUnlock = useCallback(
+    (hex: string) => {
+      if (errorAutoMatch) toggleErrorAutoMatch();
+      setErrorColorHex(`#${hex}`);
+    },
+    [errorAutoMatch, toggleErrorAutoMatch, setErrorColorHex],
+  );
+
   const handleModeChange = useCallback(
     (val: string) => setMode(val as PaletteMode),
     [setMode],
@@ -316,6 +324,7 @@ export function SeedColors() {
               readOnly
               readOnlyHex={effectiveErrorHex.replace('#', '')}
               locked
+              onUnlock={handleErrorUnlock}
             />
           ) : (
             <ColorInput

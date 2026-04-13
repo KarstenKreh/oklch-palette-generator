@@ -139,6 +139,14 @@ function AccentRow({
     onToggleAutoMatch(index);
   }, [index, onToggleAutoMatch]);
 
+  const handleUnlock = useCallback(
+    (newHex: string) => {
+      if (autoMatch) onToggleAutoMatch(index);
+      onUpdate(index, { hex: `#${newHex}` });
+    },
+    [index, autoMatch, onToggleAutoMatch, onUpdate],
+  );
+
   const displayHex = (autoMatch ? effectiveHex : hex).replace('#', '');
 
   return (
@@ -268,6 +276,7 @@ function AccentRow({
             readOnly
             readOnlyHex={effectiveHex.replace('#', '')}
             locked
+            onUnlock={handleUnlock}
           />
         ) : (
           <ColorInput

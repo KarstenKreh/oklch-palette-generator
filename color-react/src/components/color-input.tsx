@@ -16,6 +16,8 @@ interface ColorInputProps {
   readOnlyHex?: string;
   /** Show a lock icon overlay on the swatch */
   locked?: boolean;
+  /** Called when a locked swatch is clicked and a color is picked — disables auto and sets the new hex */
+  onUnlock?: (hex: string) => void;
 }
 
 export function ColorInput({
@@ -26,6 +28,7 @@ export function ColorInput({
   readOnly,
   readOnlyHex,
   locked,
+  onUnlock,
 }: ColorInputProps) {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -50,9 +53,14 @@ export function ColorInput({
 
   const handlePickerChange = useCallback(
     (hex: string) => {
-      onChange(hex.replace('#', '').toUpperCase());
+      const clean = hex.replace('#', '').toUpperCase();
+      if (onUnlock) {
+        onUnlock(clean);
+      } else {
+        onChange(clean);
+      }
     },
-    [onChange],
+    [onChange, onUnlock],
   );
 
   const swatchBtn = (color: string, key?: string, showLock?: boolean) => (
@@ -72,7 +80,7 @@ export function ColorInput({
   return (
     <div className="flex h-7 items-center gap-2">
       {/* Swatches — grouped, no gap, rounded container */}
-      {readOnly ? (
+      {readOnly && !(locked && onUnlock) ? (
         <div className="flex items-center overflow-hidden rounded-md border border-border">
           {swatchBtn(swatchColor, undefined, locked)}
           {previewSwatches?.map((color, i) => swatchBtn(color, `ps-${i}`))}
