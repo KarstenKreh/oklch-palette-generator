@@ -1,7 +1,7 @@
-// URL state serialization — pure functions, no DOM access
-// Types inlined to avoid dependency on color-react's store
+// URL state serialization for the Color tool — pure functions, no DOM access.
+// Shared between color-react and system-react.
 
-import type { PaletteMode } from '@core/palette';
+import type { PaletteMode } from '../palette';
 
 export type FgContrastMode = 'best' | 'preferLight' | 'preferDark';
 
@@ -14,7 +14,7 @@ export interface Accent {
   autoHue: number;
 }
 
-interface EncodableState {
+export interface DecodedState {
   brandHex: string;
   bgColorHex: string;
   bgAutoMatch: boolean;
@@ -31,7 +31,7 @@ interface EncodableState {
   extraAccents: Accent[];
 }
 
-export function encodeState(s: EncodableState): string {
+export function encodeState(s: DecodedState): string {
   const brand = s.brandHex.replace('#', '');
   const bg = s.bgColorHex.replace('#', '');
   const err = s.errorColorHex.replace('#', '');
@@ -43,24 +43,7 @@ export function encodeState(s: EncodableState): string {
   return hash;
 }
 
-export interface DecodedColorState {
-  brandHex: string;
-  bgColorHex: string;
-  bgAutoMatch: boolean;
-  errorColorHex: string;
-  errorAutoMatch: boolean;
-  chromaScale: number;
-  currentMode: PaletteMode;
-  brandPin: boolean;
-  brandInvert: boolean;
-  errorPin: boolean;
-  errorInvert: boolean;
-  fgContrastMode: FgContrastMode;
-  themeName: string;
-  extraAccents: Accent[];
-}
-
-export function decodeState(hash: string): DecodedColorState | null {
+export function decodeState(hash: string): DecodedState | null {
   if (!hash) return null;
   const segments = hash.split('!');
   const p = segments[0].split(',');
@@ -70,7 +53,7 @@ export function decodeState(hash: string): DecodedColorState | null {
 
   if (!/^[0-9a-fA-F]{6}$/.test(brand)) return null;
 
-  const result: DecodedColorState = {
+  const result: DecodedState = {
     brandHex: '#' + brand.toUpperCase(),
     bgColorHex: /^[0-9a-fA-F]{6}$/.test(bg) ? '#' + bg.toUpperCase() : '#' + brand.toUpperCase(),
     bgAutoMatch: bgAuto === '1',
@@ -79,9 +62,12 @@ export function decodeState(hash: string): DecodedColorState | null {
     chromaScale: 0.25,
     currentMode: (mode === 'balanced' || mode === 'exact') ? mode : 'balanced',
     brandPin: p[7] === '1',
+    brandInvert: false,
     errorPin: p[8] === '1',
+    errorInvert: false,
     fgContrastMode: 'best',
     themeName: 'Standby.Design',
+    extraAccents: [],
   };
 
   const chromaVal = parseInt(chroma);
@@ -102,7 +88,6 @@ export function decodeState(hash: string): DecodedColorState | null {
   result.brandInvert = p.length > 11 && p[11] === '1';
   result.errorInvert = p.length > 12 && p[12] === '1';
 
-  result.extraAccents = [];
   for (let i = 1; i < segments.length; i++) {
     const firstColon = segments[i].indexOf(':');
     if (firstColon === -1) continue;

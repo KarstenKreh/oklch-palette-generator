@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CodeBlock } from '@core/code-block';
-import type { DecodedColorState } from '@/lib/color-url-state';
-import type { UrlState } from '@/lib/type-url-state';
+import type { DecodedState as DecodedColorState } from '@core/url-state/color';
+import type { UrlState } from '@core/url-state/type';
 import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
-import type { ShapeState } from '@/lib/shape-url-state';
+import type { ShapeUrlState as ShapeState } from '@core/url-state/shape';
 import {
   generatePrimitivesOklch,
   generateSemantic,
@@ -31,7 +31,7 @@ import {
   generateLlmBriefing as generateShapeLlmBriefing,
   optsFromState as shapeOptsFromState,
 } from '@/lib/shape-code-export';
-import type { SymbolState } from '@/lib/symbol-url-state';
+import type { UrlState as SymbolState } from '@core/url-state/symbol';
 import { computeIconTokens, weightToStroke } from '@core/icon-tokens';
 import { ICON_SETS, getSetById } from '@core/icon-sets';
 import { recommendSets } from '@core/recommend';
@@ -73,7 +73,7 @@ function generateSymbolCss(sym: SymbolState): string {
     const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
     return r[0]?.set || ICON_SETS[0];
   })();
-  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight), sym.snapTo4px);
   const lines = [
     `/* Icon Tokens — standby.design/symbol */`,
     `/* Recommended: ${set.name} (${set.id}) */`,
@@ -90,7 +90,7 @@ function generateSymbolTailwind(sym: SymbolState): string {
     const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
     return r[0]?.set || ICON_SETS[0];
   })();
-  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight), sym.snapTo4px);
   const lines = [
     `/* Icon Tokens — standby.design/symbol */`,
     `/* Recommended: ${set.name} (${set.id}) */`,
@@ -107,7 +107,7 @@ function generateSymbolLlmBriefing(sym: SymbolState): string {
     const r = recommendSets({ style: sym.preferredStyle, mood: 50, weight: sym.preferredWeight, corners: sym.preferredCorners });
     return r[0]?.set || ICON_SETS[0];
   })();
-  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight));
+  const tokens = computeIconTokens(sym.iconBaseSize, sym.iconScale, weightToStroke(set.strokeWeight), sym.snapTo4px);
   return [
     `# Icon System — standby.design/symbol`,
     ``,

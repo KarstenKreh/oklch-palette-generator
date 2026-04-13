@@ -1,8 +1,7 @@
 import { create } from 'zustand';
+import type { IconStyle, IconWeight, IconCorners } from '@core/url-state/symbol';
 
-export type IconStyle = 'outlined' | 'filled' | 'duotone' | 'auto';
-export type IconWeight = 'thin' | 'regular' | 'bold' | 'auto';
-export type IconCorners = 'sharp' | 'rounded' | 'auto';
+export type { IconStyle, IconWeight, IconCorners } from '@core/url-state/symbol';
 
 export interface SymbolState {
   preferredStyle: IconStyle;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { encodeState, decodeState, type UrlState } from './url-state';
+import { encodeState, decodeState, type UrlState } from './symbol';
 
 const DEFAULT_STATE: UrlState = {
   preferredStyle: 'auto',

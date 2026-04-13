@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { encodeState, decodeState } from './url-state';
-import type { ShapeState } from '@/store/shape-store';
+import { encodeState, decodeState, type ShapeUrlState } from './shape';
 
-function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
+function makeState(overrides: Partial<ShapeUrlState> = {}): ShapeUrlState {
   return {
     shapeStyle: 'paper',
     shadowEnabled: true,
@@ -25,33 +24,8 @@ function makeState(overrides: Partial<ShapeState> = {}): ShapeState {
     ringColorMode: 'auto',
     ringCustomColor: '#000000',
     separationMode: 'shadow',
-    surfaceHex: '#335A7F',
-    // Stubs for setter functions — not used in encode/decode
-    setShapeStyle: () => {},
-    setShadowEnabled: () => {},
-    setShadowType: () => {},
-    setShadowStrength: () => {},
-    setShadowBlurScale: () => {},
-    setShadowScale: () => {},
-    setShadowColorMode: () => {},
-    setShadowCustomColor: () => {},
-    setBorderEnabled: () => {},
-    setBorderWidth: () => {},
-    setBorderColorMode: () => {},
-    setBorderCustomColor: () => {},
-    setBorderRadius: () => {},
-    setGlassDepth: () => {},
-    setGlassBlur: () => {},
-    setGlassDispersion: () => {},
-    setRingWidth: () => {},
-    setRingOffset: () => {},
-    setRingColorMode: () => {},
-    setRingCustomColor: () => {},
-    setSeparationMode: () => {},
-    setSurfaceHex: () => {},
-    setFullState: () => {},
     ...overrides,
-  } as ShapeState;
+  };
 }
 
 describe('encodeState / decodeState round-trip', () => {

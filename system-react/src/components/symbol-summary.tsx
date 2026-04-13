@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { SymbolState } from '@/lib/symbol-url-state';
+import type { UrlState as SymbolState } from '@core/url-state/symbol';
 import { ICON_SETS, getSetById } from '@core/icon-sets';
 import { SAMPLE_ICONS, type SampleIconName, type IconDef } from '@core/sample-icons';
 import { computeIconTokens, weightToStroke } from '@core/icon-tokens';
@@ -43,8 +43,8 @@ export function SymbolSummary({ symbolState }: { symbolState: SymbolState }) {
   }, [symbolState]);
 
   const tokens = useMemo(
-    () => computeIconTokens(symbolState.iconBaseSize, symbolState.iconScale, weightToStroke(set.strokeWeight)),
-    [symbolState.iconBaseSize, symbolState.iconScale, set.strokeWeight],
+    () => computeIconTokens(symbolState.iconBaseSize, symbolState.iconScale, weightToStroke(set.strokeWeight), symbolState.snapTo4px),
+    [symbolState.iconBaseSize, symbolState.iconScale, set.strokeWeight, symbolState.snapTo4px],
   );
 
   const iconData = SAMPLE_ICONS[set.id];

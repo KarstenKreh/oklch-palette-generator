@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { encodeState, decodeState } from './url-state';
+import { encodeState, decodeState, type DecodedState } from './color';
 
-function makeState(overrides: Record<string, unknown> = {}) {
+function makeState(overrides: Partial<DecodedState> = {}): DecodedState {
   return {
     brandHex: '#335A7F',
     bgColorHex: '#335A7F',
@@ -9,12 +9,12 @@ function makeState(overrides: Record<string, unknown> = {}) {
     errorColorHex: '#CC3333',
     errorAutoMatch: true,
     chromaScale: 0.25,
-    currentMode: 'balanced' as const,
+    currentMode: 'balanced',
     brandPin: false,
     brandInvert: false,
     errorPin: false,
     errorInvert: false,
-    fgContrastMode: 'best' as const,
+    fgContrastMode: 'best',
     themeName: 'Standby.Design',
     extraAccents: [],
     ...overrides,

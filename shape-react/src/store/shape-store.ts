@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import type { PaletteMode } from '@core/palette';
+import type { ShapeStyle, ShadowType, ColorMode, SeparationMode } from '@core/url-state/shape';
 
-export type ShapeStyle = 'paper' | 'glass';
-export type ShadowType = 'normal' | 'neumorphic' | 'flat';
-export type ColorMode = 'auto' | 'custom';
-export type SeparationMode = 'shadow' | 'border' | 'contrast' | 'gap' | 'mixed';
+export type { ShapeStyle, ShadowType, ColorMode, SeparationMode } from '@core/url-state/shape';
 
 export interface ShapeState {
   // Style (top-level mode)
@@ -28,7 +26,7 @@ export interface ShapeState {
   // Border Radius
   borderRadius: number;
 
-  // Glass (Liquid Glass via vaso — active when shapeStyle === 'glass')
+  // Glass (Liquid Glass via liquid-glass-react — active when shapeStyle === 'glass')
   glassDepth: number;
   glassBlur: number;
   glassDispersion: number;
@@ -120,7 +118,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   brandPin: false,
 
   // Setters
-  setShapeStyle: (v) => set({ shapeStyle: v }),
+  setShapeStyle: (v) => set((prev) => v === 'neomorph' && prev.shapeStyle !== 'neomorph'
+    ? { shapeStyle: v, borderWidth: 0 }
+    : { shapeStyle: v }),
   setShadowEnabled: (v) => set({ shadowEnabled: v }),
   setShadowType: (v) => set({ shadowType: v }),
   setShadowStrength: (v) => set({ shadowStrength: v }),

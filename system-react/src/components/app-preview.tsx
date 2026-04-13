@@ -4,10 +4,10 @@ import type { PaletteEntry } from '@core/palette';
 import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
-import type { ShapeState } from '@/lib/shape-url-state';
+import type { ShapeUrlState as ShapeState } from '@core/url-state/shape';
 import { PhoneMockup } from '@/components/phone-mockup';
 import { contrastRatio } from '@core/color-math';
-import type { FgContrastMode } from '@/lib/color-url-state';
+import type { FgContrastMode } from '@core/url-state/color';
 
 interface PaletteResult {
   brand: PaletteEntry[];

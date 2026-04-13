@@ -4,7 +4,7 @@
 
 import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
 import { hexToOklch, oklchToHex } from '@core/color-math';
-import type { ColorMode, SeparationMode, ShapeStyle, ShapeState } from './shape-url-state';
+import type { ColorMode, SeparationMode, ShapeStyle, ShapeUrlState as ShapeState } from '@core/url-state/shape';
 
 export interface ShapeExportOptions {
   shapeStyle: ShapeStyle;

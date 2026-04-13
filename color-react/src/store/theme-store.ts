@@ -1,17 +1,9 @@
 import { create } from 'zustand';
 import type { PaletteMode } from '@core/palette';
 import { SUCCESS_HUE, WARNING_HUE, INFO_HUE } from '@core/palette';
+import type { Accent, FgContrastMode } from '@core/url-state/color';
 
-export interface Accent {
-  name: string;
-  hex: string;
-  pin: boolean;
-  invert: boolean;
-  autoMatch: boolean;
-  autoHue: number;
-}
-
-export type FgContrastMode = 'best' | 'preferLight' | 'preferDark';
+export type { Accent, FgContrastMode } from '@core/url-state/color';
 
 interface ThemeState {
   currentMode: PaletteMode;

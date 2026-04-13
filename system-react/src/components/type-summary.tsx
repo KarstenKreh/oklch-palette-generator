@@ -1,6 +1,6 @@
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
-import type { UrlState } from '@/lib/type-url-state';
+import type { UrlState } from '@core/url-state/type';
 
 const HEADING_LEVELS = new Set(['display', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 

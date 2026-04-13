@@ -3,7 +3,7 @@
 import { hexToOklch, contrastRatio, invertHex } from '@core/color-math';
 import { generateShadowValues } from '@core/shadows';
 import type { PaletteEntry } from '@core/palette';
-import type { FgContrastMode } from './color-url-state';
+import type { FgContrastMode } from '@core/url-state/color';
 
 export interface AccentPalette {
   name: string;

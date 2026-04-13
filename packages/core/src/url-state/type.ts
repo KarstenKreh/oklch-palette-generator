@@ -1,8 +1,12 @@
 /**
- * URL hash state decoding for the type scale (read-only in system app).
+ * URL hash state encoding/decoding for the Type tool.
+ * Shared between type-react and system-react.
  *
  * Format (v2):
  *   mode,baseSize,customRatio,mobileRatio,headingFont,bodyFont,monoFont[,trad...]|key=val&key=val
+ *
+ * The pipe separator divides the legacy positional part from extended key-value pairs.
+ * Old URLs without a pipe are decoded with defaults for the new fields.
  *
  * Extended keys:
  *   hw  = headingWeight (100–900, default 500)
@@ -15,8 +19,8 @@
  *   tm  = traditionalMobileAssignments (px,px,...  in TYPE_LEVELS order)
  */
 
-import type { TypeLevel } from '@core/scale';
-import { TYPE_LEVELS, DEFAULT_TRADITIONAL } from '@core/scale';
+import type { TypeLevel } from '../scale';
+import { TYPE_LEVELS, DEFAULT_TRADITIONAL } from '../scale';
 
 export interface UrlState {
   scaleMode: 'golden' | 'traditional' | 'custom';
@@ -36,6 +40,56 @@ export interface UrlState {
   traditionalAssignments?: Record<TypeLevel, number>;
   traditionalMobileAssignments?: Record<TypeLevel, number>;
 }
+
+/* ── Encode ── */
+
+function encodeOverrides(overrides: Partial<Record<TypeLevel, number>>): string {
+  const entries = Object.entries(overrides).filter(([, v]) => v !== undefined);
+  if (entries.length === 0) return '';
+  return entries.map(([k, v]) => `${k}:${v}`).join(';');
+}
+
+export function encodeState(state: UrlState): string {
+  const parts: (string | number)[] = [
+    state.scaleMode,
+    state.baseSize,
+    state.customRatio,
+    state.mobileRatio,
+    state.headingFont,
+    state.bodyFont,
+    state.monoFont,
+  ];
+
+  if (state.scaleMode === 'traditional' && state.traditionalAssignments) {
+    for (const level of TYPE_LEVELS) {
+      parts.push(state.traditionalAssignments[level]);
+    }
+  }
+
+  const ext: string[] = [];
+
+  if (state.headingWeight !== 500) ext.push(`hw=${state.headingWeight}`);
+  if (state.mobileBaseSize !== state.baseSize) ext.push(`mbs=${state.mobileBaseSize}`);
+  if (state.mobileRatioMode !== 'auto') ext.push(`mrm=${state.mobileRatioMode}`);
+  if (state.autoShrink !== 25) ext.push(`as=${state.autoShrink}`);
+  if (state.spacingBaseMultiplier !== 1) ext.push(`sbm=${state.spacingBaseMultiplier}`);
+
+  const lh = encodeOverrides(state.lineHeightOverrides);
+  if (lh) ext.push(`lh=${lh}`);
+
+  const ls = encodeOverrides(state.letterSpacingOverrides);
+  if (ls) ext.push(`ls=${ls}`);
+
+  if (state.scaleMode === 'traditional' && state.traditionalMobileAssignments) {
+    const tmParts = TYPE_LEVELS.map(l => state.traditionalMobileAssignments![l]);
+    ext.push(`tm=${tmParts.join(',')}`);
+  }
+
+  const positional = parts.join(',');
+  return ext.length > 0 ? `${positional}|${ext.join('&')}` : positional;
+}
+
+/* ── Decode ── */
 
 function decodeOverrides(str: string): Partial<Record<TypeLevel, number>> {
   const result: Partial<Record<TypeLevel, number>> = {};
