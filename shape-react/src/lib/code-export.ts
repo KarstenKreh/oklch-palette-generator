@@ -113,7 +113,7 @@ export function generateCssExport(opts: ShapeExportOptions): string {
   css += `  --ring-width: ${opts.ringWidth}px;\n`;
   css += `  --ring-offset: ${opts.ringOffset}px;\n`;
 
-  // Glass (Liquid Glass — use with vaso or similar)
+  // Glass (Liquid Glass — use with liquid-glass-react or similar)
   if (opts.shapeStyle === 'glass') {
     css += `\n  /* Liquid Glass */\n`;
     css += `  --glass-depth: ${opts.glassDepth};\n`;
@@ -168,7 +168,7 @@ export function generateTailwindV4Export(opts: ShapeExportOptions): string {
   css += `\n  --ring-width: ${opts.ringWidth}px;\n`;
   css += `  --ring-offset: ${opts.ringOffset}px;\n`;
 
-  // Glass (Liquid Glass — use with vaso or similar)
+  // Glass (Liquid Glass — use with liquid-glass-react or similar)
   if (opts.shapeStyle === 'glass') {
     css += `\n  /* Liquid Glass */\n`;
     css += `  --glass-depth: ${opts.glassDepth};\n`;
@@ -338,11 +338,11 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
   // Glass
   md += `\n## Liquid Glass\n\n`;
   if (opts.shapeStyle === 'glass') {
-    md += `Uses the \`vaso\` library (liquid glass distortion effect).\n\n`;
+    md += `Uses the \`liquid-glass-react\` library (liquid glass distortion effect).\n\n`;
     md += `- **Depth:** ${opts.glassDepth} (displacement intensity, negative = compression)\n`;
     md += `- **Blur:** ${opts.glassBlur} (backdrop blur amount)\n`;
     md += `- **Dispersion:** ${opts.glassDispersion} (chromatic aberration)\n`;
-    md += `\n\`\`\`tsx\nimport { Vaso } from 'vaso'\n\n<Vaso depth={${opts.glassDepth}} blur={${opts.glassBlur}} dispersion={${opts.glassDispersion}} radius={${opts.borderRadius}} />\n\`\`\`\n`;
+    md += `\n\`\`\`tsx\nimport LiquidGlass from 'liquid-glass-react'\n\n<LiquidGlass\n  displacementScale={${(opts.glassDepth * 40).toFixed(0)}}\n  blurAmount={${(opts.glassBlur * 0.03).toFixed(3)}}\n  aberrationIntensity={${(opts.glassDispersion * 4).toFixed(2)}}\n  cornerRadius={${opts.borderRadius}}\n  elasticity={0}\n>\n  {children}\n</LiquidGlass>\n\`\`\`\n`;
   } else {
     md += `Liquid glass effect is **disabled**.\n`;
   }

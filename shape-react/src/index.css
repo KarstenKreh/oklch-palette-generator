@@ -6,12 +6,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Override Vaso's auto-generated box-shadow and clip dispersion edge artifacts */
-[data-vaso] {
-  box-shadow: none !important;
-  clip-path: inset(1px) !important;
-}
-
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;

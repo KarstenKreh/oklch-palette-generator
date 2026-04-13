@@ -1,9 +1,22 @@
 import { useMemo } from 'react';
-import { Vaso } from 'vaso';
+import LiquidGlass from 'liquid-glass-react';
+import { TriangleAlert } from 'lucide-react';
 import { useShapeStore } from '@/store/shape-store';
 import { generateShadows, type ShadowConfig } from '@core/shadows';
 import { generatePalette, computeAutoErrorHex, type PaletteEntry, type Step, type PaletteMode } from '@core/palette';
 import { contrastRatio } from '@core/color-math';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import type { ShapeStyle } from '@/store/shape-store';
+
+function glassProps(depth: number, blur: number, dispersion: number, cornerRadius: number) {
+  return {
+    displacementScale: depth * 40,
+    blurAmount: blur * 0.03,
+    aberrationIntensity: dispersion * 4,
+    elasticity: 0,
+    cornerRadius,
+  };
+}
 
 /** Look up a step in a palette by step number. */
 function step(palette: PaletteEntry[], s: Step): string {
@@ -18,22 +31,25 @@ function pickFgFromPalette(bgHex: string, palette: PaletteEntry[], lightStep: St
 }
 
 /** Derive semantic preview colors from brand hex using the real palette engine. */
-function deriveSurface(hex: string, isDark: boolean, mode: PaletteMode = 'balanced', chromaScale: number = 1.0, brandPin: boolean = false) {
+function deriveSurface(hex: string, isDark: boolean, mode: PaletteMode = 'balanced', chromaScale: number = 1.0, brandPin: boolean = false, style: ShapeStyle = 'paper') {
   const brand = generatePalette(hex, 1.0, mode);
   const surface = generatePalette(hex, chromaScale * 0.15, mode);
   const errorHex = computeAutoErrorHex(hex);
   const error = generatePalette(errorHex, 1.0, mode);
   const errorSurface = generatePalette(errorHex, 0.1, mode);  // neutral version for fg
+  const isNeomorph = style === 'neomorph';
 
   if (isDark) {
     const primaryBg = brandPin ? hex : step(brand, 400);
     const secondaryBg = step(brand, 800);
     const destructiveBg = step(error, 400);
+    // Neomorph: homogenize bg/card/elevated/muted so surfaces blend into parent — dual shadows carry the depth.
+    const monoBg = step(surface, 875);
     return {
-      bg: step(surface, 875),
-      card: step(surface, 825),
-      elevated: step(surface, 800),
-      muted: step(surface, 850),
+      bg: monoBg,
+      card: isNeomorph ? monoBg : step(surface, 825),
+      elevated: isNeomorph ? monoBg : step(surface, 800),
+      muted: isNeomorph ? monoBg : step(surface, 850),
       secondary: secondaryBg,
       secondaryFg: pickFgFromPalette(secondaryBg, brand, 100, 900),
       destructive: destructiveBg,
@@ -51,11 +67,12 @@ function deriveSurface(hex: string, isDark: boolean, mode: PaletteMode = 'balanc
   const primaryBg = brandPin ? hex : step(brand, 600);
   const secondaryBg = step(brand, 200);
   const destructiveBg = step(error, 600);
+  const monoBg = step(surface, 75);
   return {
-    bg: step(surface, 50),
-    card: step(surface, 25),
-    elevated: step(surface, 25),
-    muted: step(surface, 75),
+    bg: isNeomorph ? monoBg : step(surface, 50),
+    card: isNeomorph ? monoBg : step(surface, 25),
+    elevated: isNeomorph ? monoBg : step(surface, 25),
+    muted: isNeomorph ? monoBg : step(surface, 75),
     secondary: secondaryBg,
     secondaryFg: pickFgFromPalette(secondaryBg, brand, 100, 900),
     destructive: destructiveBg,
@@ -68,6 +85,22 @@ function deriveSurface(hex: string, isDark: boolean, mode: PaletteMode = 'balanc
     primaryFg: pickFgFromPalette(primaryBg, brand, 50, 975),
     ring: step(surface, 400),
   };
+}
+
+/** Dynamic contrast warning — renders a small alert icon with tooltip when ratio < WCAG AA (4.5). */
+function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: string }) {
+  const ratio = contrastRatio(fg, bg);
+  if (ratio >= 4.5) return null;
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <TriangleAlert className="size-3 text-amber-500 shrink-0" aria-label={`Kontrast-Warnung: ${label}`} />
+      </TooltipTrigger>
+      <TooltipContent>
+        Kontrast {ratio.toFixed(2)}:1 — unter WCAG AA (4.5:1) für {label}.
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -155,23 +188,24 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
 
           if (isGlass) {
             return (
-              <div key={level} className="flex-1 overflow-hidden" style={{ borderRadius: `${levelRadius}px` }}>
-                <Vaso
-                  className="w-full"
-                  px={0}
-                  py={0}
-                  radius={levelRadius}
-                  depth={store.glassDepth}
-                  blur={store.glassBlur}
-                  dispersion={store.glassDispersion}
-                >
-                  <div className="relative z-10 p-2 flex flex-col items-center gap-1">
+              <div
+                key={level}
+                className="flex-1 relative overflow-hidden"
+                style={{
+                  height: 64,
+                  borderRadius: `${levelRadius}px`,
+                  backgroundColor: colors.card,
+                  boxShadow: `inset 0 0 0 1px ${colors.borderMuted}`,
+                }}
+              >
+                <LiquidGlass {...glassProps(store.glassDepth, store.glassBlur, store.glassDispersion, levelRadius)}>
+                  <div className="p-2 flex flex-col items-center gap-1">
                     <span className="text-caption font-semibold">{level}</span>
                     <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
                       {levelRadius}px
                     </span>
                   </div>
-                </Vaso>
+                </LiquidGlass>
               </div>
             );
           }
@@ -271,29 +305,24 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
       <div className="relative">
         {isGlass ? (
           <div
+            className="relative"
             style={{
+              height: 32,
               outline: `${store.ringWidth}px solid ${ringColor}`,
               outlineOffset: `${store.ringOffset}px`,
               borderRadius: `${radius}px`,
               overflow: 'hidden',
+              backgroundColor: colors.card,
             }}
           >
-            <Vaso
-              className="w-full"
-              px={0}
-              py={0}
-              radius={radius}
-              depth={store.glassDepth * 0.3}
-              blur={store.glassBlur}
-              dispersion={store.glassDispersion * 0.3}
-            >
+            <LiquidGlass {...glassProps(store.glassDepth * 0.3, store.glassBlur, store.glassDispersion * 0.3, radius)}>
               <div
-                className="relative z-10 px-3 py-1.5 text-caption"
+                className="px-3 py-1.5 text-caption"
                 style={{ color: colors.textMuted }}
               >
                 Input with focus ring
               </div>
-            </Vaso>
+            </LiquidGlass>
           </div>
         ) : (
           <div
