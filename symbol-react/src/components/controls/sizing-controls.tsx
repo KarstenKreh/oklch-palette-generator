@@ -65,7 +65,7 @@ function BaseInput({ value, onChange }: { value: number; onChange: (v: number) =
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-body-s font-medium text-foreground/70 mr-auto">
+      <span className="text-body-s font-medium text-foreground mr-auto">
         Base size
       </span>
       <div className="relative">
