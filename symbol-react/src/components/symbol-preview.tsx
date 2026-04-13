@@ -16,6 +16,7 @@ function SampleIcon({ def, size, viewBox }: { def: IconDef; size: number; viewBo
       strokeWidth={def.type === 'stroke' ? (def.strokeWidth ?? 2) : 0}
       strokeLinecap="round"
       strokeLinejoin="round"
+      className="shrink-0"
     >
       {paths.map((d, i) => (
         <path key={i} d={d} />
@@ -41,21 +42,23 @@ export function SymbolPreview() {
   if (!iconData) return <p className="text-muted-foreground text-caption">No icons for variant "{activeId}"</p>;
 
   const cols = SAMPLE_ICON_NAMES.length;
+  const maxPx = tokens.sizes[tokens.sizes.length - 1].px;
+  const cellMin = `${maxPx + 8}px`;
 
   return (
     <div className="overflow-x-auto">
     <div
       className="grid border-l border-t border-border/50"
-      style={{ gridTemplateColumns: `auto repeat(${cols}, minmax(2.5rem, 1fr))` }}
+      style={{ gridTemplateColumns: `auto repeat(${cols}, minmax(${cellMin}, 1fr))` }}
     >
       {/* Header row — icon names */}
       <div className="border-r border-b border-border/50" />
       {SAMPLE_ICON_NAMES.map((name) => (
         <div
           key={name}
-          className="border-r border-b border-border/50 flex items-center justify-center py-1.5"
+          className="border-r border-b border-border/50 flex items-end justify-center py-1.5 px-1"
         >
-          <span className="text-[8px] font-mono text-muted-foreground/40">{name}</span>
+          <span className="text-[8px] font-mono text-muted-foreground/40 text-center leading-tight">{name}</span>
         </div>
       ))}
 
@@ -75,7 +78,7 @@ export function SymbolPreview() {
           {SAMPLE_ICON_NAMES.map((name: SampleIconName) => (
             <div
               key={`${size.name}-${name}`}
-              className="border-r border-b border-border/50 flex items-center justify-center py-2 text-foreground"
+              className="border-r border-b border-border/50 flex items-center justify-center py-2 px-1 text-foreground"
             >
               <SampleIcon def={iconData.icons[name]} size={size.px} viewBox={iconData.viewBox} />
             </div>
