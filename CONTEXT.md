@@ -403,7 +403,7 @@ User controls → Zustand store → PreviewPanel (style-conditional rendering)
 
 ### Core Concept
 
-Recommends curated icon sets based on visual personality. Three families (Material Symbols, Lucide, Phosphor) with style variants. Generates icon sizing tokens derived from a scale ratio.
+Recommends curated icon sets based on visual personality. Five families (Material Symbols, Lucide, Phosphor, Solar, Radix) with style variants. Generates icon sizing tokens derived from a scale ratio.
 
 ### Icon Families (`packages/core/src/icon-sets.ts`)
 
@@ -412,6 +412,8 @@ Recommends curated icon sets based on visual personality. Three families (Materi
 | **Material Symbols** | Outlined, Filled | Sharp | Corporate/serious |
 | **Lucide** | Outlined | Rounded | Friendly/balanced |
 | **Phosphor** | Regular, Bold, Thin, Fill | Rounded | Warm/versatile |
+| **Solar** | Linear, Bold, Broken | Rounded | Expressive/modern (unique broken-line variant) |
+| **Radix Icons** | Regular | Sharp | Precise/minimal (native 15×15 grid) |
 
 ### Icon Sizing Tokens (`packages/core/src/icon-tokens.ts`)
 
@@ -419,7 +421,7 @@ Recommends curated icon sets based on visual personality. Three families (Materi
 
 ### Sample Icons (`packages/core/src/sample-icons.ts`)
 
-12 bundled SVG icon paths per variant (home, search, settings, user, heart, arrow-right, mail, star, bookmark, bell, chat, eye). Material uses `viewBox="0 -960 960 960"` (native Google format), Lucide/Phosphor use `viewBox="0 0 24 24"`.
+12 bundled SVG icon paths per variant (home, search, settings, user, heart, arrow-right, mail, star, bookmark, bell, chat, eye). Material uses `viewBox="0 -960 960 960"`, Radix uses `viewBox="0 0 15 15"`, all others use `viewBox="0 0 24 24"`. Solar variants share base paths; Broken uses `strokeDasharray` for the characteristic gapped stroke.
 
 ### State (`store/symbol-store.ts`)
 

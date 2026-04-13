@@ -78,6 +78,38 @@ export const ICON_FAMILIES: IconFamily[] = [
       { id: 'phosphor-fill', style: 'filled', strokeWeight: 'regular', label: 'Fill' },
     ],
   },
+  {
+    id: 'solar',
+    name: 'Solar',
+    iconifyPrefix: 'solar',
+    cornerStyle: 'rounded',
+    mood: 75,
+    description: 'Expressive, modern, with a distinctive broken-line variant.',
+    url: 'https://solar-icons.com',
+    npmPackage: '@iconify-json/solar',
+    license: 'CC BY 4.0',
+    defaultVariant: 'solar-linear',
+    variants: [
+      { id: 'solar-linear', style: 'outlined', strokeWeight: 'thin', label: 'Linear' },
+      { id: 'solar-bold', style: 'outlined', strokeWeight: 'bold', label: 'Bold' },
+      { id: 'solar-broken', style: 'outlined', strokeWeight: 'thin', label: 'Broken' },
+    ],
+  },
+  {
+    id: 'radix',
+    name: 'Radix Icons',
+    iconifyPrefix: 'radix-icons',
+    cornerStyle: 'sharp',
+    mood: 40,
+    description: 'Precise, minimal, designed on a 15px grid.',
+    url: 'https://www.radix-ui.com/icons',
+    npmPackage: '@radix-ui/react-icons',
+    license: 'MIT',
+    defaultVariant: 'radix',
+    variants: [
+      { id: 'radix', style: 'outlined', strokeWeight: 'thin', label: 'Regular' },
+    ],
+  },
 ];
 
 /** Flat list of all variants (for export/recommend compatibility) */

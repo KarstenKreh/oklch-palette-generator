@@ -19,6 +19,7 @@ export interface IconDef {
   d: string | string[];
   type: 'stroke' | 'fill';
   strokeWidth?: number;
+  strokeDasharray?: string;
 }
 
 export interface IconSetIcons {
@@ -146,6 +147,72 @@ const PHOSPHOR_FILL: IconSetIcons = {
   },
 };
 
+/* ═══════════════════════════════════════════════════════════════════
+   Solar — viewBox="0 0 24 24", stroke-based, slightly chunky proportions
+   Source: https://solar-icons.com (CC BY 4.0)
+   Preview approximations in Solar's rounded style.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const SOLAR_BASE_ICONS: Record<SampleIconName, IconDef> = {
+  home:          { d: ['M2.5 11.5L12 3.5l9.5 8', 'M4.5 10v9a1 1 0 0 0 1 1h4v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h4a1 1 0 0 0 1-1v-9'], type: 'stroke' },
+  search:        { d: ['M11.5 19a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z', 'M17 17l3.5 3.5'], type: 'stroke' },
+  settings:      { d: ['M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', 'M19.4 12c0-.5-.05-1-.14-1.48l2.04-1.57-2-3.46-2.4.95c-.74-.63-1.6-1.1-2.56-1.37L14 2.5h-4l-.34 2.57c-.96.27-1.82.74-2.56 1.37l-2.4-.95-2 3.46 2.04 1.57c-.09.48-.14.98-.14 1.48s.05 1 .14 1.48L2.7 14.05l2 3.46 2.4-.95c.74.63 1.6 1.1 2.56 1.37L10 20.5h4l.34-2.57c.96-.27 1.82-.74 2.56-1.37l2.4.95 2-3.46-2.04-1.57c.09-.48.14-.98.14-1.48z'], type: 'stroke' },
+  user:          { d: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4 20c1.2-3 4.5-5 8-5s6.8 2 8 5'], type: 'stroke' },
+  heart:         { d: 'M4 12.5c0-3 2-5.5 5-5.5 1.5 0 2.5.5 3 1.5.5-1 1.5-1.5 3-1.5 3 0 5 2.5 5 5.5 0 4.5-6 8-8 9-2-1-8-4.5-8-9z', type: 'stroke' },
+  'arrow-right': { d: ['M4 12h15', 'M13 6l6 6-6 6'], type: 'stroke' },
+  mail:          { d: ['M3.5 6.5h17v11h-17z', 'M4 7l8 6 8-6'], type: 'stroke' },
+  star:          { d: 'M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3z', type: 'stroke' },
+  bookmark:      { d: 'M6 4.5h12v16l-6-4-6 4z', type: 'stroke' },
+  bell:          { d: ['M6 10c0-3.5 2.5-6 6-6s6 2.5 6 6c0 5 2.5 7 2.5 7H3.5S6 15 6 10z', 'M10 20c.5.5 1.2.8 2 .8s1.5-.3 2-.8'], type: 'stroke' },
+  chat:          { d: 'M4 4.5h16c.5 0 1 .5 1 1v10c0 .5-.5 1-1 1H8l-4 3.5V5.5c0-.5.5-1 1-1z', type: 'stroke' },
+  eye:           { d: ['M2.5 12C4.5 7.5 8 5.5 12 5.5s7.5 2 9.5 6.5c-2 4.5-5.5 6.5-9.5 6.5s-7.5-2-9.5-6.5z', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'], type: 'stroke' },
+};
+
+const SOLAR_LINEAR: IconSetIcons = {
+  viewBox: '0 0 24 24',
+  icons: Object.fromEntries(
+    Object.entries(SOLAR_BASE_ICONS).map(([k, v]) => [k, { ...v, strokeWidth: 1.5 }])
+  ) as Record<SampleIconName, IconDef>,
+};
+
+const SOLAR_BOLD: IconSetIcons = {
+  viewBox: '0 0 24 24',
+  icons: Object.fromEntries(
+    Object.entries(SOLAR_BASE_ICONS).map(([k, v]) => [k, { ...v, strokeWidth: 2.5 }])
+  ) as Record<SampleIconName, IconDef>,
+};
+
+const SOLAR_BROKEN: IconSetIcons = {
+  viewBox: '0 0 24 24',
+  icons: Object.fromEntries(
+    Object.entries(SOLAR_BASE_ICONS).map(([k, v]) => [k, { ...v, strokeWidth: 1.5, strokeDasharray: '3 2.5' }])
+  ) as Record<SampleIconName, IconDef>,
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   Radix Icons — viewBox="0 0 15 15", stroke-based, minimal 15px grid
+   Source: https://www.radix-ui.com/icons (MIT)
+   Preview approximations scaled to 15×15 grid.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const RADIX: IconSetIcons = {
+  viewBox: '0 0 15 15',
+  icons: {
+    home:          { d: ['M1.5 6.5L7.5 1.5l6 5V13a.5.5 0 0 1-.5.5H9.5V10h-4v3.5H2a.5.5 0 0 1-.5-.5V6.5z'], type: 'stroke', strokeWidth: 1 },
+    search:        { d: ['M6.5 11a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z', 'M10 10l3.5 3.5'], type: 'stroke', strokeWidth: 1 },
+    settings:      { d: ['M7.5 9.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z', 'M7.5 1.5v1.5M7.5 12v1.5M13.5 7.5H12M3 7.5H1.5M11.5 3.5l-1 1M4.5 10.5l-1 1M11.5 11.5l-1-1M4.5 4.5l-1-1'], type: 'stroke', strokeWidth: 1 },
+    user:          { d: ['M7.5 7.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5z', 'M2.5 13.5c.5-2.5 2.5-4 5-4s4.5 1.5 5 4'], type: 'stroke', strokeWidth: 1 },
+    heart:         { d: 'M7.5 12.5L2.75 8a2.75 2.75 0 0 1 4.75-2.75A2.75 2.75 0 0 1 12.25 8L7.5 12.5z', type: 'stroke', strokeWidth: 1 },
+    'arrow-right': { d: ['M1.5 7.5h12', 'M8.5 3l4.5 4.5L8.5 12'], type: 'stroke', strokeWidth: 1 },
+    mail:          { d: ['M1.5 3.5h12v8h-12z', 'M1.5 4l6 4 6-4'], type: 'stroke', strokeWidth: 1 },
+    star:          { d: 'M7.5 1.5l1.85 3.75L13.5 5.8l-3 2.9.7 4.1-3.7-1.95L3.8 12.8l.7-4.1-3-2.9 4.15-.55L7.5 1.5z', type: 'stroke', strokeWidth: 1 },
+    bookmark:      { d: 'M3.5 1.5h8V13.5l-4-2.75-4 2.75V1.5z', type: 'stroke', strokeWidth: 1 },
+    bell:          { d: ['M3.75 6.25A3.75 3.75 0 0 1 11.25 6.25c0 3.125 1.5 4.375 1.5 4.375H2.25s1.5-1.25 1.5-4.375z', 'M6 12.25a1.5 1.5 0 0 0 3 0'], type: 'stroke', strokeWidth: 1 },
+    chat:          { d: 'M13.5 9a.5.5 0 0 1-.5.5H5l-3 2.5v-9a.5.5 0 0 1 .5-.5H13a.5.5 0 0 1 .5.5V9z', type: 'stroke', strokeWidth: 1 },
+    eye:           { d: ['M1 7.5C2.5 4.5 5 3 7.5 3s5 1.5 6.5 4.5c-1.5 3-4 4.5-6.5 4.5S2.5 10.5 1 7.5z', 'M7.5 9.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z'], type: 'stroke', strokeWidth: 1 },
+  },
+};
+
 export const SAMPLE_ICONS: Record<string, IconSetIcons> = {
   'material-outlined': MATERIAL_OUTLINED,
   'material-filled': MATERIAL_FILLED,
@@ -154,4 +221,8 @@ export const SAMPLE_ICONS: Record<string, IconSetIcons> = {
   'phosphor-bold': PHOSPHOR_BOLD,
   'phosphor-thin': PHOSPHOR_THIN,
   'phosphor-fill': PHOSPHOR_FILL,
+  'solar-linear': SOLAR_LINEAR,
+  'solar-bold': SOLAR_BOLD,
+  'solar-broken': SOLAR_BROKEN,
+  'radix': RADIX,
 };

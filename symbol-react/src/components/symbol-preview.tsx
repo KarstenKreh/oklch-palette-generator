@@ -14,6 +14,7 @@ function SampleIcon({ def, size, viewBox }: { def: IconDef; size: number; viewBo
       fill={def.type === 'fill' ? 'currentColor' : 'none'}
       stroke={def.type === 'stroke' ? 'currentColor' : 'none'}
       strokeWidth={def.type === 'stroke' ? (def.strokeWidth ?? 2) : 0}
+      strokeDasharray={def.strokeDasharray}
       strokeLinecap="round"
       strokeLinejoin="round"
       className="shrink-0"
