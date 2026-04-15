@@ -3,12 +3,10 @@
  */
 
 import type { ComputedLevel } from '@core/scale';
-import type { SpacingToken } from '@core/spacing';
 import { fontFamily, buildFontshareEmbed } from '@core/fontshare';
 
 interface ExportOptions {
   levels: ComputedLevel[];
-  spacingTokens: SpacingToken[];
   headingFont: string;
   bodyFont: string;
   monoFont: string;
@@ -49,13 +47,6 @@ export function generateCssExport(opts: ExportOptions): string {
     css += `  --tracking-${l.level}: ${l.letterSpacing}em;\n`;
   }
 
-  if (opts.spacingTokens.length > 0) {
-    css += `\n  /* Spacing Scale */\n`;
-    for (const t of opts.spacingTokens) {
-      css += `  --space-${t.name}: ${t.rem}rem;\n`;
-    }
-  }
-
   css += `}\n`;
   return css;
 }
@@ -93,20 +84,13 @@ export function generateTailwindV4Export(opts: ExportOptions): string {
     css += `  --tracking-${l.level}: ${l.letterSpacing}em;\n`;
   }
 
-  if (opts.spacingTokens.length > 0) {
-    css += `\n`;
-    for (const t of opts.spacingTokens) {
-      css += `  --space-${t.name}: ${t.rem}rem;\n`;
-    }
-  }
-
   css += `}\n`;
   return css;
 }
 
 /** LLM Briefing (Markdown) */
 export function generateLlmBriefing(opts: ExportOptions): string {
-  const { levels, spacingTokens, headingFont, bodyFont, monoFont, scaleLabel } = opts;
+  const { levels, headingFont, bodyFont, monoFont, scaleLabel } = opts;
 
   const headingFF = fontFamily(headingFont);
   const bodyFF = fontFamily(bodyFont);
@@ -144,19 +128,10 @@ export function generateLlmBriefing(opts: ExportOptions): string {
     md += `| ${l.label} | ${l.letterSpacing}em |\n`;
   }
 
-  if (spacingTokens.length > 0) {
-    md += `\n## Spacing Scale\n\n`;
-    md += `| Token | Value |\n`;
-    md += `|-------|-------|\n`;
-    for (const t of spacingTokens) {
-      md += `| --space-${t.name} | ${t.rem}rem (${t.px}px) |\n`;
-    }
-  }
-
   md += `\n## Usage\n\n`;
   md += `Use the CSS custom properties from the CSS or Tailwind export.\n`;
   md += `Font sizes use \`clamp()\` for fluid scaling between 375px and 1920px viewport.\n`;
-  md += `Combine with color tokens from standby.design/color and shape tokens from standby.design/shape.\n`;
+  md += `Combine with color tokens from standby.design/color, shape tokens from standby.design/shape, and spacing/layout tokens from standby.design/space.\n`;
 
   return md;
 }

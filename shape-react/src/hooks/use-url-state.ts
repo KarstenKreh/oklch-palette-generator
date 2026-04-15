@@ -3,7 +3,7 @@ import { useShapeStore } from '@/store/shape-store';
 import { encodeState, decodeState } from '@/lib/url-state';
 import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
 
-interface OtherSegments { c?: string; t?: string; y?: string }
+interface OtherSegments { c?: string; t?: string; y?: string; p?: string }
 
 /**
  * Two-way sync between shape store and URL hash.
@@ -25,6 +25,7 @@ export function useUrlState(): OtherSegments {
       captured.c = getMySegment(raw, 'c') || undefined;
       captured.t = getMySegment(raw, 't') || undefined;
       captured.y = getMySegment(raw, 'y') || undefined;
+      captured.p = getMySegment(raw, 'p') || undefined;
       const shapeRaw = getMySegment(raw, 's');
       if (shapeRaw) {
         const decoded = decodeState(shapeRaw);
@@ -41,7 +42,7 @@ export function useUrlState(): OtherSegments {
     const currentStore = useShapeStore.getState();
     const encoded = encodeState(currentStore);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: captured.c, t: captured.t, s: encoded, y: captured.y,
+      c: captured.c, t: captured.t, s: encoded, y: captured.y, p: captured.p,
     }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -52,7 +53,7 @@ export function useUrlState(): OtherSegments {
     if (skipNextWrite.current) { skipNextWrite.current = false; return; }
     const encoded = encodeState(store);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: othersRef.current.c, t: othersRef.current.t, s: encoded, y: othersRef.current.y,
+      c: othersRef.current.c, t: othersRef.current.t, s: encoded, y: othersRef.current.y, p: othersRef.current.p,
     }));
   }, [
     store.shadowEnabled, store.shadowType, store.shadowStrength, store.shadowBlurScale, store.shadowScale,
@@ -62,6 +63,7 @@ export function useUrlState(): OtherSegments {
     store.shapeStyle, store.glassDepth, store.glassBlur, store.glassDispersion,
     store.ringWidth, store.ringOffset, store.ringColorMode, store.ringCustomColor,
     store.separationMode,
+    store.shadowOffsetX, store.shadowOffsetY, store.brutalistVariant,
   ]);
 
   return others;

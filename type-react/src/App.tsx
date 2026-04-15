@@ -6,7 +6,6 @@ import { ScaleControls } from '@/components/scale-controls';
 import { TypePreview } from '@/components/type-preview';
 import { ScaleTable } from '@/components/scale-table';
 import { ScaleDiagram } from '@/components/scale-diagram';
-import { SpacingTable } from '@/components/spacing-table';
 import { CodeExport } from '@/components/code-export';
 import { useFontLoader } from '@/hooks/use-font-loader';
 import { useUrlState } from '@/hooks/use-url-state';
@@ -30,11 +29,9 @@ function App() {
     bodyFont: store.bodyFont,
     monoFont: store.monoFont,
     headingWeight: store.headingWeight,
-    weightCompensation: store.weightCompensation,
     mobileBaseSize: store.mobileBaseSize,
     mobileRatioMode: store.mobileRatioMode,
     autoShrink: store.autoShrink,
-    spacingBaseMultiplier: store.spacingBaseMultiplier,
     lineHeightOverrides: store.lineHeightOverrides,
     letterSpacingOverrides: store.letterSpacingOverrides,
     traditionalAssignments:
@@ -49,7 +46,7 @@ function App() {
 
   const getCurrentHash = useCallback(() => {
     const typeEncoded = getTypeEncoded();
-    return buildUnifiedHash({ c: otherSegments.c, t: typeEncoded, s: otherSegments.s, y: otherSegments.y });
+    return buildUnifiedHash({ c: otherSegments.c, t: typeEncoded, s: otherSegments.s, y: otherSegments.y, p: otherSegments.p });
   }, [getTypeEncoded, otherSegments]);
 
   const handleShare = useCallback(() => {
@@ -74,7 +71,7 @@ function App() {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
-            Type Scale Generator
+            Type
           </h1>
           <Button variant="default" onClick={handleShare}>
             Share Scale
@@ -108,12 +105,6 @@ function App() {
             <h2 className="text-body-s font-semibold mb-3">Values</h2>
             <ScaleTable />
           </div>
-        </div>
-
-        {/* Spacing */}
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <h2 className="text-body-s font-semibold mb-3">Spacing scale</h2>
-          <SpacingTable />
         </div>
 
         {/* Code Export */}

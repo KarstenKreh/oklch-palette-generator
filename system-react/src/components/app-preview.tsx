@@ -9,6 +9,7 @@ import { PhoneMockup } from '@/components/phone-mockup';
 import { contrastRatio } from '@core/color-math';
 import { generateShadows, generateNeumorphicInset, type ShadowConfig, type ShadowType } from '@core/shadows';
 import { LiquidGlass } from '@core/liquid-glass';
+import { BrutalistEcho, deriveBorderFromBg, type BrutalistLevel } from '@core/brutalist-echo';
 import type { FgContrastMode } from '@core/url-state/color';
 
 interface PaletteResult {
@@ -60,10 +61,19 @@ interface Tokens {
   shadowInset: string;
   isNeomorph: boolean;
   isGlass: boolean;
+  isNeobrutalism: boolean;
   isDark: boolean;
   glassDepth: number;
   glassBlur: number;
   glassDispersion: number;
+  brutalistOffsetX: number;
+  brutalistOffsetY: number;
+  brutalistScale: number;
+  brutalistStrength: number;
+  brutalistStrokeWidth: number;
+  brutalistVariant: 'outlined' | 'solid';
+  brutalistColorMode: 'auto' | 'custom';
+  brutalistCustomColor: string;
   fs: (name: string) => string | undefined;
   lh: (name: string) => number | undefined;
   ls: (name: string) => string | undefined;
@@ -95,13 +105,14 @@ function buildTokens(
   const borderW = (shape?.borderEnabled ?? true) ? (shape?.borderWidth ?? 1) : 0;
   const isNeomorph = shape?.shapeStyle === 'neomorph';
   const isGlass = shape?.shapeStyle === 'glass';
+  const isNeobrutalism = shape?.shapeStyle === 'neobrutalism';
 
   // Surface base (overall app bg) — neomorph & paper both compute this the same;
   // neomorph re-uses it for card/elevated to achieve the monochromatic effect below.
   const baseBg = dark ? p(surface, 875) : p(surface, 50);
 
   // Shadow engine — route neomorph → 'neumorphic', paper → user's shadowType (default 'normal').
-  // Glass stays without shadow in this preview (user is actively iterating the real Glass elsewhere).
+  // Glass and Neobrutalism don't use box-shadow in this preview (brutalism uses DOM-sibling echoes).
   const resolvedShadowType: ShadowType = isNeomorph ? 'neumorphic' : (shape?.shadowType ?? 'normal');
   const shadowConfig: ShadowConfig = {
     type: resolvedShadowType,
@@ -111,7 +122,7 @@ function buildTokens(
     colorMode: shape?.shadowColorMode ?? 'auto',
     customColor: shape?.shadowCustomColor ?? '#000000',
   };
-  const shadowsEnabled = (shape?.shadowEnabled ?? true) && !isGlass;
+  const shadowsEnabled = (shape?.shadowEnabled ?? true) && !isGlass && !isNeobrutalism;
   const shadowSet = shadowsEnabled ? generateShadows(baseBg, dark, shadowConfig) : [];
   const insetSet = shadowsEnabled && isNeomorph ? generateNeumorphicInset(baseBg, dark, shadowConfig) : [];
   const pickShadow = (name: string) => shadowSet.find(s => s.name === name)?.shadow ?? 'none';
@@ -175,10 +186,19 @@ function buildTokens(
     border: dark ? p(surface, 700) : p(surface, 200),
     radius, borderW, shadow, shadowSm, shadowInset, isNeomorph,
     isGlass,
+    isNeobrutalism,
     isDark: dark,
     glassDepth: shape?.glassDepth ?? 0.2,
     glassBlur: shape?.glassBlur ?? 1.0,
     glassDispersion: shape?.glassDispersion ?? 0.5,
+    brutalistOffsetX: shape?.shadowOffsetX ?? 2,
+    brutalistOffsetY: shape?.shadowOffsetY ?? 4,
+    brutalistScale: shape?.shadowScale ?? 1.272,
+    brutalistStrength: shape?.shadowStrength ?? 1,
+    brutalistStrokeWidth: borderW || 1,
+    brutalistVariant: shape?.brutalistVariant ?? 'outlined',
+    brutalistColorMode: shape?.shadowColorMode ?? 'auto',
+    brutalistCustomColor: shape?.shadowCustomColor ?? '#000000',
     fs: (name: string) => { const v = l(name); return v ? `${v.maxRem}rem` : undefined; },
     lh: (name: string) => l(name)?.lineHeight,
     ls: (name: string) => { const v = l(name); return v?.letterSpacing ? `${v.letterSpacing}em` : undefined; },
@@ -190,6 +210,40 @@ function buildTokens(
     bodyFf: bodyFont ? `'${bodyFont}', sans-serif` : undefined,
     headingFw: headingWeight ?? 700,
   };
+}
+
+/* ─── Brutalism helpers ─── */
+function brutalBorder(t: Tokens, bg: string): string {
+  return t.brutalistColorMode === 'custom' ? t.brutalistCustomColor : deriveBorderFromBg(bg);
+}
+function BrutalistWrap({
+  t, level, radius, bg, children, style,
+}: {
+  t: Tokens;
+  level: BrutalistLevel;
+  radius: number;
+  bg: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  const border = brutalBorder(t, bg);
+  const isSolid = t.brutalistVariant === 'solid';
+  return (
+    <div style={{ position: 'relative', ...style }}>
+      <BrutalistEcho
+        level={level}
+        offsetX={t.brutalistOffsetX}
+        offsetY={t.brutalistOffsetY}
+        scale={t.brutalistScale}
+        strokeWidth={isSolid ? 0 : t.brutalistStrokeWidth}
+        borderRadius={radius}
+        bgColor={isSolid ? border : bg}
+        borderColor={border}
+        opacity={t.brutalistStrength}
+      />
+      {children}
+    </div>
+  );
 }
 
 /* ─── Card helper ─── */
@@ -208,6 +262,22 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
           <div style={{ padding: '8px 10px' }}>{children}</div>
         </LiquidGlass>
       </div>
+    );
+  }
+  if (t.isNeobrutalism) {
+    const isSolid = t.brutalistVariant === 'solid';
+    return (
+      <BrutalistWrap t={t} level="md" radius={t.radius} bg={t.bgCard} style={style}>
+        <div style={{
+          position: 'relative',
+          backgroundColor: t.bgCard,
+          borderRadius: t.radius,
+          border: isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, t.bgCard)}`,
+          padding: '8px 10px',
+        }}>
+          {children}
+        </div>
+      </BrutalistWrap>
     );
   }
   return (
@@ -299,6 +369,23 @@ function DashboardScreen({ t }: { t: Tokens }) {
               </div>
             );
           }
+          if (t.isNeobrutalism) {
+            const isSolid = t.brutalistVariant === 'solid';
+            return (
+              <BrutalistWrap key={stat.label} t={t} level="sm" radius={t.radius} bg={t.bgCard} style={{ flex: 1 }}>
+                <div style={{
+                  position: 'relative',
+                  backgroundColor: t.bgCard,
+                  borderRadius: t.radius,
+                  border: isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, t.bgCard)}`,
+                  padding: '6px 8px',
+                  display: 'flex', flexDirection: 'column', gap: '2px',
+                }}>
+                  {statContent}
+                </div>
+              </BrutalistWrap>
+            );
+          }
           return (
             <div key={stat.label} style={{
               flex: 1,
@@ -374,25 +461,34 @@ function DashboardScreen({ t }: { t: Tokens }) {
 
       {/* Widget 5: Quick Actions */}
       <div style={{ display: 'flex', gap: '6px' }}>
-        <button style={{
-          flex: 1, padding: '4px 8px',
-          borderRadius: Math.max(3, t.radius - 2), border: 'none',
-          backgroundColor: t.primary, color: t.primaryFg,
-          fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-        }}>Create</button>
-        <button style={{
-          flex: 1, padding: '4px 8px',
-          borderRadius: Math.max(3, t.radius - 2),
-          border: `${t.borderW || 1}px solid ${t.border}`,
-          backgroundColor: 'transparent', color: t.fg,
-          fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-        }}>Export</button>
-        <button style={{
-          flex: 1, padding: '4px 8px',
-          borderRadius: Math.max(3, t.radius - 2), border: 'none',
-          backgroundColor: t.destructive, color: t.destructiveFg,
-          fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-        }}>Delete</button>
+        {([
+          { label: 'Create', bg: t.primary, fg: t.primaryFg, transparent: false },
+          { label: 'Export', bg: t.bg, fg: t.fg, transparent: true },
+          { label: 'Delete', bg: t.destructive, fg: t.destructiveFg, transparent: false },
+        ] as const).map((b) => {
+          const btnR = Math.max(3, t.radius - 2);
+          const isSolid = t.brutalistVariant === 'solid';
+          const echoBg = b.transparent ? t.bg : b.bg;
+          const btnStyle: React.CSSProperties = {
+            flex: 1, padding: '4px 8px',
+            borderRadius: btnR,
+            backgroundColor: b.transparent ? 'transparent' : b.bg,
+            color: b.fg,
+            fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
+            border: t.isNeobrutalism
+              ? (isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, echoBg)}`)
+              : (b.transparent ? `${t.borderW || 1}px solid ${t.border}` : 'none'),
+            position: 'relative',
+          };
+          if (t.isNeobrutalism) {
+            return (
+              <BrutalistWrap key={b.label} t={t} level="sm" radius={btnR} bg={echoBg} style={{ flex: 1 }}>
+                <button style={btnStyle}>{b.label}</button>
+              </BrutalistWrap>
+            );
+          }
+          return <button key={b.label} style={btnStyle}>{b.label}</button>;
+        })}
       </div>
     </div>
   );
@@ -451,27 +547,45 @@ function MessengerScreen({ t }: { t: Tokens }) {
         {/* Messages */}
         <div style={{ flex: 1, overflow: 'hidden', padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
           <div style={{ textAlign: 'center', fontSize: '0.5rem', color: t.muted, padding: '2px 0' }}>Today</div>
-          {chatMessages.map((m, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: m.sent ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '78%',
-                backgroundColor: m.sent ? t.primarySecondary : t.bgCard,
-                color: t.fg,
-                borderRadius: bubbleR,
-                borderBottomRightRadius: m.sent ? 3 : bubbleR,
-                borderBottomLeftRadius: m.sent ? bubbleR : 3,
-                padding: '4px 8px',
-                boxShadow: m.sent ? 'none' : t.shadow,
-                border: !m.sent && t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
-              }}>
+          {chatMessages.map((m, i) => {
+            const bubbleBg = m.sent ? t.primarySecondary : t.bgCard;
+            const isSolid = t.brutalistVariant === 'solid';
+            const brutalizeBubble = !m.sent && t.isNeobrutalism;
+            const bubbleStyle: React.CSSProperties = {
+              maxWidth: '78%',
+              backgroundColor: bubbleBg,
+              color: t.fg,
+              borderRadius: bubbleR,
+              borderBottomRightRadius: m.sent ? 3 : bubbleR,
+              borderBottomLeftRadius: m.sent ? bubbleR : 3,
+              padding: '4px 8px',
+              boxShadow: m.sent || t.isNeobrutalism ? 'none' : t.shadow,
+              border: brutalizeBubble
+                ? (isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, bubbleBg)}`)
+                : (!m.sent && t.borderW ? `${t.borderW}px solid ${t.border}` : 'none'),
+              position: 'relative',
+            };
+            const bubbleContent = (
+              <>
                 <div style={{ fontSize: fsCaption, lineHeight: 1.4 }}>{m.text}</div>
                 <div style={{ fontSize: '0.5rem', color: t.muted, textAlign: 'right', marginTop: '1px', display: 'flex', justifyContent: 'flex-end', gap: '2px', alignItems: 'center' }}>
                   {m.time}
                   {m.sent && <CheckCheck size={8} color={m.read ? t.primary : t.muted} />}
                 </div>
+              </>
+            );
+            return (
+              <div key={i} style={{ display: 'flex', justifyContent: m.sent ? 'flex-end' : 'flex-start' }}>
+                {brutalizeBubble ? (
+                  <BrutalistWrap t={t} level="sm" radius={bubbleR} bg={bubbleBg}>
+                    <div style={bubbleStyle}>{bubbleContent}</div>
+                  </BrutalistWrap>
+                ) : (
+                  <div style={bubbleStyle}>{bubbleContent}</div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Input bar */}

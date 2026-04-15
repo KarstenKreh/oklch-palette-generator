@@ -8,6 +8,7 @@ import { decodeState as decodeColorState, encodeState as encodeColorState, type 
 import { decodeState as decodeTypeState } from '@core/url-state/type';
 import { decodeState as decodeShapeState, type ShapeUrlState as ShapeState } from '@core/url-state/shape';
 import { decodeState as decodeSymbolState, type UrlState as SymbolState } from '@core/url-state/symbol';
+import { decodeState as decodeSpaceState, DEFAULT_SPACE_URL_STATE, type SpaceUrlState } from '@core/url-state/space';
 import { generatePalette, computeAutoErrorHex, computeAutoAccentHex, type PaletteEntry } from '@core/palette';
 import { hexToOklch } from '@core/color-math';
 import { customScale, traditionalScale, type ComputedLevel } from '@core/scale';
@@ -94,10 +95,12 @@ function App() {
   const [typeState, setTypeState] = useState<ReturnType<typeof decodeTypeState>>(null);
   const [shapeState, setShapeState] = useState<Partial<ShapeState> | null>(null);
   const [symbolState, setSymbolState] = useState<SymbolState | null>(null);
+  const [spaceState, setSpaceState] = useState<SpaceUrlState>(DEFAULT_SPACE_URL_STATE);
   const [colorSegment, setColorSegment] = useState<string | null>(null);
   const [typeSegment, setTypeSegment] = useState<string | null>(null);
   const [shapeSegment, setShapeSegment] = useState<string | null>(null);
   const [symbolSegment, setSymbolSegment] = useState<string | null>(null);
+  const [spaceSegment, setSpaceSegment] = useState<string | null>(null);
   const [themeName, setThemeName] = useState('');
 
   useEffect(() => {
@@ -106,10 +109,12 @@ function App() {
     const ts = getMySegment(raw, 't');
     const ss = getMySegment(raw, 's');
     const ys = getMySegment(raw, 'y');
+    const ps = getMySegment(raw, 'p');
     setColorSegment(cs);
     setTypeSegment(ts);
     setShapeSegment(ss);
     setSymbolSegment(ys);
+    setSpaceSegment(ps);
 
     if (cs) {
       const decoded = decodeColorState(cs);
@@ -119,6 +124,10 @@ function App() {
     if (ts) setTypeState(decodeTypeState(ts));
     if (ss) setShapeState(decodeShapeState(ss));
     if (ys) setSymbolState(decodeSymbolState(ys));
+    if (ps) {
+      const decoded = decodeSpaceState(ps);
+      if (decoded) setSpaceState({ ...DEFAULT_SPACE_URL_STATE, ...decoded });
+    }
 
     // Fill in defaults for any missing segments
     if (!cs) setColorState(DEFAULT_COLOR_STATE);
@@ -186,10 +195,15 @@ function App() {
     return s;
   }, [typeState]);
 
-  const spacing = useMemo<SpacingToken[] | null>(() => {
-    if (!scale) return null;
-    return computeSpacingTokens(scale, typeState?.spacingBaseMultiplier ?? 1.0);
-  }, [scale, typeState]);
+  const spacing = useMemo<SpacingToken[]>(() => {
+    return computeSpacingTokens({
+      baseRem: spaceState.spacingBaseRem,
+      ratio: spaceState.spacingRatio,
+      mode: spaceState.spacingMode,
+      multiplier: spaceState.spacingMultiplier,
+      snap: spaceState.spacingSnap,
+    });
+  }, [spaceState]);
 
   const handleNameChange = useCallback((name: string) => {
     setThemeName(name);
@@ -199,14 +213,14 @@ function App() {
       const newColorSegment = encodeColorState(updated);
       setColorSegment(newColorSegment);
       history.replaceState(null, '', '#' + buildUnifiedHash({
-        c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined,
+        c: newColorSegment, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined, p: spaceSegment || undefined,
       }));
     }
-  }, [colorState, typeSegment, shapeSegment, symbolSegment]);
+  }, [colorState, typeSegment, shapeSegment, symbolSegment, spaceSegment]);
 
   const getCurrentHash = useCallback(() => {
-    return buildUnifiedHash({ c: colorSegment || undefined, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined });
-  }, [colorSegment, typeSegment, shapeSegment, symbolSegment]);
+    return buildUnifiedHash({ c: colorSegment || undefined, t: typeSegment || undefined, s: shapeSegment || undefined, y: symbolSegment || undefined, p: spaceSegment || undefined });
+  }, [colorSegment, typeSegment, shapeSegment, symbolSegment, spaceSegment]);
 
   const handleShare = useCallback(() => {
     const hash = getCurrentHash();

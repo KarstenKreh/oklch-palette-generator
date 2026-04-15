@@ -5,7 +5,7 @@ import { hexToOklch, oklchToHex } from './color-math';
 
 export const SQRT_PHI = 1.272;
 
-export type ShadowType = 'normal' | 'neumorphic' | 'flat';
+export type ShadowType = 'normal' | 'neumorphic' | 'flat' | 'brutalist';
 
 export interface ShadowConfig {
   type: ShadowType;
@@ -14,6 +14,9 @@ export interface ShadowConfig {
   scale: number;         // level spread (default √φ = 1.272)
   colorMode: 'auto' | 'custom';
   customColor: string;   // hex, used when colorMode === 'custom'
+  offsetX?: number;      // brutalist: base X offset in px (default 4)
+  offsetY?: number;      // brutalist: base Y offset in px (default 4)
+  borderWidth?: number;  // brutalist: stroke width of the offset outline in px (default 1)
 }
 
 /** Build the 5-level factor array from a scale value.
@@ -123,6 +126,44 @@ function generateFlat(bgHex: string, isDark: boolean, config: ShadowConfig): Sha
   });
 }
 
+/** Generate brutalist shadows — offset outline (echo stroke), not a solid block.
+ *  Stacks two shadows per level: a bg-colored filler + a spread-expanded stroke
+ *  so the visible effect is a duplicate border sitting at an offset, PostHog-style. */
+function generateBrutalist(bgHex: string, isDark: boolean, config: ShadowConfig): ShadowValue[] {
+  const baseX = config.offsetX ?? 4;
+  const baseY = config.offsetY ?? 4;
+  const strokeWidth = config.borderWidth ?? 1;
+
+  let strokeL: number;
+  let strokeC: number;
+  let strokeH: string;
+  if (config.colorMode === 'custom' && config.customColor) {
+    const [l, c, h] = hexToOklch(config.customColor);
+    strokeL = l;
+    strokeC = c;
+    strokeH = h.toFixed(2);
+  } else {
+    const [, , surfaceHue] = hexToOklch(bgHex);
+    strokeL = isDark ? 0.98 : 0.05;
+    strokeC = 0.005;
+    strokeH = surfaceHue.toFixed(2);
+  }
+
+  const [bgL, bgC, bgHue] = hexToOklch(bgHex);
+
+  return buildLevels(config.scale).map(({ name, factor }) => {
+    const oX = (baseX * factor).toFixed(2);
+    const oY = (baseY * factor).toFixed(2);
+    const a = Math.min(1, config.strength).toFixed(3);
+    // First shadow (drawn on top): bg-colored fill at offset → masks the interior.
+    // Second shadow (drawn beneath): same offset + spread = strokeWidth → visible as the echo outline.
+    const shadow =
+      `${oX}px ${oY}px 0 0 oklch(${bgL.toFixed(3)} ${bgC.toFixed(3)} ${bgHue.toFixed(2)}), ` +
+      `${oX}px ${oY}px 0 ${strokeWidth}px oklch(${strokeL} ${strokeC} ${strokeH} / ${a})`;
+    return { name, shadow };
+  });
+}
+
 /** Convert 0–1 alpha to 2-char hex. */
 function alphaHex(a: number): string {
   return Math.round(Math.min(1, Math.max(0, a)) * 255).toString(16).padStart(2, '0');
@@ -133,6 +174,7 @@ export function generateShadows(bgHex: string, isDark: boolean, config: ShadowCo
   switch (config.type) {
     case 'neumorphic': return generateNeumorphic(bgHex, isDark, config);
     case 'flat': return generateFlat(bgHex, isDark, config);
+    case 'brutalist': return generateBrutalist(bgHex, isDark, config);
     default: return generateNormal(bgHex, isDark, config);
   }
 }

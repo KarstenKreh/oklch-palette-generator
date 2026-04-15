@@ -5,6 +5,7 @@ import type { ShapeUrlState } from '@core/url-state/shape';
 import { contrastRatio, invertHex } from '@core/color-math';
 import { generateShadows, type ShadowConfig } from '@core/shadows';
 import { LiquidGlass } from '@core/liquid-glass';
+import { BrutalistEcho, deriveBorderFromBg } from '@core/brutalist-echo';
 import { PanelSvg } from '@/components/panel-svg';
 import { Sun, Moon, SunDim, MoonStar } from 'lucide-react';
 
@@ -193,13 +194,47 @@ export function SurfacePanel({
   const bw = shapeTokens?.borderEnabled !== false ? (shapeTokens?.borderWidth ?? 1) : 0;
   const br = shapeTokens?.borderRadius ?? 8;
 
-  // Neomorph / Glass only for Standard panels — HC panels stay paper-like by constraint.
+  // Neomorph / Glass / Neobrutalism only for Standard panels — HC panels stay paper-like by constraint.
   const isStandardPanel = panelType === 'light' || panelType === 'dark';
   const isNeomorph = isStandardPanel && shape?.shapeStyle === 'neomorph';
   const isGlass = isStandardPanel && shape?.shapeStyle === 'glass';
+  const isNeobrutalism = isStandardPanel && shape?.shapeStyle === 'neobrutalism';
   const glassDepth = shape?.glassDepth ?? 0.2;
   const glassBlur = shape?.glassBlur ?? 1.0;
   const glassDispersion = shape?.glassDispersion ?? 0.5;
+
+  const brutalistOffsetX = shape?.shadowOffsetX ?? 2;
+  const brutalistOffsetY = shape?.shadowOffsetY ?? 4;
+  const brutalistScale = shape?.shadowScale ?? 1.272;
+  const brutalistStrength = shape?.shadowStrength ?? 1;
+  const brutalistStrokeWidth = bw || 1;
+  const brutalistVariant = shape?.brutalistVariant ?? 'outlined';
+
+  const brutalistEnabled = isNeobrutalism && (shape?.shadowEnabled ?? true);
+  /** Per-element border derived from that element's bg — matches shape-react's logic. */
+  function brutalBorder(bg: string): string {
+    return shape?.shadowColorMode === 'custom' && shape?.shadowCustomColor
+      ? shape.shadowCustomColor
+      : deriveBorderFromBg(bg);
+  }
+  function brutalEcho(level: 'xs' | 'sm' | 'md' | 'lg' | 'xl', radius: number, bg: string) {
+    if (!brutalistEnabled) return null;
+    const border = brutalBorder(bg);
+    const isSolid = brutalistVariant === 'solid';
+    return (
+      <BrutalistEcho
+        level={level}
+        offsetX={brutalistOffsetX}
+        offsetY={brutalistOffsetY}
+        scale={brutalistScale}
+        strokeWidth={isSolid ? 0 : brutalistStrokeWidth}
+        borderRadius={radius}
+        bgColor={isSolid ? border : bg}
+        borderColor={border}
+        opacity={brutalistStrength}
+      />
+    );
+  }
 
   const neomorphShadows = isNeomorph ? generateShadows(bgHex, isDark, {
     type: 'neumorphic',
@@ -321,20 +356,24 @@ export function SurfacePanel({
               </div>
             );
           }
+          const cardBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(card.bg) : borderMutedHex;
+          const showCardBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
           return (
-            <div
-              key={card.name}
-              className="p-2.5 text-caption flex flex-col justify-between min-h-20"
-              style={{
-                backgroundColor: card.bg,
-                color: textHex,
-                border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
-                borderRadius: br,
-                boxShadow: shadowMd,
-              }}
-            >
-              <span className="font-medium">{card.name}</span>
-              <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
+            <div key={card.name} className="relative">
+              {brutalEcho('md', br, card.bg)}
+              <div
+                className="relative p-2.5 text-caption flex flex-col justify-between min-h-20"
+                style={{
+                  backgroundColor: card.bg,
+                  color: textHex,
+                  border: showCardBorder ? `${bw || 1}px solid ${cardBorder}` : 'none',
+                  borderRadius: br,
+                  boxShadow: brutalistEnabled ? undefined : shadowMd,
+                }}
+              >
+                <span className="font-medium">{card.name}</span>
+                <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
+              </div>
             </div>
           );
         })}
@@ -342,24 +381,31 @@ export function SurfacePanel({
 
       {/* Buttons */}
       <div className="flex gap-2">
-        <div
-          className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: primaryBg, color: primaryFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
-        >
-          Primary
-        </div>
-        <div
-          className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: secondaryBg, color: secondaryFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
-        >
-          Secondary
-        </div>
-        <div
-          className="px-3 py-1.5 text-caption font-medium"
-          style={{ backgroundColor: destructiveBg, color: destructiveFg, borderRadius: Math.max(4, br - 2), boxShadow: shadowSm }}
-        >
-          Destructive
-        </div>
+        {([
+          { label: 'Primary', bg: primaryBg, fg: primaryFg },
+          { label: 'Secondary', bg: secondaryBg, fg: secondaryFg },
+          { label: 'Destructive', bg: destructiveBg, fg: destructiveFg },
+        ] as const).map((btn) => {
+          const btnR = Math.max(4, br - 2);
+          const showBtnBorder = brutalistEnabled && brutalistVariant !== 'solid';
+          return (
+            <div key={btn.label} className="relative inline-flex">
+              {brutalEcho('sm', btnR, btn.bg)}
+              <div
+                className="relative px-3 py-1.5 text-caption font-medium"
+                style={{
+                  backgroundColor: btn.bg,
+                  color: btn.fg,
+                  borderRadius: btnR,
+                  border: showBtnBorder ? `${brutalistStrokeWidth}px solid ${brutalBorder(btn.bg)}` : undefined,
+                  boxShadow: brutalistEnabled ? undefined : shadowSm,
+                }}
+              >
+                {btn.label}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Badges: Error + Accents */}
@@ -370,27 +416,48 @@ export function SurfacePanel({
           const errBadgeBg = isDark ? getHex(errorSurface, 800) : getHex(errorSurface, 100);
           const errBadgeText = isDark ? getHex(error, 50) : getHex(error, 950);
           const errBorderHex = isDark ? getHex(errorSurface, 700) : getHex(errorSurface, 300);
+          const errBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(errBadgeBg) : errBorderHex;
+          const showErrBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
           return (
-            <div
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
-              style={{ backgroundColor: errBadgeBg, color: errBadgeText, border: bw ? `${bw}px solid ${errBorderHex}` : 'none', borderRadius: br }}
-            >
-              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
-              Error
+            <div className="relative inline-flex">
+              {brutalEcho('sm', br, errBadgeBg)}
+              <div
+                className="relative inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+                style={{
+                  backgroundColor: errBadgeBg,
+                  color: errBadgeText,
+                  border: showErrBorder ? `${bw || 1}px solid ${errBorder}` : 'none',
+                  borderRadius: br,
+                }}
+              >
+                <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
+                Error
+              </div>
             </div>
           );
         })()}
         {/* Accent badges */}
-        {accentItems.map((item) => (
-          <div
-            key={item.name}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
-            style={{ backgroundColor: item.badgeBg, color: item.badgeText, border: bw ? `${bw}px solid ${item.badgeBorder}` : 'none', borderRadius: br }}
-          >
-            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
-            {item.name}
-          </div>
-        ))}
+        {accentItems.map((item) => {
+          const accBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(item.badgeBg) : item.badgeBorder;
+          const showAccBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
+          return (
+            <div key={item.name} className="relative inline-flex">
+              {brutalEcho('sm', br, item.badgeBg)}
+              <div
+                className="relative inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+                style={{
+                  backgroundColor: item.badgeBg,
+                  color: item.badgeText,
+                  border: showAccBorder ? `${bw || 1}px solid ${accBorder}` : 'none',
+                  borderRadius: br,
+                }}
+              >
+                <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
+                {item.name}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
     </div>

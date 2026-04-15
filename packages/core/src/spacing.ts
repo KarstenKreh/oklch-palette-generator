@@ -1,12 +1,15 @@
 /**
- * Spacing token computation derived from the type scale.
+ * Spacing token computation.
  *
- * The baseline unit is calculated from Body M's max size × its line-height.
- * Named tokens are multiples of this baseline.
+ * Two modes:
+ *   - harmonic: hand-picked multiples (0.25× … 6×) applied to a base unit.
+ *   - geometric: 9 steps centred on `sm`, each step = base × ratio^(i - 3).
+ *
+ * The base unit comes either from the type scale (legacy overload kept for
+ * system-react back-compat) or directly from a SpacingConfig (new /space tool).
  */
 
 import type { ComputedLevel } from './scale';
-import { round } from './math';
 
 export interface SpacingToken {
   name: string;
@@ -15,7 +18,17 @@ export interface SpacingToken {
   px: number;
 }
 
-const SPACING_STEPS: { name: string; multiple: number }[] = [
+export type SpacingMode = 'harmonic' | 'geometric';
+
+export interface SpacingConfig {
+  baseRem: number;
+  ratio: number;
+  mode: SpacingMode;
+  multiplier: number;
+  snap: boolean;
+}
+
+export const SPACING_STEPS: { name: string; multiple: number }[] = [
   { name: '3xs', multiple: 0.25 },
   { name: '2xs', multiple: 0.5 },
   { name: 'xs', multiple: 0.75 },
@@ -27,21 +40,33 @@ const SPACING_STEPS: { name: string; multiple: number }[] = [
   { name: '3xl', multiple: 6 },
 ];
 
-export function computeSpacingTokens(
-  levels: ComputedLevel[],
-  multiplier: number = 1,
-): SpacingToken[] {
-  const bodyM = levels.find((l) => l.level === 'body-m');
-  if (!bodyM) return [];
+// Index of `sm` in SPACING_STEPS — geometric centre.
+const SM_INDEX = 3;
 
-  const baselineUnit = bodyM.maxRem * bodyM.lineHeight * multiplier;
+export const DEFAULT_SPACING_CONFIG: SpacingConfig = {
+  baseRem: 1.0,
+  ratio: 1.272,
+  mode: 'harmonic',
+  multiplier: 1.0,
+  snap: true,
+};
 
-  return SPACING_STEPS.map((step) => {
-    const raw = baselineUnit * step.multiple;
-    // Round to clean values: 0.25rem grid for small, 0.5rem for larger
-    const rem = raw < 1 ? Math.round(raw * 4) / 4
-              : raw < 4 ? Math.round(raw * 2) / 2
-              : Math.round(raw);
+function snapRem(raw: number): number {
+  if (raw < 1) return Math.round(raw * 4) / 4;
+  if (raw < 4) return Math.round(raw * 2) / 2;
+  return Math.round(raw);
+}
+
+function computeFromConfig(cfg: SpacingConfig): SpacingToken[] {
+  const { baseRem, ratio, mode, multiplier, snap } = cfg;
+  const unit = baseRem * multiplier;
+
+  return SPACING_STEPS.map((step, i) => {
+    const raw =
+      mode === 'harmonic'
+        ? unit * step.multiple
+        : unit * Math.pow(ratio, i - SM_INDEX);
+    const rem = snap ? snapRem(raw) : Math.round(raw * 1000) / 1000;
     return {
       name: step.name,
       multiple: step.multiple,
@@ -49,4 +74,37 @@ export function computeSpacingTokens(
       px: Math.round(rem * 16),
     };
   });
+}
+
+function computeFromLevels(
+  levels: ComputedLevel[],
+  multiplier: number,
+): SpacingToken[] {
+  const bodyM = levels.find((l) => l.level === 'body-m');
+  if (!bodyM) return [];
+  const baseRem = bodyM.maxRem * bodyM.lineHeight;
+  return computeFromConfig({
+    baseRem,
+    ratio: 1.272,
+    mode: 'harmonic',
+    multiplier,
+    snap: true,
+  });
+}
+
+/**
+ * Compute spacing tokens.
+ *
+ * Two call signatures:
+ *   computeSpacingTokens(cfg: SpacingConfig)  — new /space tool
+ *   computeSpacingTokens(levels, multiplier)  — legacy, derives base from Body M
+ */
+export function computeSpacingTokens(cfg: SpacingConfig): SpacingToken[];
+export function computeSpacingTokens(levels: ComputedLevel[], multiplier?: number): SpacingToken[];
+export function computeSpacingTokens(
+  arg: SpacingConfig | ComputedLevel[],
+  multiplier: number = 1,
+): SpacingToken[] {
+  if (Array.isArray(arg)) return computeFromLevels(arg, multiplier);
+  return computeFromConfig(arg);
 }

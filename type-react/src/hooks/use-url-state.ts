@@ -3,7 +3,7 @@ import { useTypeStore } from '@/store/type-store';
 import { encodeState, decodeState } from '@/lib/url-state';
 import { isUnifiedHash, getMySegment, buildUnifiedHash } from '@core/unified-hash';
 
-interface OtherSegments { c?: string; s?: string; y?: string }
+interface OtherSegments { c?: string; s?: string; y?: string; p?: string }
 
 /**
  * Returns the other tools' hash segments (c=, s=), captured at mount.
@@ -28,7 +28,6 @@ export function useUrlState() {
     mobileBaseSize: s.mobileBaseSize,
     mobileRatioMode: s.mobileRatioMode,
     autoShrink: s.autoShrink,
-    spacingBaseMultiplier: s.spacingBaseMultiplier,
     lineHeightOverrides: s.lineHeightOverrides,
     letterSpacingOverrides: s.letterSpacingOverrides,
     traditionalAssignments:
@@ -45,6 +44,7 @@ export function useUrlState() {
       c: unified ? (getMySegment(raw, 'c') || undefined) : undefined,
       s: unified ? (getMySegment(raw, 's') || undefined) : undefined,
       y: unified ? (getMySegment(raw, 'y') || undefined) : undefined,
+      p: unified ? (getMySegment(raw, 'p') || undefined) : undefined,
     };
     othersRef.current = captured;
     setOthers(captured);
@@ -66,7 +66,6 @@ export function useUrlState() {
             headingWeight: state.headingWeight,
             bodyFont: state.bodyFont,
             monoFont: state.monoFont,
-            spacingBaseMultiplier: state.spacingBaseMultiplier,
             lineHeightOverrides: state.lineHeightOverrides,
             letterSpacingOverrides: state.letterSpacingOverrides,
           };
@@ -87,7 +86,7 @@ export function useUrlState() {
     const currentStore = useTypeStore.getState();
     const encoded = encodeStore(currentStore);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: captured.c, t: encoded, s: captured.s, y: captured.y,
+      c: captured.c, t: encoded, s: captured.s, y: captured.y, p: captured.p,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -97,14 +96,13 @@ export function useUrlState() {
     if (skipNextWrite.current) { skipNextWrite.current = false; return; }
     const encoded = encodeStore(store);
     history.replaceState(null, '', '#' + buildUnifiedHash({
-      c: othersRef.current.c, t: encoded, s: othersRef.current.s, y: othersRef.current.y,
+      c: othersRef.current.c, t: encoded, s: othersRef.current.s, y: othersRef.current.y, p: othersRef.current.p,
     }));
   }, [
     store.scaleMode, store.baseSize, store.mobileBaseSize, store.customRatio,
     store.mobileRatioMode, store.mobileRatio, store.autoShrink,
     store.headingFont, store.headingWeight,
     store.bodyFont, store.monoFont,
-    store.spacingBaseMultiplier,
     store.lineHeightOverrides, store.letterSpacingOverrides,
     store.traditionalAssignments, store.traditionalMobileAssignments,
   ]);

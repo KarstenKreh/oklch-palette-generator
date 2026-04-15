@@ -23,7 +23,6 @@ interface TypeState {
 
   lineHeightOverrides: Partial<Record<TypeLevel, number>>;
   letterSpacingOverrides: Partial<Record<TypeLevel, number>>;
-  spacingBaseMultiplier: number;
 
   previewText: string;
   previewViewport: number;
@@ -43,7 +42,6 @@ interface TypeState {
   setMonoFont: (slug: string) => void;
   setLineHeightOverride: (level: TypeLevel, value: number | null) => void;
   setLetterSpacingOverride: (level: TypeLevel, value: number | null) => void;
-  setSpacingBaseMultiplier: (m: number) => void;
   resetTypographyDetails: () => void;
   setPreviewText: (text: string) => void;
   setPreviewViewport: (px: number) => void;
@@ -68,7 +66,6 @@ export const useTypeStore = create<TypeState>((set) => ({
 
   lineHeightOverrides: {},
   letterSpacingOverrides: {},
-  spacingBaseMultiplier: 1.0,
 
   previewText: '',
   previewViewport: 1920,
@@ -110,7 +107,6 @@ export const useTypeStore = create<TypeState>((set) => ({
       if (value === null) { delete overrides[level]; } else { overrides[level] = value; }
       return { letterSpacingOverrides: overrides };
     }),
-  setSpacingBaseMultiplier: (m) => set({ spacingBaseMultiplier: m }),
   resetTypographyDetails: () => set({ lineHeightOverrides: {}, letterSpacingOverrides: {} }),
   setPreviewText: (text) => set({ previewText: text }),
   setPreviewViewport: (px) => set({ previewViewport: px }),

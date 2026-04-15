@@ -23,6 +23,7 @@ function App() {
       t: otherSegments.t || undefined,
       s: otherSegments.s || undefined,
       y: symbolEncoded,
+      p: otherSegments.p || undefined,
     });
   }, [store, otherSegments]);
 

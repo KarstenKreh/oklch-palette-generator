@@ -96,6 +96,22 @@ export const ICON_FAMILIES: IconFamily[] = [
     ],
   },
   {
+    id: 'tabler',
+    name: 'Tabler Icons',
+    iconifyPrefix: 'tabler',
+    cornerStyle: 'rounded',
+    mood: 50,
+    description: 'Clean, systematic, with outline and filled variants on a 24px grid.',
+    url: 'https://tabler.io/icons',
+    npmPackage: '@tabler/icons-react',
+    license: 'MIT',
+    defaultVariant: 'tabler-outline',
+    variants: [
+      { id: 'tabler-outline', style: 'outlined', strokeWeight: 'regular', label: 'Outline' },
+      { id: 'tabler-filled', style: 'filled', strokeWeight: 'regular', label: 'Filled' },
+    ],
+  },
+  {
     id: 'radix',
     name: 'Radix Icons',
     iconifyPrefix: 'radix-icons',

@@ -16,8 +16,15 @@
 - URL: https://standby.design/type
 - Purpose: Generate fluid typographic scales using mathematical ratios and clamp()
 - Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON), Fontshare embed code
-- Features: Golden ratio / custom ratio / traditional scales, fluid clamp() values, responsive mobile scales, spacing scale, live Fontshare font preview
+- Features: Golden ratio / custom ratio / traditional scales, fluid clamp() values, responsive mobile scales, live Fontshare font preview
 - Use case: Designers and developers building consistent, responsive type hierarchies
+
+### Spacing & Layout Generator
+- URL: https://standby.design/space
+- Purpose: Generate spacing scales, breakpoints, container widths, and aspect ratios
+- Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON)
+- Features: Harmonic and geometric (√φ) spacing modes, Tailwind-compatible breakpoints, container max-widths, aspect ratio tokens including golden and silver
+- Use case: Designers and developers building consistent spatial systems independent of typography
 
 ## How to use the generated code
 

@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { generateCssExport, generateTailwindV4Export } from './code-export';
 import { customScale } from '@core/scale';
-import { computeSpacingTokens } from '@core/spacing';
 
 function makeOpts() {
   const levels = customScale(1.0, 1.272);
-  const spacingTokens = computeSpacingTokens(levels);
   return {
     levels,
-    spacingTokens,
     headingFont: 'satoshi',
     bodyFont: 'satoshi',
     monoFont: 'system-mono',
@@ -48,10 +45,10 @@ describe('generateCssExport', () => {
     expect(output).toContain('--tracking-display');
   });
 
-  it('contains spacing tokens', () => {
+  it('does not contain spacing tokens (moved to /space tool)', () => {
     const output = generateCssExport(makeOpts());
-    expect(output).toContain('--space-sm');
-    expect(output).toContain('--space-3xl');
+    expect(output).not.toContain('--space-sm');
+    expect(output).not.toContain('--space-3xl');
   });
 
   it('snapshot stability', () => {
@@ -71,13 +68,13 @@ describe('generateTailwindV4Export', () => {
     expect(output).not.toContain(':root');
   });
 
-  it('contains same tokens as CSS export', () => {
+  it('contains same tokens as CSS export (minus spacing)', () => {
     const output = generateTailwindV4Export(makeOpts());
     expect(output).toContain('--text-display');
     expect(output).toContain('--font-heading');
     expect(output).toContain('--leading-display');
     expect(output).toContain('--tracking-display');
-    expect(output).toContain('--space-sm');
+    expect(output).not.toContain('--space-sm');
   });
 
   it('snapshot stability', () => {

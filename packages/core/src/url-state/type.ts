@@ -13,7 +13,7 @@
  *   mbs = mobileBaseSize (rem, default = baseSize)
  *   mrm = mobileRatioMode ('auto'|'custom', default 'auto')
  *   as  = autoShrink (%, default 25)
- *   sbm = spacingBaseMultiplier (number, default 1)
+ *   sbm = deprecated (spacingBaseMultiplier moved to /space tool; read-and-discard)
  *   lh  = lineHeightOverrides (level:val;level:val)
  *   ls  = letterSpacingOverrides (level:val;level:val)
  *   tm  = traditionalMobileAssignments (px,px,...  in TYPE_LEVELS order)
@@ -34,7 +34,6 @@ export interface UrlState {
   mobileBaseSize: number;
   mobileRatioMode: 'auto' | 'custom';
   autoShrink: number;
-  spacingBaseMultiplier: number;
   lineHeightOverrides: Partial<Record<TypeLevel, number>>;
   letterSpacingOverrides: Partial<Record<TypeLevel, number>>;
   traditionalAssignments?: Record<TypeLevel, number>;
@@ -72,7 +71,6 @@ export function encodeState(state: UrlState): string {
   if (state.mobileBaseSize !== state.baseSize) ext.push(`mbs=${state.mobileBaseSize}`);
   if (state.mobileRatioMode !== 'auto') ext.push(`mrm=${state.mobileRatioMode}`);
   if (state.autoShrink !== 25) ext.push(`as=${state.autoShrink}`);
-  if (state.spacingBaseMultiplier !== 1) ext.push(`sbm=${state.spacingBaseMultiplier}`);
 
   const lh = encodeOverrides(state.lineHeightOverrides);
   if (lh) ext.push(`lh=${lh}`);
@@ -132,7 +130,6 @@ export function decodeState(hash: string): UrlState | null {
     mobileBaseSize: baseSize,
     mobileRatioMode: 'auto',
     autoShrink: 25,
-    spacingBaseMultiplier: 1,
     lineHeightOverrides: {},
     letterSpacingOverrides: {},
   };
@@ -170,8 +167,8 @@ export function decodeState(hash: string): UrlState | null {
     const as = params.get('as');
     if (as) { const n = parseFloat(as); if (!isNaN(n)) state.autoShrink = n; }
 
-    const sbm = params.get('sbm');
-    if (sbm) { const n = parseFloat(sbm); if (!isNaN(n)) state.spacingBaseMultiplier = n; }
+    // sbm (spacingBaseMultiplier) moved to /space tool — read-and-discard for back-compat
+    params.get('sbm');
 
     const lh = params.get('lh');
     if (lh) state.lineHeightOverrides = decodeOverrides(lh);

@@ -6,7 +6,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Copy } from 'lucide-react';
 import { useComputedScale } from '@/hooks/use-computed-scale';
-import { useComputedSpacing } from '@/hooks/use-computed-spacing';
 import { useTypeStore } from '@/store/type-store';
 import {
   generateCssExport,
@@ -24,7 +23,6 @@ const SCALE_LABELS: Record<string, string> = {
 
 export function CodeExport() {
   const levels = useComputedScale();
-  const spacingTokens = useComputedSpacing();
   const store = useTypeStore();
   const [tab, setTab] = useState('css');
 
@@ -42,13 +40,12 @@ export function CodeExport() {
   const opts = useMemo(
     () => ({
       levels,
-      spacingTokens,
       headingFont: store.headingFont,
       bodyFont: store.bodyFont,
       monoFont: store.monoFont,
       scaleLabel,
     }),
-    [levels, spacingTokens, store.headingFont, store.bodyFont, store.monoFont, scaleLabel],
+    [levels, store.headingFont, store.bodyFont, store.monoFont, scaleLabel],
   );
 
   const cssCode = useMemo(() => generateCssExport(opts), [opts]);
@@ -56,13 +53,12 @@ export function CodeExport() {
   const dtCode = useMemo(
     () => generateDesignTokens({
       levels,
-      spacingTokens,
       headingFont: store.headingFont,
       bodyFont: store.bodyFont,
       monoFont: store.monoFont,
       headingWeight: store.headingWeight,
     }),
-    [levels, spacingTokens, store.headingFont, store.bodyFont, store.monoFont, store.headingWeight],
+    [levels, store.headingFont, store.bodyFont, store.monoFont, store.headingWeight],
   );
   const embedCode = useMemo(
     () => generateFontEmbed(store.headingFont, store.bodyFont, store.monoFont),

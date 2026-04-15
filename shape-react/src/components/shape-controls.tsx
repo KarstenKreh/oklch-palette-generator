@@ -5,6 +5,7 @@ import { BorderControls } from '@/components/controls/border-controls';
 import { RadiusControls } from '@/components/controls/radius-controls';
 import { RingControls } from '@/components/controls/ring-controls';
 import { GlassControls } from '@/components/controls/glass-controls';
+import { BrutalistShadowControls } from '@/components/controls/brutalist-shadow-controls';
 
 export function ShapeControls() {
   const shapeStyle = useShapeStore((s) => s.shapeStyle);
@@ -34,6 +35,15 @@ export function ShapeControls() {
         {shapeStyle === 'neomorph' && (
           <>
             <div className="p-3"><ShadowControls /></div>
+            <div className="p-3"><BorderControls /></div>
+            <div className="p-3"><RadiusControls /></div>
+            <div className="p-3"><RingControls /></div>
+          </>
+        )}
+
+        {shapeStyle === 'neobrutalism' && (
+          <>
+            <div className="p-3"><BrutalistShadowControls /></div>
             <div className="p-3"><BorderControls /></div>
             <div className="p-3"><RadiusControls /></div>
             <div className="p-3"><RingControls /></div>

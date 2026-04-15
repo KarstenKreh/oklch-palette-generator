@@ -24,6 +24,9 @@ function makeState(overrides: Partial<ShapeUrlState> = {}): ShapeUrlState {
     ringColorMode: 'auto',
     ringCustomColor: '#000000',
     separationMode: 'shadow',
+    shadowOffsetX: 2,
+    shadowOffsetY: 4,
+    brutalistVariant: 'outlined',
     ...overrides,
   };
 }
@@ -61,6 +64,20 @@ describe('encodeState / decodeState round-trip', () => {
     const state = makeState({ shapeStyle: 'neomorph' });
     const decoded = decodeState(encodeState(state));
     expect(decoded!.shapeStyle).toBe('neomorph');
+  });
+
+  it('round-trips neobrutalism style with offsets and variant', () => {
+    const state = makeState({
+      shapeStyle: 'neobrutalism',
+      shadowOffsetX: -3,
+      shadowOffsetY: 5,
+      brutalistVariant: 'solid',
+    });
+    const decoded = decodeState(encodeState(state));
+    expect(decoded!.shapeStyle).toBe('neobrutalism');
+    expect(decoded!.shadowOffsetX).toBe(-3);
+    expect(decoded!.shadowOffsetY).toBe(5);
+    expect(decoded!.brutalistVariant).toBe('solid');
   });
 
   it('round-trips flat shadow type', () => {
@@ -140,11 +157,11 @@ describe('decodeState edge cases', () => {
     expect(decodeState('')).toBeNull();
   });
 
-  it('encodeState produces exactly 21 comma-separated fields', () => {
+  it('encodeState produces exactly 24 comma-separated fields', () => {
     const state = makeState();
     const encoded = encodeState(state);
     const parts = encoded.split(',');
-    expect(parts).toHaveLength(21);
+    expect(parts).toHaveLength(24);
   });
 
   it('validates shape style against allowed set', () => {

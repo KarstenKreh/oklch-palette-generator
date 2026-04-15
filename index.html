@@ -61,6 +61,14 @@
       },
       {
         "@type": "WebApplication",
+        "name": "Spacing & Layout Generator",
+        "url": "https://standby.design/space",
+        "applicationCategory": "DesignApplication",
+        "description": "Generate spacing scales, breakpoints, container widths, and aspect ratios. Export as CSS custom properties, Tailwind v4, or design tokens.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "WebApplication",
         "name": "Design System Viewer",
         "url": "https://standby.design/system",
         "applicationCategory": "DesignApplication",
@@ -224,6 +232,7 @@
     .tool-card--type  { --card-accent: var(--type-accent); }
     .tool-card--shape  { --card-accent: oklch(0.6 0.12 50); }
     .tool-card--symbol { --card-accent: oklch(0.6 0.12 320); }
+    .tool-card--space { --card-accent: oklch(0.6 0.1 110); }
     .tool-card--system { --card-accent: oklch(0.6 0.1 160); }
 
     footer {
@@ -302,6 +311,20 @@
       <span class="label">Symbol</span>
       <h2>Icon Set Generator</h2>
       <p>Find icon sets that match your brand personality &mdash; get sizing tokens and export recommendations.</p>
+    </a>
+
+    <a href="/space" class="tool-card tool-card--space">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--card-accent)">
+          <rect width="7" height="7" x="3" y="3" rx="1"/>
+          <rect width="7" height="7" x="14" y="3" rx="1"/>
+          <rect width="7" height="7" x="14" y="14" rx="1"/>
+          <rect width="7" height="7" x="3" y="14" rx="1"/>
+        </svg>
+      </div>
+      <span class="label">Space</span>
+      <h2>Spacing &amp; Layout Generator</h2>
+      <p>Spacing scales, breakpoints, container widths, and aspect ratios &mdash; production-ready layout tokens.</p>
     </a>
 
     <a href="/system" class="tool-card tool-card--system" style="grid-column: 1 / -1;">

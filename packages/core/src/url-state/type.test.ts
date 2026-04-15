@@ -15,7 +15,6 @@ function makeCustomState(overrides: Partial<UrlState> = {}): UrlState {
     mobileBaseSize: 1.0,
     mobileRatioMode: 'auto',
     autoShrink: 25,
-    spacingBaseMultiplier: 1,
     lineHeightOverrides: {},
     letterSpacingOverrides: {},
     ...overrides,
@@ -61,10 +60,11 @@ describe('encodeState / decodeState round-trip', () => {
     expect(decoded!.autoShrink).toBe(40);
   });
 
-  it('round-trips spacingBaseMultiplier', () => {
-    const state = makeCustomState({ spacingBaseMultiplier: 1.5 });
-    const decoded = decodeState(encodeState(state));
-    expect(decoded!.spacingBaseMultiplier).toBe(1.5);
+  it('silently ignores legacy sbm field (moved to /space tool)', () => {
+    const decoded = decodeState('custom,1.0,1.272,1.2,satoshi,satoshi,system-mono|sbm=1.5');
+    expect(decoded).not.toBeNull();
+    // Field is read-and-discarded; URL still decodes cleanly
+    expect(decoded!.scaleMode).toBe('custom');
   });
 
   it('round-trips lineHeightOverrides', () => {
@@ -117,7 +117,6 @@ describe('backward compatibility', () => {
     expect(decoded!.mobileBaseSize).toBe(1.0);
     expect(decoded!.mobileRatioMode).toBe('auto');
     expect(decoded!.autoShrink).toBe(25);
-    expect(decoded!.spacingBaseMultiplier).toBe(1);
     expect(decoded!.lineHeightOverrides).toEqual({});
     expect(decoded!.letterSpacingOverrides).toEqual({});
   });

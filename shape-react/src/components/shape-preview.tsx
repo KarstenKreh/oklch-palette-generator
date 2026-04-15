@@ -3,9 +3,19 @@ import { TriangleAlert, Sun, Moon } from 'lucide-react';
 import { useShapeStore } from '@/store/shape-store';
 import { generateShadows, generateNeumorphicInset, type ShadowConfig } from '@core/shadows';
 import { deriveSurface } from '@core/surface';
-import { contrastRatio } from '@core/color-math';
+import { contrastRatio, hexToOklch, oklchToHex, maxChromaInGamut } from '@core/color-math';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
+/** Derive a brutalist border color by darkening the bg by ~1 palette step (ΔL ≈ 0.10 in OKLCH).
+ *  Darkens in both light and dark modes — keeps the hue, Gamut-safe chroma. */
+function deriveBorderFromBg(bgHex: string): string {
+  const [L, C, H] = hexToOklch(bgHex);
+  const shifted = Math.max(0.05, L - 0.10);
+  const maxC = maxChromaInGamut(shifted, H);
+  return oklchToHex(shifted, Math.min(C, maxC * 0.95), H);
+}
 import { LiquidGlass } from '@core/liquid-glass';
+import { BrutalistEcho as CoreBrutalistEcho } from '@core/brutalist-echo';
 
 /** Dynamic contrast warning — renders a small alert icon with tooltip when ratio < WCAG AA (4.5). */
 function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: string }) {
@@ -29,23 +39,32 @@ function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: str
 
 function PreviewPanel({ isDark }: { isDark: boolean }) {
   const store = useShapeStore();
-  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, store.errorHex, store.errorPin, store.errorInvert), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, store.errorHex, store.errorPin, store.errorInvert]);
+  // When error isn't pinned, pass undefined → deriveSurface auto-derives error hue from brand
+  // (mirrors Color app's errorAutoMatch behavior, so Shape and Color agree on fresh state).
+  const effectiveErrorHex = store.errorPin ? store.errorHex : undefined;
+  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, effectiveErrorHex, store.errorPin, store.errorInvert), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, effectiveErrorHex, store.errorPin, store.errorInvert]);
   const isGlass = store.shapeStyle === 'glass';
   const isNeomorph = store.shapeStyle === 'neomorph';
+  const isNeobrutalism = store.shapeStyle === 'neobrutalism';
 
+  // Brutalist shadow color: auto → match border, custom → user value.
+  const brutalistAuto = isNeobrutalism && store.shadowColorMode === 'auto';
   const shadowConfig: ShadowConfig = {
-    type: isNeomorph ? 'neumorphic' : store.shadowType,
+    type: isNeomorph ? 'neumorphic' : isNeobrutalism ? 'brutalist' : store.shadowType,
     strength: store.shadowStrength,
     blurScale: store.shadowBlurScale,
     scale: store.shadowScale,
-    colorMode: store.shadowColorMode,
-    customColor: store.shadowCustomColor,
+    colorMode: brutalistAuto ? 'custom' : store.shadowColorMode,
+    customColor: brutalistAuto ? colors.border : store.shadowCustomColor,
+    offsetX: store.shadowOffsetX,
+    offsetY: store.shadowOffsetY,
+    borderWidth: store.borderEnabled ? store.borderWidth : 1,
   };
 
   const shadows = useMemo(
     () => store.shadowEnabled ? generateShadows(colors.bg, isDark, shadowConfig) : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [colors.bg, isDark, store.shadowEnabled, store.shadowType, store.shapeStyle, store.shadowStrength, store.shadowBlurScale, store.shadowScale, store.shadowColorMode, store.shadowCustomColor],
+    [colors.bg, isDark, store.shadowEnabled, store.shadowType, store.shapeStyle, store.shadowStrength, store.shadowBlurScale, store.shadowScale, store.shadowColorMode, store.shadowCustomColor, store.shadowOffsetX, store.shadowOffsetY, store.borderEnabled, store.borderWidth, colors.border],
   );
 
   const insetShadows = useMemo(
@@ -55,8 +74,39 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
   );
 
   const radius = store.borderRadius;
-  const borderShadow = store.borderEnabled ? `inset 0 0 0 ${store.borderWidth}px ${colors.border}` : '';
+  // Cards/inputs use the native CSS border only — no inset shadow border (avoids visible double line).
   const ringColor = store.ringColorMode === 'custom' ? store.ringCustomColor : colors.primary;
+
+  const brutalistEchoColor = store.shadowColorMode === 'custom' ? store.shadowCustomColor : colors.border;
+  const brutalistStrokeWidth = store.borderEnabled ? store.borderWidth : 1;
+  function BrutalistEcho({
+    level,
+    borderRadius,
+    bgColor,
+    borderColor,
+    strokeWidthOverride,
+  }: {
+    level: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    borderRadius: number;
+    bgColor: string;
+    borderColor?: string;
+    strokeWidthOverride?: number;
+  }) {
+    if (!isNeobrutalism || !store.shadowEnabled) return null;
+    return (
+      <CoreBrutalistEcho
+        level={level}
+        offsetX={store.shadowOffsetX}
+        offsetY={store.shadowOffsetY}
+        scale={store.shadowScale}
+        strokeWidth={strokeWidthOverride ?? brutalistStrokeWidth}
+        borderRadius={borderRadius}
+        bgColor={bgColor}
+        borderColor={borderColor ?? brutalistEchoColor}
+        opacity={store.shadowStrength}
+      />
+    );
+  }
 
   return (
     <div
@@ -132,21 +182,31 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
             );
           }
 
+          const cardBorderCol = isNeobrutalism ? deriveBorderFromBg(colors.card) : colors.borderMuted;
+          const isSolid = isNeobrutalism && store.brutalistVariant === 'solid';
           return (
-            <div
-              key={level}
-              className="flex-1 p-2 flex flex-col items-center gap-1"
-              style={{
-                backgroundColor: colors.card,
-                boxShadow: [shadow?.shadow, borderShadow].filter(Boolean).join(', ') || undefined,
-                borderRadius: `${levelRadius}px`,
-                ...(store.borderEnabled && { border: `${store.borderWidth}px solid ${colors.borderMuted}` }),
-              }}
-            >
-              <span className="text-caption font-semibold">{level}</span>
-              <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
-                {levelRadius}px
-              </span>
+            <div key={level} className="relative flex-1">
+              <BrutalistEcho
+                level={level}
+                borderRadius={levelRadius}
+                bgColor={isSolid ? cardBorderCol : colors.card}
+                borderColor={cardBorderCol}
+                strokeWidthOverride={isSolid ? 0 : undefined}
+              />
+              <div
+                className="relative p-2 flex flex-col items-center gap-1"
+                style={{
+                  backgroundColor: colors.card,
+                  boxShadow: isNeobrutalism ? undefined : shadow?.shadow,
+                  borderRadius: `${levelRadius}px`,
+                  ...(store.borderEnabled && !isSolid && { border: `${store.borderWidth}px solid ${cardBorderCol}` }),
+                }}
+              >
+                <span className="text-caption font-semibold">{level}</span>
+                <span className="text-[9px] font-mono" style={{ color: colors.textMuted }}>
+                  {levelRadius}px
+                </span>
+              </div>
             </div>
           );
         })}
@@ -159,12 +219,36 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
           { label: 'Secondary', bg: colors.secondary, fg: colors.secondaryFg },
           { label: 'Destructive', bg: colors.destructive, fg: colors.destructiveFg },
         ] as const).map(({ label, bg, fg }) => {
+          const borderCol = deriveBorderFromBg(bg);
+          const isSolidBtn = isNeobrutalism && store.brutalistVariant === 'solid';
           const buttonShadow = isNeomorph ? shadows.find(s => s.name === 'sm')?.shadow : undefined;
           return (
             <div key={label} className="relative inline-flex items-center">
+              <BrutalistEcho
+                level="sm"
+                borderRadius={radius}
+                bgColor={isSolidBtn ? borderCol : bg}
+                borderColor={borderCol}
+                strokeWidthOverride={isSolidBtn ? 0 : undefined}
+              />
               <button
-                className="px-3 py-1.5 text-caption font-medium inline-flex items-center gap-1.5"
-                style={{ backgroundColor: bg, color: fg, borderRadius: `${radius}px`, boxShadow: buttonShadow }}
+                className={`relative px-3 py-1.5 text-caption font-medium inline-flex items-center gap-1.5 ${
+                  isNeobrutalism ? 'neobrutalism-press' :
+                  isGlass ? 'glass-press' :
+                  isNeomorph ? 'neomorph-press' :
+                  'paper-press'
+                }`}
+                style={{
+                  backgroundColor: bg,
+                  color: fg,
+                  borderRadius: `${radius}px`,
+                  boxShadow: buttonShadow,
+                  border: isNeobrutalism && store.borderEnabled && !isSolidBtn ? `${store.borderWidth}px solid ${borderCol}` : undefined,
+                  ...(isNeobrutalism && {
+                    ['--press-x' as string]: `${store.shadowOffsetX / store.shadowScale}px`,
+                    ['--press-y' as string]: `${store.shadowOffsetY / store.shadowScale}px`,
+                  }),
+                }}
               >
                 {label}
                 <ContrastWarning fg={fg} bg={bg} label={`${label}-Button`} />
@@ -201,13 +285,11 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
             style={{
               backgroundColor: colors.card,
               borderRadius: `${radius}px`,
-              boxShadow: [
-                isNeomorph ? insetShadows.find(s => s.name === 'sm')?.shadow : null,
-                borderShadow,
-              ].filter(Boolean).join(', ') || undefined,
+              boxShadow: isNeomorph ? insetShadows.find(s => s.name === 'sm')?.shadow : undefined,
               outline: `${store.ringWidth}px solid ${ringColor}`,
               outlineOffset: `${store.ringOffset}px`,
               color: colors.textMuted,
+              ...(store.borderEnabled && { border: `${store.borderWidth}px solid ${isNeobrutalism ? deriveBorderFromBg(colors.card) : colors.borderMuted}` }),
             }}
           >
             Input with focus ring

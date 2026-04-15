@@ -24,12 +24,16 @@ describe('isUnifiedHash', () => {
     expect(isUnifiedHash('y=symbol')).toBe(true);
   });
 
+  it('detects unified format with p= segment', () => {
+    expect(isUnifiedHash('p=space')).toBe(true);
+  });
+
   it('detects unified format with leading #', () => {
     expect(isUnifiedHash('#c=abc&t=xyz')).toBe(true);
   });
 
   it('detects combined segments', () => {
-    expect(isUnifiedHash('c=abc&t=xyz&s=123')).toBe(true);
+    expect(isUnifiedHash('c=abc&t=xyz&s=123&p=xyz')).toBe(true);
   });
 
   it('rejects legacy hash without segment keys', () => {
@@ -46,29 +50,29 @@ describe('isUnifiedHash', () => {
 });
 
 describe('parseUnifiedHash', () => {
-  it('parses all four segments', () => {
-    const result = parseUnifiedHash('c=colordata&t=typedata&s=shapedata&y=symboldata');
-    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: 'shapedata', y: 'symboldata' });
+  it('parses all five segments', () => {
+    const result = parseUnifiedHash('c=colordata&t=typedata&s=shapedata&y=symboldata&p=spacedata');
+    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: 'shapedata', y: 'symboldata', p: 'spacedata' });
   });
 
   it('parses with leading #', () => {
     const result = parseUnifiedHash('#c=colordata&t=typedata');
-    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: null, y: null });
+    expect(result).toEqual({ c: 'colordata', t: 'typedata', s: null, y: null, p: null });
   });
 
   it('returns null for missing segments', () => {
     const result = parseUnifiedHash('c=only-color');
-    expect(result).toEqual({ c: 'only-color', t: null, s: null, y: null });
+    expect(result).toEqual({ c: 'only-color', t: null, s: null, y: null, p: null });
   });
 
   it('returns all null for legacy hash', () => {
     const result = parseUnifiedHash('335A7F,335A7F,1');
-    expect(result).toEqual({ c: null, t: null, s: null, y: null });
+    expect(result).toEqual({ c: null, t: null, s: null, y: null, p: null });
   });
 
   it('returns null value for empty segment (c= without value)', () => {
     const result = parseUnifiedHash('c=&t=data');
-    expect(result).toEqual({ c: null, t: 'data', s: null, y: null });
+    expect(result).toEqual({ c: null, t: 'data', s: null, y: null, p: null });
   });
 
   it('handles segments with special characters (commas, colons)', () => {
@@ -81,12 +85,17 @@ describe('parseUnifiedHash', () => {
     const result = parseUnifiedHash('c=335A7F,bg,1,err,1,25,balanced,0,0,best,Standby.Design');
     expect(result.c).toContain('Standby.Design');
   });
+
+  it('parses space segment with extended keys', () => {
+    const result = parseUnifiedHash('p=harmonic,1000,1272,100,1|bp=sm:640');
+    expect(result.p).toBe('harmonic,1000,1272,100,1|bp=sm:640');
+  });
 });
 
 describe('buildUnifiedHash', () => {
   it('builds hash with all segments', () => {
-    const hash = buildUnifiedHash({ c: 'color', t: 'type', s: 'shape' });
-    expect(hash).toBe('c=color&t=type&s=shape');
+    const hash = buildUnifiedHash({ c: 'color', t: 'type', s: 'shape', p: 'space' });
+    expect(hash).toBe('c=color&t=type&s=shape&p=space');
   });
 
   it('omits empty segments', () => {
@@ -119,6 +128,10 @@ describe('getMySegment', () => {
     expect(getMySegment('c=colordata&t=typedata', 't')).toBe('typedata');
   });
 
+  it('reads space segment', () => {
+    expect(getMySegment('c=x&p=spacedata', 'p')).toBe('spacedata');
+  });
+
   it('returns null for missing segment', () => {
     expect(getMySegment('c=colordata', 's')).toBeNull();
   });
@@ -135,10 +148,10 @@ describe('setMySegment', () => {
     expect(result).toContain('t=type');
   });
 
-  it('adds a segment to existing hash', () => {
-    const result = setMySegment('c=color', 's', 'shape');
+  it('adds a space segment to existing hash', () => {
+    const result = setMySegment('c=color', 'p', 'space');
     expect(result).toContain('c=color');
-    expect(result).toContain('s=shape');
+    expect(result).toContain('p=space');
   });
 
   it('works on legacy hash (creates new unified from scratch)', () => {
@@ -149,30 +162,25 @@ describe('setMySegment', () => {
 
 describe('round-trips', () => {
   it('build → parse returns same values', () => {
-    const segments = { c: 'color-hash', t: 'type-hash', s: 'shape-hash', y: null };
+    const segments = { c: 'color-hash', t: 'type-hash', s: 'shape-hash', y: null, p: null };
     const built = buildUnifiedHash({ c: 'color-hash', t: 'type-hash', s: 'shape-hash' });
     const parsed = parseUnifiedHash(built);
     expect(parsed).toEqual(segments);
   });
 
-  it('build → parse round-trips with symbol segment', () => {
-    const built = buildUnifiedHash({ c: 'color', t: 'type', s: 'shape', y: 'a,50,a,a,125,1250,' });
+  it('build → parse round-trips with all five segments', () => {
+    const built = buildUnifiedHash({ c: 'color', t: 'type', s: 'shape', y: 'a,50,a,a,125,1250,', p: 'spacedata' });
     const parsed = parseUnifiedHash(built);
     expect(parsed.y).toBe('a,50,a,a,125,1250,');
     expect(parsed.c).toBe('color');
+    expect(parsed.p).toBe('spacedata');
   });
 
-  it('survives special characters in color hash (commas, colons, exclamations)', () => {
-    const colorHash = '335A7F,335A7F,1,CC3333,1,25,balanced,0,0,best,Standby.Design,0,0!Success:00FF00:0:1:145:0';
-    const built = buildUnifiedHash({ c: colorHash, t: 'custom,1.0,1.272,1.2,satoshi,satoshi,system-mono' });
-    const parsed = parseUnifiedHash(built);
-    expect(parsed.c).toBe(colorHash);
-  });
-
-  it('set then get returns the set value', () => {
-    const hash = buildUnifiedHash({ c: 'old', t: 'type' });
+  it('setMySegment preserves p when updating c', () => {
+    const hash = buildUnifiedHash({ c: 'old', t: 'type', p: 'space' });
     const updated = setMySegment(hash, 'c', 'new');
     expect(getMySegment(updated, 'c')).toBe('new');
     expect(getMySegment(updated, 't')).toBe('type');
+    expect(getMySegment(updated, 'p')).toBe('space');
   });
 });

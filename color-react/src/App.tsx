@@ -34,7 +34,7 @@ function App() {
 
   const getCurrentHash = useCallback(() => {
     const colorEncoded = encodeState(store);
-    return buildUnifiedHash({ c: colorEncoded, t: otherSegments.t, s: otherSegments.s, y: otherSegments.y });
+    return buildUnifiedHash({ c: colorEncoded, t: otherSegments.t, s: otherSegments.s, y: otherSegments.y, p: otherSegments.p });
   }, [store, otherSegments]);
 
   const handleShare = useCallback(() => {
@@ -59,7 +59,7 @@ function App() {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
-            Color Palette Generator
+            Color
           </h1>
           <Button variant="default" onClick={handleShare}>
             Share Theme

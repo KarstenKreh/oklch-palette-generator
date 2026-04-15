@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import type { PaletteMode } from '@core/palette';
-import type { ShapeStyle, ShadowType, ColorMode, SeparationMode } from '@core/url-state/shape';
+import type { ShapeStyle, ShadowType, ColorMode, SeparationMode, BrutalistVariant } from '@core/url-state/shape';
 
-export type { ShapeStyle, ShadowType, ColorMode, SeparationMode } from '@core/url-state/shape';
+export type { ShapeStyle, ShadowType, ColorMode, SeparationMode, BrutalistVariant } from '@core/url-state/shape';
 
 export interface ShapeState {
   // Style (top-level mode)
@@ -16,6 +16,12 @@ export interface ShapeState {
   shadowScale: number;
   shadowColorMode: ColorMode;
   shadowCustomColor: string;
+
+  // Brutalist shadow offset (active when shapeStyle === 'neobrutalism')
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  /** 'outlined' = front + echo both have border; 'solid' = no front border, echo filled in border color. */
+  brutalistVariant: BrutalistVariant;
 
   // Borders
   borderEnabled: boolean;
@@ -58,6 +64,9 @@ export interface ShapeState {
   setShadowScale: (v: number) => void;
   setShadowColorMode: (v: ColorMode) => void;
   setShadowCustomColor: (v: string) => void;
+  setShadowOffsetX: (v: number) => void;
+  setShadowOffsetY: (v: number) => void;
+  setBrutalistVariant: (v: BrutalistVariant) => void;
   setBorderEnabled: (v: boolean) => void;
   setBorderWidth: (v: number) => void;
   setBorderColorMode: (v: ColorMode) => void;
@@ -94,6 +103,11 @@ export const useShapeStore = create<ShapeState>((set) => ({
   shadowColorMode: 'auto',
   shadowCustomColor: '#000000',
 
+  // Brutalist offsets
+  shadowOffsetX: 2,
+  shadowOffsetY: 4,
+  brutalistVariant: 'outlined' as BrutalistVariant,
+
   // Borders
   borderEnabled: true,
   borderWidth: 1,
@@ -127,9 +141,26 @@ export const useShapeStore = create<ShapeState>((set) => ({
   errorInvert: false,
 
   // Setters
-  setShapeStyle: (v) => set((prev) => v === 'neomorph' && prev.shapeStyle !== 'neomorph'
-    ? { shapeStyle: v, borderWidth: 0, ringWidth: 3, ringOffset: 0 }
-    : { shapeStyle: v }),
+  setShapeStyle: (v) => set((prev) => {
+    if (v === 'neomorph' && prev.shapeStyle !== 'neomorph') {
+      return { shapeStyle: v, borderWidth: 0, ringWidth: 3, ringOffset: 0 };
+    }
+    if (v === 'neobrutalism' && prev.shapeStyle !== 'neobrutalism') {
+      return {
+        shapeStyle: v,
+        borderEnabled: true,
+        borderWidth: 2,
+        borderRadius: 4,
+        shadowOffsetX: 2,
+        shadowOffsetY: 4,
+        shadowStrength: 1.0,
+        shadowColorMode: 'auto',
+        ringWidth: 2,
+        ringOffset: 4,
+      };
+    }
+    return { shapeStyle: v };
+  }),
   setShadowEnabled: (v) => set({ shadowEnabled: v }),
   setShadowType: (v) => set({ shadowType: v }),
   setShadowStrength: (v) => set({ shadowStrength: v }),
@@ -137,6 +168,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   setShadowScale: (v) => set({ shadowScale: v }),
   setShadowColorMode: (v) => set({ shadowColorMode: v }),
   setShadowCustomColor: (v) => set({ shadowCustomColor: v }),
+  setShadowOffsetX: (v) => set({ shadowOffsetX: v }),
+  setShadowOffsetY: (v) => set({ shadowOffsetY: v }),
+  setBrutalistVariant: (v) => set({ brutalistVariant: v }),
   setBorderEnabled: (v) => set({ borderEnabled: v }),
   setBorderWidth: (v) => set({ borderWidth: v }),
   setBorderColorMode: (v) => set({ borderColorMode: v }),

@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 
-type Tool = 'home' | 'system' | 'color' | 'type' | 'shape' | 'symbol';
+type Tool = 'home' | 'system' | 'color' | 'type' | 'shape' | 'symbol' | 'space';
 
 interface ToolNavProps {
   activeTool: Tool;
   buildHash: () => string;
 }
 
-const DEV_PORTS: Record<string, number> = { color: 5177, type: 5174, system: 5175, shape: 5176, symbol: 5178 };
+const DEV_PORTS: Record<string, number> = { color: 5177, type: 5174, system: 5175, shape: 5176, symbol: 5178, space: 5179 };
 
 function toolUrl(key: Tool): string {
   if (key === 'home') return '/';
@@ -86,6 +86,17 @@ function StarIcon({ className }: { className?: string }) {
   );
 }
 
+function GridIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <rect width="7" height="7" x="3" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="14" rx="1" />
+      <rect width="7" height="7" x="3" y="14" rx="1" />
+    </Icon>
+  );
+}
+
 function LayersIcon({ className }: { className?: string }) {
   return (
     <Icon className={className}>
@@ -101,6 +112,7 @@ type IconComponent = (props: { className?: string }) => ReactNode;
 const tools: { key: Tool; label: string; icon: IconComponent }[] = [
   { key: 'color', label: 'Color', icon: PaletteIcon },
   { key: 'shape', label: 'Shape', icon: BoxIcon },
+  { key: 'space', label: 'Space', icon: GridIcon },
   { key: 'symbol', label: 'Symbol', icon: StarIcon },
   { key: 'type', label: 'Type', icon: TypeIcon },
 ];

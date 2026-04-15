@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { ToolNav } from './tool-nav';
 import { PirateFooter } from './pirate-footer';
 
-type Tool = 'color' | 'type' | 'shape' | 'symbol' | 'system';
+type Tool = 'color' | 'type' | 'shape' | 'symbol' | 'space' | 'system';
 
 interface AppShellProps {
   activeTool: Tool;

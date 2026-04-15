@@ -40,8 +40,8 @@ function FamilyButton({ family, isActive, onClick, activeVariantId }: {
     <button
       onClick={onClick}
       className={cn(
-        'flex-1 flex flex-col items-center gap-1.5 px-3 py-3 transition-colors cursor-pointer',
-        'border-r border-border last:border-r-0',
+        'flex flex-col items-center gap-1.5 px-3 py-3 transition-colors cursor-pointer',
+        'rounded-md border border-border sm:rounded-none sm:border-0 sm:border-r sm:last:border-r-0 sm:flex-1',
         isActive
           ? 'bg-primary text-primary-foreground'
           : 'bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -85,7 +85,7 @@ export function SetSelector() {
       {/* Family selector */}
       <div className="space-y-1.5">
         <span className="text-caption font-medium">Icon Set</span>
-        <div className="flex w-full rounded-lg border border-border overflow-hidden">
+        <div className="grid grid-cols-3 gap-1.5 sm:flex sm:gap-0 sm:w-full sm:rounded-lg sm:border sm:border-border sm:overflow-hidden">
           {ICON_FAMILIES.map((family) => (
             <FamilyButton
               key={family.id}

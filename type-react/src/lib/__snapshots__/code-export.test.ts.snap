@@ -46,17 +46,6 @@ exports[`generateCssExport > snapshot stability 1`] = `
   --tracking-body-m: 0em;
   --tracking-body-s: 0.01em;
   --tracking-caption: 0.01em;
-
-  /* Spacing Scale */
-  --space-3xs: 0.5rem;
-  --space-2xs: 1rem;
-  --space-xs: 1.5rem;
-  --space-sm: 2rem;
-  --space-md: 3rem;
-  --space-lg: 4rem;
-  --space-xl: 6rem;
-  --space-2xl: 8rem;
-  --space-3xl: 11rem;
 }
 "
 `;
@@ -103,16 +92,6 @@ exports[`generateTailwindV4Export > snapshot stability 1`] = `
   --tracking-body-m: 0em;
   --tracking-body-s: 0.01em;
   --tracking-caption: 0.01em;
-
-  --space-3xs: 0.5rem;
-  --space-2xs: 1rem;
-  --space-xs: 1.5rem;
-  --space-sm: 2rem;
-  --space-md: 3rem;
-  --space-lg: 4rem;
-  --space-xl: 6rem;
-  --space-2xl: 8rem;
-  --space-3xl: 11rem;
 }
 "
 `;

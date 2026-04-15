@@ -1,0 +1,48 @@
+import { describe, it, expect } from 'vitest';
+import { DEFAULT_ASPECT_RATIOS, formatAspect, aspectValue, reciprocal } from './aspect';
+
+describe('DEFAULT_ASPECT_RATIOS', () => {
+  it('includes square, video, and golden', () => {
+    const names = DEFAULT_ASPECT_RATIOS.map((a) => a.name);
+    expect(names).toContain('square');
+    expect(names).toContain('video');
+    expect(names).toContain('golden');
+  });
+
+  it('golden is 1.618:1', () => {
+    const golden = DEFAULT_ASPECT_RATIOS.find((a) => a.name === 'golden');
+    expect(golden).toBeDefined();
+    expect(golden!.w).toBeCloseTo(1.618, 3);
+    expect(golden!.h).toBe(1);
+  });
+});
+
+describe('formatAspect', () => {
+  it('formats integer ratios without decimals', () => {
+    expect(formatAspect({ name: 'video', w: 16, h: 9 })).toBe('16 / 9');
+    expect(formatAspect({ name: 'square', w: 1, h: 1 })).toBe('1 / 1');
+  });
+
+  it('formats decimal ratios with trimmed zeros', () => {
+    expect(formatAspect({ name: 'golden', w: 1.618, h: 1 })).toBe('1.618 / 1');
+  });
+});
+
+describe('aspectValue', () => {
+  it('returns w/h', () => {
+    expect(aspectValue({ name: 'video', w: 16, h: 9 })).toBeCloseTo(16 / 9, 5);
+    expect(aspectValue({ name: 'square', w: 1, h: 1 })).toBe(1);
+  });
+
+  it('returns 0 for zero height to avoid division error', () => {
+    expect(aspectValue({ name: 'bad', w: 1, h: 0 })).toBe(0);
+  });
+});
+
+describe('reciprocal', () => {
+  it('swaps w and h', () => {
+    expect(reciprocal({ name: 'video', w: 16, h: 9 })).toEqual({
+      name: 'video-portrait', w: 9, h: 16,
+    });
+  });
+});

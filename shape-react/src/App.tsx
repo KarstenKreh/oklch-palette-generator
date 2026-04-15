@@ -26,6 +26,7 @@ function App() {
       t: otherSegments.t || undefined,
       s: shapeEncoded,
       y: otherSegments.y || undefined,
+      p: otherSegments.p || undefined,
     });
   }, [store, otherSegments]);
 

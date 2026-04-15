@@ -1,8 +1,9 @@
 // URL state serialization for the Shape tool — pure functions, no DOM access.
 // Shared between shape-react and system-react.
 
-export type ShapeStyle = 'paper' | 'glass' | 'neomorph';
+export type ShapeStyle = 'paper' | 'glass' | 'neomorph' | 'neobrutalism';
 export type ShadowType = 'normal' | 'flat';
+export type BrutalistVariant = 'outlined' | 'solid';
 export type ColorMode = 'auto' | 'custom';
 export type SeparationMode = 'shadow' | 'border' | 'contrast' | 'gap' | 'mixed';
 
@@ -29,6 +30,9 @@ export interface ShapeUrlState {
   ringColorMode: ColorMode;
   ringCustomColor: string;
   separationMode: SeparationMode;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  brutalistVariant: BrutalistVariant;
 }
 
 /**
@@ -40,7 +44,8 @@ export interface ShapeUrlState {
  *         borderRadius,
  *         glassDepth,glassBlur,glassDispersion,
  *         ringWidth,ringOffset,ringColorMode,ringCustomHex,
- *         separationMode
+ *         separationMode,
+ *         shadowOffsetX,shadowOffsetY,brutalistVariant
  */
 export function encodeState(s: ShapeUrlState): string {
   return [
@@ -65,10 +70,13 @@ export function encodeState(s: ShapeUrlState): string {
     s.ringColorMode === 'auto' ? 'a' : 'c',
     s.ringColorMode === 'custom' ? s.ringCustomColor.replace('#', '') : '',
     s.separationMode,
+    s.shadowOffsetX,
+    s.shadowOffsetY,
+    s.brutalistVariant === 'solid' ? 's' : 'o',
   ].join(',');
 }
 
-const SHAPE_STYLES = new Set(['paper', 'glass', 'neomorph']);
+const SHAPE_STYLES = new Set(['paper', 'glass', 'neomorph', 'neobrutalism']);
 const SHADOW_TYPES = new Set(['normal', 'flat']);
 const SEPARATION_MODES = new Set(['shadow', 'border', 'contrast', 'gap', 'mixed']);
 
@@ -129,6 +137,15 @@ export function decodeState(raw: string): Partial<ShapeUrlState> | null {
   if (parts[19] && /^[0-9a-fA-F]{6}$/.test(parts[19])) result.ringCustomColor = '#' + parts[19];
 
   if (SEPARATION_MODES.has(parts[20])) result.separationMode = parts[20] as SeparationMode;
+
+  // Backward-compatible brutalism fields (added after initial 21-field format).
+  const oX = parseInt(parts[21]);
+  if (!isNaN(oX)) result.shadowOffsetX = oX;
+  const oY = parseInt(parts[22]);
+  if (!isNaN(oY)) result.shadowOffsetY = oY;
+  if (parts[23] === 's' || parts[23] === 'o') {
+    result.brutalistVariant = parts[23] === 's' ? 'solid' : 'outlined';
+  }
 
   return result;
 }
