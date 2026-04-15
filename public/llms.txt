@@ -5,7 +5,7 @@
 
 ## Tools
 
-### OKLCH Palette Generator
+### Color Palette Generator
 - URL: https://standby.design/color
 - Purpose: Generate perceptually uniform color palettes in the OKLCH color space
 - Output formats: CSS Custom Properties, Tailwind v4 config, Design Tokens (JSON)

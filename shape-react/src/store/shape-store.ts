@@ -45,6 +45,9 @@ export interface ShapeState {
   paletteMode: PaletteMode;
   chromaScale: number;
   brandPin: boolean;
+  errorHex: string;
+  errorPin: boolean;
+  errorInvert: boolean;
 
   // Setters
   setShapeStyle: (v: ShapeStyle) => void;
@@ -72,6 +75,9 @@ export interface ShapeState {
   setPaletteMode: (v: PaletteMode) => void;
   setChromaScale: (v: number) => void;
   setBrandPin: (v: boolean) => void;
+  setErrorHex: (v: string) => void;
+  setErrorPin: (v: boolean) => void;
+  setErrorInvert: (v: boolean) => void;
   setFullState: (state: Partial<ShapeState>) => void;
 }
 
@@ -99,7 +105,7 @@ export const useShapeStore = create<ShapeState>((set) => ({
 
   // Glass
   glassDepth: 0.2,
-  glassBlur: 2.0,
+  glassBlur: 1.0,
   glassDispersion: 0.5,
 
   // Ring
@@ -116,6 +122,9 @@ export const useShapeStore = create<ShapeState>((set) => ({
   paletteMode: 'balanced' as PaletteMode,
   chromaScale: 1.0,
   brandPin: false,
+  errorHex: '#CC3333',
+  errorPin: false,
+  errorInvert: false,
 
   // Setters
   setShapeStyle: (v) => set((prev) => v === 'neomorph' && prev.shapeStyle !== 'neomorph'
@@ -145,5 +154,8 @@ export const useShapeStore = create<ShapeState>((set) => ({
   setPaletteMode: (v) => set({ paletteMode: v }),
   setChromaScale: (v) => set({ chromaScale: v }),
   setBrandPin: (v) => set({ brandPin: v }),
+  setErrorHex: (v) => set({ errorHex: v }),
+  setErrorPin: (v) => set({ errorPin: v }),
+  setErrorInvert: (v) => set({ errorInvert: v }),
   setFullState: (partial) => set(partial),
 }));

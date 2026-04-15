@@ -198,7 +198,7 @@ export function SurfacePanel({
   const isNeomorph = isStandardPanel && shape?.shapeStyle === 'neomorph';
   const isGlass = isStandardPanel && shape?.shapeStyle === 'glass';
   const glassDepth = shape?.glassDepth ?? 0.2;
-  const glassBlur = shape?.glassBlur ?? 2;
+  const glassBlur = shape?.glassBlur ?? 1.0;
   const glassDispersion = shape?.glassDispersion ?? 0.5;
 
   const neomorphShadows = isNeomorph ? generateShadows(bgHex, isDark, {
@@ -259,7 +259,7 @@ export function SurfacePanel({
           <span
             className="text-caption font-semibold uppercase tracking-wider px-1.5 py-0.5 inline-flex items-center gap-1 mb-1"
             style={{
-              backgroundColor: bgHex,
+              backgroundColor: cardHex,
               border: bw ? `${bw}px solid ${borderMutedHex}` : 'none',
               borderRadius: Math.max(4, br - 4),
               color: textHex,

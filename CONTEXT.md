@@ -8,7 +8,7 @@ Design tool suite at [standby.design](https://standby.design). Generates product
 
 ```
 standby.design/              Hub landing page (static HTML)
-├── /color                    OKLCH Palette Generator (React SPA)
+├── /color                    Color Palette Generator (React SPA)
 ├── /type                     Fluid Type Scale Generator (React SPA)
 ├── /shape                    Shape Token Generator (React SPA)
 ├── /symbol                   Icon Style Recommender (React SPA)
@@ -52,7 +52,7 @@ All four React apps share identical dependencies:
 
 ---
 
-## Color App — OKLCH Palette Generator
+## Color App — Color Palette Generator
 
 ### Core Concept
 

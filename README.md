@@ -8,7 +8,7 @@ Multi-Tool-Hub unter **standby.design** — kleine Tools für Designer und Entwi
 /
 ├── index.html        # Hub-Seite (standby.design)
 ├── color/
-│   └── index.html    # OKLCH Palette Generator (standby.design/color)
+│   └── index.html    # Color Palette Generator (standby.design/color)
 ├── Dockerfile
 ├── nginx.conf
 ├── docker-compose.yml
@@ -29,7 +29,7 @@ A-Record für `standby.design` und `www.standby.design` → `46.225.131.97`
 
 ---
 
-# OKLCH Tonal Palette Generator (`/color`)
+# Color Palette Generator (`/color`)
 
 Ein interaktiver, client-seitiger Palette-Generator im **OKLCH-Farbraum** — keine Dependencies, kein Build-Step.
 

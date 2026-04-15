@@ -9,7 +9,7 @@ REMOTE_DIR="/opt/oklch-palette"
 echo "==> Checking Traefik..."
 ssh -i "$SSH_KEY" "$SERVER" 'docker network inspect traefik_web >/dev/null 2>&1 || { echo "ERROR: Traefik network not found. Run setup-traefik.sh first."; exit 1; }'
 
-echo "==> Deploying OKLCH Palette Generator..."
+echo "==> Deploying Color Palette Generator..."
 ssh -i "$SSH_KEY" "$SERVER" "mkdir -p $REMOTE_DIR/color-react $REMOTE_DIR/type-react $REMOTE_DIR/system-react $REMOTE_DIR/shape-react $REMOTE_DIR/symbol-react $REMOTE_DIR/packages/core $REMOTE_DIR/public"
 scp -i "$SSH_KEY" index.html docker-compose.yml Dockerfile nginx.conf og-server.js shared.css "$SERVER:$REMOTE_DIR/"
 scp -i "$SSH_KEY" public/* "$SERVER:$REMOTE_DIR/public/"

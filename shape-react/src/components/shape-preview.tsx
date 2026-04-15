@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TriangleAlert } from 'lucide-react';
+import { TriangleAlert, Sun, Moon } from 'lucide-react';
 import { useShapeStore } from '@/store/shape-store';
 import { generateShadows, generateNeumorphicInset, type ShadowConfig } from '@core/shadows';
 import { deriveSurface } from '@core/surface';
@@ -29,7 +29,7 @@ function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: str
 
 function PreviewPanel({ isDark }: { isDark: boolean }) {
   const store = useShapeStore();
-  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle]);
+  const colors = useMemo(() => deriveSurface(store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, store.errorHex, store.errorPin, store.errorInvert), [store.surfaceHex, isDark, store.paletteMode, store.chromaScale, store.brandPin, store.shapeStyle, store.errorHex, store.errorPin, store.errorInvert]);
   const isGlass = store.shapeStyle === 'glass';
   const isNeomorph = store.shapeStyle === 'neomorph';
 
@@ -84,7 +84,16 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
 
       {/* Mode label */}
       <div className="relative flex items-center gap-2">
-        <span className="text-caption font-semibold" style={{ color: colors.textMuted }}>
+        <span
+          className="text-caption font-semibold uppercase tracking-wider px-1.5 py-0.5 inline-flex items-center gap-1"
+          style={{
+            backgroundColor: colors.raised,
+            border: store.borderEnabled ? `${store.borderWidth}px solid ${colors.borderMuted}` : 'none',
+            borderRadius: Math.max(4, radius - 4),
+            color: colors.text,
+          }}
+        >
+          {isDark ? <Moon size={11} /> : <Sun size={11} />}
           {isDark ? 'Dark' : 'Light'}
         </span>
       </div>

@@ -1,8 +1,11 @@
 import { Slider } from '@/components/ui/slider';
 import { useShapeStore } from '@/store/shape-store';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Apple } from 'lucide-react';
 
-const GLASS_DEFAULTS = { glassDepth: 0.2, glassBlur: 2.0, glassDispersion: 0.4 };
+const GLASS_DEFAULTS = { glassDepth: 0.2, glassBlur: 1.0, glassDispersion: 0.5 };
+// Apple Liquid Glass preset: high lensing, minimal blur (~2px), subtle chromatic aberration.
+// Apple's effect relies on displacement/lensing rather than blur — see LiquidGlassReference.
+const APPLE_PRESET = { glassDepth: 0.5, glassBlur: 0.7, glassDispersion: 0.1 };
 
 function sliderVal(v: number | readonly number[]): number {
   return Array.isArray(v) ? v[0] : v;
@@ -19,25 +22,44 @@ export function GlassControls() {
     && glassBlur === GLASS_DEFAULTS.glassBlur
     && glassDispersion === GLASS_DEFAULTS.glassDispersion;
 
+  const isApple = glassDepth === APPLE_PRESET.glassDepth
+    && glassBlur === APPLE_PRESET.glassBlur
+    && glassDispersion === APPLE_PRESET.glassDispersion;
+
   const resetDefaults = () => {
     setGlassDepth(GLASS_DEFAULTS.glassDepth);
     setGlassBlur(GLASS_DEFAULTS.glassBlur);
     setGlassDispersion(GLASS_DEFAULTS.glassDispersion);
   };
 
+  const applyApple = () => {
+    setGlassDepth(APPLE_PRESET.glassDepth);
+    setGlassBlur(APPLE_PRESET.glassBlur);
+    setGlassDispersion(APPLE_PRESET.glassDispersion);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-body-s font-semibold">Liquid Glass</h3>
-        {!isDefault && (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={applyApple}
+            disabled={isApple}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground disabled:cursor-default"
+            title={`Apple Liquid Glass preset — Depth ${APPLE_PRESET.glassDepth}, Blur ${APPLE_PRESET.glassBlur}, Dispersion ${APPLE_PRESET.glassDispersion}`}
+          >
+            <Apple className="h-3.5 w-3.5" />
+          </button>
           <button
             onClick={resetDefaults}
-            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            disabled={isDefault}
+            className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground disabled:cursor-default"
             title="Reset to defaults"
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
-        )}
+        </div>
       </div>
 
       <div className="space-y-3">

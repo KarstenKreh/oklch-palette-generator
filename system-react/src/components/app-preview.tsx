@@ -116,7 +116,7 @@ function buildTokens(
   const insetSet = shadowsEnabled && isNeomorph ? generateNeumorphicInset(baseBg, dark, shadowConfig) : [];
   const pickShadow = (name: string) => shadowSet.find(s => s.name === name)?.shadow ?? 'none';
   const pickInset = (name: string) => insetSet.find(s => s.name === name)?.shadow ?? 'none';
-  const shadow = pickShadow('md');
+  const shadow = pickShadow('sm');
   const shadowSm = pickShadow('sm');
   const shadowInset = pickInset('sm');
 
@@ -177,7 +177,7 @@ function buildTokens(
     isGlass,
     isDark: dark,
     glassDepth: shape?.glassDepth ?? 0.2,
-    glassBlur: shape?.glassBlur ?? 2,
+    glassBlur: shape?.glassBlur ?? 1.0,
     glassDispersion: shape?.glassDispersion ?? 0.5,
     fs: (name: string) => { const v = l(name); return v ? `${v.maxRem}rem` : undefined; },
     lh: (name: string) => l(name)?.lineHeight,

@@ -50,7 +50,7 @@ function App() {
   }, [store, getCurrentHash]);
 
   useEffect(() => {
-    document.title = themeName ? `${themeName} — OKLCH Theme Generator` : 'OKLCH Theme Generator';
+    document.title = themeName ? `${themeName} — Color Palette Generator` : 'Color Palette Generator';
   }, [themeName]);
 
   return (
@@ -59,7 +59,7 @@ function App() {
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-semibold" style={{ fontSize: 'var(--text-h4)', lineHeight: 'var(--leading-h4)' }}>
-            OKLCH Theme Generator
+            Color Palette Generator
           </h1>
           <Button variant="default" onClick={handleShare}>
             Share Theme

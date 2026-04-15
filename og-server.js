@@ -80,8 +80,8 @@ function injectOgTags(html, themeName, brandHex) {
     ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', '&': '&amp;' })[c]
   );
 
-  const title = `${safeName} — OKLCH Theme Generator`;
-  const description = `${safeName} — a color theme created with the OKLCH Theme Generator on standby.design. Perceptually uniform palettes, semantic tokens, shadows, and dark mode — ready to paste into any shadcn/ui app.`;
+  const title = `${safeName} — Color Palette Generator`;
+  const description = `${safeName} — a color palette created with the Color Palette Generator on standby.design. Perceptually uniform palettes, semantic tokens, shadows, and dark mode — ready to paste into any shadcn/ui app.`;
 
   // Dynamic OG image URL with brand color
   const imageUrl = brandHex
@@ -192,7 +192,7 @@ const server = http.createServer((req, res) => {
 
   // Tool name mapping for OG descriptions
   const TOOL_META = {
-    color:  { template: colorHtmlTemplate,  label: 'OKLCH Theme Generator',    desc: 'color theme' },
+    color:  { template: colorHtmlTemplate,  label: 'Color Palette Generator', desc: 'color palette' },
     type:   { template: typeHtmlTemplate,   label: 'Type Scale Generator',    desc: 'typographic scale' },
     shape:  { template: shapeHtmlTemplate,  label: 'Shape Token Generator',   desc: 'shape token set' },
     symbol: { template: symbolHtmlTemplate, label: 'Icon Style Recommender',  desc: 'icon style recommendation' },

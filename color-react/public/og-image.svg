@@ -8,7 +8,7 @@
   <rect x="180" y="280" width="80" height="80" rx="16" fill="#5B21B6"/>
   <rect x="280" y="280" width="80" height="80" rx="16" fill="#3B0F8A"/>
   <rect x="380" y="280" width="80" height="80" rx="16" fill="#1E0A45"/>
-  <text x="540" y="240" font-family="system-ui,sans-serif" font-size="48" font-weight="700" fill="#e0e0e0">OKLCH Theme</text>
+  <text x="540" y="240" font-family="system-ui,sans-serif" font-size="48" font-weight="700" fill="#e0e0e0">Color Palette</text>
   <text x="540" y="300" font-family="system-ui,sans-serif" font-size="48" font-weight="700" fill="#e0e0e0">Generator</text>
   <text x="540" y="360" font-family="system-ui,sans-serif" font-size="22" fill="#777">Perceptually uniform color palettes</text>
   <text x="80" y="540" font-family="system-ui,sans-serif" font-size="20" fill="#4a7aaa" letter-spacing="0.08em">standby.design</text>

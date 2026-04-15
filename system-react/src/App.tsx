@@ -64,7 +64,7 @@ const DEFAULT_SHAPE_STATE: Partial<ShapeState> = {
   borderCustomColor: '#000000',
   borderRadius: 8,
   glassDepth: 0.2,
-  glassBlur: 2.0,
+  glassBlur: 1.0,
   glassDispersion: 0.4,
   ringWidth: 2,
   ringOffset: 2,

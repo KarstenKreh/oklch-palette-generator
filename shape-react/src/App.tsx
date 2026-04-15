@@ -11,6 +11,7 @@ import { useShapeStore } from '@/store/shape-store';
 import { encodeState } from '@/lib/url-state';
 import { buildUnifiedHash, getMySegment } from '@core/unified-hash';
 import { useUrlState } from '@/hooks/use-url-state';
+import { computeAutoErrorHex } from '@core/palette';
 
 function App() {
   const store = useShapeStore();
@@ -64,6 +65,19 @@ function App() {
       }
       if (parts[7] === '1' || parts[7] === '0') {
         store.setBrandPin(parts[7] === '1');
+      }
+      // parts[3] = errorColorHex, parts[4] = errorAutoMatch, parts[8] = errorPin, parts[12] = errorInvert
+      const errorHexRaw = parts[3];
+      const errorAutoMatch = parts[4] !== '0';
+      const effectiveErrorHex = errorAutoMatch
+        ? computeAutoErrorHex('#' + brandHex)
+        : (/^[0-9a-fA-F]{6}$/.test(errorHexRaw) ? '#' + errorHexRaw : '#CC3333');
+      store.setErrorHex(effectiveErrorHex);
+      if (parts[8] === '1' || parts[8] === '0') {
+        store.setErrorPin(parts[8] === '1');
+      }
+      if (parts[12] === '1' || parts[12] === '0') {
+        store.setErrorInvert(parts[12] === '1');
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

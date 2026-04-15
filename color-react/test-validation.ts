@@ -1,5 +1,5 @@
 /**
- * Comprehensive validation script for the OKLCH Palette Generator.
+ * Comprehensive validation script for the Color Palette Generator.
  * Run with: npx tsx test-validation.ts
  */
 

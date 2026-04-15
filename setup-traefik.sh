@@ -72,7 +72,7 @@ EOF"
 echo "==> Starting Traefik..."
 ssh -i "$SSH_KEY" "$SERVER" "cd /opt/traefik && docker compose up -d"
 
-echo "==> Deploying updated OKLCH Palette Generator..."
+echo "==> Deploying updated Color Palette Generator..."
 REMOTE_DIR="/opt/oklch-palette"
 scp -i "$SSH_KEY" index.html docker-compose.yml Dockerfile nginx.conf "$SERVER:$REMOTE_DIR/"
 scp -i "$SSH_KEY" -r color "$SERVER:$REMOTE_DIR/"
@@ -89,5 +89,5 @@ ssh -i "$SSH_KEY" "$SERVER" "docker network rm corethority_internal 2>/dev/null 
 
 echo ""
 echo "==> Migration complete!"
-echo "    standby.design       → OKLCH Palette Generator (HTTPS)"
+echo "    standby.design       → Color Palette Generator (HTTPS)"
 echo "    46.225.131.97        → corethority (HTTP)"
