@@ -21,6 +21,7 @@ import { TypeSummary } from '@/components/type-summary';
 import { CombinedExport } from '@/components/combined-export';
 import { AppPreview } from '@/components/app-preview';
 import { SymbolSummary } from '@/components/symbol-summary';
+import { SpaceSummary } from '@/components/space-summary';
 import { SquarePen } from 'lucide-react';
 
 function accentCssName(name: string): string {
@@ -346,6 +347,21 @@ function App() {
           </div>
         )}
 
+        {/* Space Summary */}
+        <div className="bg-card border border-border rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold" style={{ fontSize: 'var(--text-body-l, 1.125rem)' }}>Spacing &amp; Layout</h2>
+            <a
+              href={`/space#${getCurrentHash()}`}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors pr-1"
+            >
+              <SquarePen size={14} />
+              Edit
+            </a>
+          </div>
+          <SpaceSummary spacing={spacing} spaceState={spaceState} />
+        </div>
+
         {/* Symbol Summary */}
         {symbolState && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
@@ -374,6 +390,7 @@ function App() {
               spacing={spacing}
               shapeState={shapeState}
               symbolState={symbolState}
+              spaceState={spaceState}
               surfaceHex={palette?.effectiveBgHex}
             />
           </div>

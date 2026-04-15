@@ -13,6 +13,13 @@ import type { AccentPalette } from '@/lib/color-code-export';
 import type { ComputedLevel } from '@core/scale';
 import type { SpacingToken } from '@core/spacing';
 import type { ShapeUrlState as ShapeState } from '@core/url-state/shape';
+import type { SpaceUrlState } from '@core/url-state/space';
+import {
+  generateSpaceCss,
+  generateSpaceTailwind,
+  generateSpaceLlmBriefing,
+  type SpaceExportOptions,
+} from '@core/space-code-export';
 import {
   generatePrimitivesOklch,
   generateSemantic,
@@ -57,7 +64,18 @@ interface CombinedExportProps {
   spacing: SpacingToken[] | null;
   shapeState: Partial<ShapeState> | null;
   symbolState: SymbolState | null;
+  spaceState: SpaceUrlState;
   surfaceHex?: string;
+}
+
+function getSpaceRatioLabel(s: SpaceUrlState): string {
+  if (s.spacingMode === 'geometric' && Math.abs(s.spacingRatio - 1.272) < 0.001) {
+    return '√φ Golden Ratio';
+  }
+  if (s.spacingMode === 'geometric') {
+    return `Geometric ×${s.spacingRatio.toFixed(3)}`;
+  }
+  return 'Harmonic multiples';
 }
 
 function getScaleLabel(typeState: UrlState | null): string {
@@ -122,7 +140,7 @@ function generateSymbolLlmBriefing(sym: SymbolState): string {
   ].join('\n');
 }
 
-export function CombinedExport({ colorState, palette, typeState, scale, spacing, shapeState, symbolState, surfaceHex }: CombinedExportProps) {
+export function CombinedExport({ colorState, palette, typeState, scale, spacing, shapeState, symbolState, spaceState, surfaceHex }: CombinedExportProps) {
   const [activeTab, setActiveTab] = useState('css');
 
   // Copy All state
@@ -159,28 +177,28 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
   }, [colorState, palette]);
 
   const typeCss = useMemo(() => {
-    if (!typeState || !scale || !spacing) return '';
+    if (!typeState || !scale) return '';
     return generateTypeCss({
       levels: scale,
-      spacingTokens: spacing,
+      spacingTokens: [],
       headingFont: typeState.headingFont,
       bodyFont: typeState.bodyFont,
       monoFont: typeState.monoFont,
       scaleLabel: getScaleLabel(typeState),
     });
-  }, [typeState, scale, spacing]);
+  }, [typeState, scale]);
 
   const typeTailwind = useMemo(() => {
-    if (!typeState || !scale || !spacing) return '';
+    if (!typeState || !scale) return '';
     return generateTypeTailwind({
       levels: scale,
-      spacingTokens: spacing,
+      spacingTokens: [],
       headingFont: typeState.headingFont,
       bodyFont: typeState.bodyFont,
       monoFont: typeState.monoFont,
       scaleLabel: getScaleLabel(typeState),
     });
-  }, [typeState, scale, spacing]);
+  }, [typeState, scale]);
 
   const shapeCss = useMemo(() => {
     if (!shapeState) return '';
@@ -203,6 +221,24 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
     if (!symbolState) return '';
     return generateSymbolTailwind(symbolState);
   }, [symbolState]);
+
+  const spaceOpts: SpaceExportOptions | null = useMemo(() => {
+    if (!spacing) return null;
+    return {
+      spacingTokens: spacing,
+      breakpoints: spaceState.breakpoints,
+      fluidMinVw: spaceState.fluidMinVw,
+      fluidMaxVw: spaceState.fluidMaxVw,
+      containers: spaceState.containers,
+      proseMaxCh: spaceState.proseMaxCh,
+      aspectRatios: spaceState.aspectRatios,
+      includeReciprocals: spaceState.aspectIncludeReciprocals,
+      ratioLabel: getSpaceRatioLabel(spaceState),
+    };
+  }, [spacing, spaceState]);
+
+  const spaceCss = useMemo(() => (spaceOpts ? generateSpaceCss(spaceOpts) : ''), [spaceOpts]);
+  const spaceTailwind = useMemo(() => (spaceOpts ? generateSpaceTailwind(spaceOpts) : ''), [spaceOpts]);
 
   const fontEmbed = useMemo(() => {
     if (!typeState) return '';
@@ -229,16 +265,22 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
     }
 
     // Type briefing
-    if (typeState && scale && spacing) {
+    if (typeState && scale) {
       if (md) md += '\n---\n\n';
       md += generateTypeLlmBriefing({
         levels: scale,
-        spacingTokens: spacing,
+        spacingTokens: [],
         headingFont: typeState.headingFont,
         bodyFont: typeState.bodyFont,
         monoFont: typeState.monoFont,
         scaleLabel: getScaleLabel(typeState),
       });
+    }
+
+    // Space briefing
+    if (spaceOpts) {
+      if (md) md += '\n---\n\n';
+      md += generateSpaceLlmBriefing(spaceOpts);
     }
 
     // Shape briefing
@@ -255,14 +297,14 @@ export function CombinedExport({ colorState, palette, typeState, scale, spacing,
     }
 
     return md || '<!-- No configuration available -->';
-  }, [colorState, palette, typeState, scale, spacing, shapeState, surfaceHex, symbolState]);
+  }, [colorState, palette, typeState, scale, spaceOpts, shapeState, surfaceHex, symbolState]);
 
   const outputs = useMemo(() => {
-    const css = [colorCss, typeCss, shapeCss, symbolCss].filter(Boolean).join('\n') || '/* No configuration available */';
-    const tailwind = [colorCss, typeTailwind, shapeTailwind, symbolTailwind].filter(Boolean).join('\n') || '/* No configuration available */';
+    const css = [colorCss, typeCss, spaceCss, shapeCss, symbolCss].filter(Boolean).join('\n') || '/* No configuration available */';
+    const tailwind = [colorCss, typeTailwind, spaceTailwind, shapeTailwind, symbolTailwind].filter(Boolean).join('\n') || '/* No configuration available */';
     const embed = fontEmbed || '<!-- No fonts selected -->';
     return { css, tailwind, embed, llm: llmBriefing };
-  }, [colorCss, typeCss, typeTailwind, shapeCss, shapeTailwind, symbolCss, symbolTailwind, fontEmbed, llmBriefing]);
+  }, [colorCss, typeCss, spaceCss, typeTailwind, spaceTailwind, shapeCss, shapeTailwind, symbolCss, symbolTailwind, fontEmbed, llmBriefing]);
 
   const handleCopyAll = useCallback(() => {
     const parts: string[] = [];
