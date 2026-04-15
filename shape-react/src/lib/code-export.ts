@@ -4,7 +4,7 @@
 
 import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
 import { generatePalette, type PaletteEntry, type Step } from '@core/palette';
-import type { ColorMode, SeparationMode, ShapeStyle } from '@/store/shape-store';
+import type { ColorMode, SeparationMode, ShapeStyle, BrutalistVariant } from '@/store/shape-store';
 
 export interface ShapeExportOptions {
   shapeStyle: ShapeStyle;
@@ -15,6 +15,9 @@ export interface ShapeExportOptions {
   shadowScale: number;
   shadowColorMode: ColorMode;
   shadowCustomColor: string;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  brutalistVariant: BrutalistVariant;
   borderEnabled: boolean;
   borderWidth: number;
   borderRadius: number;
@@ -32,7 +35,9 @@ export interface ShapeExportOptions {
 /* ------------------------------------------------------------------ */
 
 function effectiveShadowType(opts: ShapeExportOptions): ShadowType {
-  return opts.shapeStyle === 'neomorph' ? 'neumorphic' : opts.shadowType;
+  if (opts.shapeStyle === 'neomorph') return 'neumorphic';
+  if (opts.shapeStyle === 'neobrutalism') return 'brutalist';
+  return opts.shadowType;
 }
 
 function buildShadowConfig(opts: ShapeExportOptions): ShadowConfig {
@@ -43,6 +48,9 @@ function buildShadowConfig(opts: ShapeExportOptions): ShadowConfig {
     scale: opts.shadowScale,
     colorMode: opts.shadowColorMode,
     customColor: opts.shadowCustomColor,
+    offsetX: opts.shadowOffsetX,
+    offsetY: opts.shadowOffsetY,
+    borderWidth: opts.borderEnabled ? opts.borderWidth : 1,
   };
 }
 
@@ -71,7 +79,7 @@ function pxToRem(px: number): string {
 }
 
 function shadowTypeLabel(t: ShadowType): string {
-  return { normal: 'Normal', neumorphic: 'Neumorphic', flat: 'Flat' }[t];
+  return { normal: 'Normal', neumorphic: 'Neumorphic', flat: 'Flat', brutalist: 'Brutalist' }[t];
 }
 
 function scaleLabel(scale: number): string {
@@ -290,7 +298,12 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
 
   let md = `# Shape Tokens — standby.design/shape\n\n`;
 
-  md += `**Style:** ${opts.shapeStyle === 'paper' ? 'Paper' : opts.shapeStyle === 'glass' ? 'Glass (Liquid Glass)' : 'Neomorph (Soft UI)'}\n\n`;
+  const styleLabel =
+    opts.shapeStyle === 'paper' ? 'Paper' :
+    opts.shapeStyle === 'glass' ? 'Glass (Liquid Glass)' :
+    opts.shapeStyle === 'neomorph' ? 'Neomorph (Soft UI)' :
+    `Neobrutalism (${opts.brutalistVariant})`;
+  md += `**Style:** ${styleLabel}\n\n`;
 
   if (opts.shapeStyle === 'neomorph') {
     md += `## Neomorph Notes\n\n`;
@@ -298,6 +311,15 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
     md += `- **Accessibility:** Low surface/background contrast is inherent to the style. Ensure text and interactive elements meet WCAG AA (4.5:1) against their own backgrounds — the preview flags sub-threshold buttons.\n`;
     md += `- **Pressed states:** Mirror the same shadow values with \`inset\` to create a depressed effect for active/pressed buttons.\n`;
     md += `- **Border default:** 0 by design. Raise \`--border-width\` only if you need extra separation.\n\n`;
+  }
+
+  if (opts.shapeStyle === 'neobrutalism') {
+    md += `## Neobrutalism Notes\n\n`;
+    md += `- **Offset outline shadow:** A solid hollow rectangle sits behind each surface at offset (${opts.shadowOffsetX}px, ${opts.shadowOffsetY}px). Generated as a stacked \`box-shadow\` with zero blur.\n`;
+    md += `- **Variant:** \`${opts.brutalistVariant}\` — outlined renders a hollow echo with the surface's border color; solid fills the echo with the border color (no stroke).\n`;
+    md += `- **Borders carry the style:** Each surface has an explicit stroke matching the echo color (derived from the surface's own bg, one palette step darker). Borders are required, not optional.\n`;
+    md += `- **No blur, no soft shadows:** This style is flat and hard-edged by design. Do not mix with gaussian drop shadows.\n`;
+    md += `- **Color ladder:** xs–xl levels scale the offset by the shadow scale (\`${scaleLabel(opts.shadowScale)}\`), so elevation reads even though all shadows are hard.\n\n`;
   }
 
   // Shadows (paper + neomorph — skipped for glass)

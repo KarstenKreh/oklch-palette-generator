@@ -213,6 +213,23 @@ function buildTokens(
 }
 
 /* ─── Brutalism helpers ─── */
+function pressClass(t: Tokens): string {
+  if (t.isNeobrutalism) return 'neobrutalism-press';
+  if (t.isGlass) return 'glass-press';
+  if (t.isNeomorph) return 'neomorph-press';
+  return 'paper-press';
+}
+
+function pressVars(t: Tokens): React.CSSProperties {
+  if (!t.isNeobrutalism) return {};
+  const oX = t.brutalistOffsetX / t.brutalistScale;
+  const oY = t.brutalistOffsetY / t.brutalistScale;
+  return {
+    ['--press-x' as string]: `${oX}px`,
+    ['--press-y' as string]: `${oY}px`,
+  };
+}
+
 function brutalBorder(t: Tokens, bg: string): string {
   return t.brutalistColorMode === 'custom' ? t.brutalistCustomColor : deriveBorderFromBg(bg);
 }
@@ -265,19 +282,16 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
     );
   }
   if (t.isNeobrutalism) {
-    const isSolid = t.brutalistVariant === 'solid';
     return (
-      <BrutalistWrap t={t} level="md" radius={t.radius} bg={t.bgCard} style={style}>
-        <div style={{
-          position: 'relative',
-          backgroundColor: t.bgCard,
-          borderRadius: t.radius,
-          border: isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, t.bgCard)}`,
-          padding: '8px 10px',
-        }}>
-          {children}
-        </div>
-      </BrutalistWrap>
+      <div style={{
+        backgroundColor: t.bgCard,
+        borderRadius: t.radius,
+        border: `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, t.bgCard)}`,
+        padding: '8px 10px',
+        ...style,
+      }}>
+        {children}
+      </div>
     );
   }
   return (
@@ -480,14 +494,16 @@ function DashboardScreen({ t }: { t: Tokens }) {
               : (b.transparent ? `${t.borderW || 1}px solid ${t.border}` : 'none'),
             position: 'relative',
           };
+          const cls = pressClass(t);
+          const vars = pressVars(t);
           if (t.isNeobrutalism) {
             return (
-              <BrutalistWrap key={b.label} t={t} level="sm" radius={btnR} bg={echoBg} style={{ flex: 1 }}>
-                <button style={btnStyle}>{b.label}</button>
+              <BrutalistWrap key={b.label} t={t} level="sm" radius={btnR} bg={echoBg} style={{ flex: 1, display: 'flex' }}>
+                <button className={cls} style={{ ...btnStyle, ...vars, flex: 'initial', width: '100%' }}>{b.label}</button>
               </BrutalistWrap>
             );
           }
-          return <button key={b.label} style={btnStyle}>{b.label}</button>;
+          return <button key={b.label} className={cls} style={{ ...btnStyle, ...vars }}>{b.label}</button>;
         })}
       </div>
     </div>
@@ -805,16 +821,18 @@ function ProfileScreen({ t }: { t: Tokens }) {
         </div>
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: '6px', width: '100%', marginTop: '6px' }}>
-          <button style={{
+          <button className={pressClass(t)} style={{
             flex: 1, padding: '4px 0', borderRadius: btnR, border: 'none',
             backgroundColor: t.primary, color: t.primaryFg,
             fontSize: '0.55rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
+            ...pressVars(t),
           }}>Edit Profile</button>
-          <button style={{
+          <button className={pressClass(t)} style={{
             flex: 1, padding: '4px 0', borderRadius: btnR,
             border: `${t.borderW || 1}px solid ${t.border}`,
             backgroundColor: 'transparent', color: t.fg,
             fontSize: '0.55rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
+            ...pressVars(t),
           }}>Share</button>
         </div>
       </div>
@@ -848,11 +866,12 @@ function ProfileScreen({ t }: { t: Tokens }) {
         ))}
 
         {/* Danger zone */}
-        <button style={{
+        <button className={pressClass(t)} style={{
           width: '100%', padding: '6px 0', borderRadius: btnR, border: 'none',
           backgroundColor: t.destructiveSecondary, color: t.destructive,
           fontSize: fsCaption, fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+          ...pressVars(t),
         }}>
           <Trash2 size={10} /> Delete Account
         </button>

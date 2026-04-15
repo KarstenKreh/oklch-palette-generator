@@ -183,23 +183,15 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
           }
 
           const cardBorderCol = isNeobrutalism ? deriveBorderFromBg(colors.card) : colors.borderMuted;
-          const isSolid = isNeobrutalism && store.brutalistVariant === 'solid';
           return (
             <div key={level} className="relative flex-1">
-              <BrutalistEcho
-                level={level}
-                borderRadius={levelRadius}
-                bgColor={isSolid ? cardBorderCol : colors.card}
-                borderColor={cardBorderCol}
-                strokeWidthOverride={isSolid ? 0 : undefined}
-              />
               <div
                 className="relative p-2 flex flex-col items-center gap-1"
                 style={{
                   backgroundColor: colors.card,
                   boxShadow: isNeobrutalism ? undefined : shadow?.shadow,
                   borderRadius: `${levelRadius}px`,
-                  ...(store.borderEnabled && !isSolid && { border: `${store.borderWidth}px solid ${cardBorderCol}` }),
+                  ...(store.borderEnabled && { border: `${store.borderWidth}px solid ${cardBorderCol}` }),
                 }}
               >
                 <span className="text-caption font-semibold">{level}</span>

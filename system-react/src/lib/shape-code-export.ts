@@ -4,7 +4,7 @@
 
 import { generateShadows, type ShadowConfig, type ShadowType } from '@core/shadows';
 import { hexToOklch, oklchToHex } from '@core/color-math';
-import type { ColorMode, SeparationMode, ShapeStyle, ShapeUrlState as ShapeState } from '@core/url-state/shape';
+import type { ColorMode, SeparationMode, ShapeStyle, BrutalistVariant, ShapeUrlState as ShapeState } from '@core/url-state/shape';
 
 export interface ShapeExportOptions {
   shapeStyle: ShapeStyle;
@@ -15,6 +15,9 @@ export interface ShapeExportOptions {
   shadowScale: number;
   shadowColorMode: ColorMode;
   shadowCustomColor: string;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  brutalistVariant: BrutalistVariant;
   borderEnabled: boolean;
   borderWidth: number;
   borderRadius: number;
@@ -36,6 +39,9 @@ const SHAPE_DEFAULTS: ShapeExportOptions = {
   shadowScale: 1.272,
   shadowColorMode: 'auto',
   shadowCustomColor: '#000000',
+  shadowOffsetX: 2,
+  shadowOffsetY: 4,
+  brutalistVariant: 'outlined',
   borderEnabled: true,
   borderWidth: 1,
   borderRadius: 8,
@@ -61,14 +67,23 @@ export function optsFromState(state: Partial<ShapeState> | null, surfaceHex?: st
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
+function effectiveShadowType(opts: ShapeExportOptions): ShadowType {
+  if (opts.shapeStyle === 'neomorph') return 'neumorphic';
+  if (opts.shapeStyle === 'neobrutalism') return 'brutalist';
+  return opts.shadowType;
+}
+
 function buildShadowConfig(opts: ShapeExportOptions): ShadowConfig {
   return {
-    type: opts.shadowType,
+    type: effectiveShadowType(opts),
     strength: opts.shadowStrength,
     blurScale: opts.shadowBlurScale,
     scale: opts.shadowScale,
     colorMode: opts.shadowColorMode,
     customColor: opts.shadowCustomColor,
+    offsetX: opts.shadowOffsetX,
+    offsetY: opts.shadowOffsetY,
+    borderWidth: opts.borderEnabled ? opts.borderWidth : 1,
   };
 }
 
@@ -93,7 +108,7 @@ function pxToRem(px: number): string {
 }
 
 function shadowTypeLabel(t: ShadowType): string {
-  return { normal: 'Normal', neumorphic: 'Neumorphic', flat: 'Flat' }[t];
+  return { normal: 'Normal', neumorphic: 'Neumorphic', flat: 'Flat', brutalist: 'Brutalist' }[t];
 }
 
 function scaleLabel(scale: number): string {
@@ -115,7 +130,7 @@ export function generateShapeCss(opts: ShapeExportOptions): string {
   if (opts.shadowEnabled) {
     const lightBg = deriveBgHex(opts.surfaceHex, false);
     const lightShadows = generateShadows(lightBg, false, config);
-    css += `  /* Shadows — ${shadowTypeLabel(opts.shadowType)}, scale ${scaleLabel(opts.shadowScale)} */\n`;
+    css += `  /* Shadows — ${shadowTypeLabel(effectiveShadowType(opts))}, scale ${scaleLabel(opts.shadowScale)} */\n`;
     for (const s of lightShadows) {
       css += `  --shadow-${s.name}: ${s.shadow};\n`;
     }
@@ -207,7 +222,7 @@ export function generateShapeTailwind(opts: ShapeExportOptions): string {
     const lightShadows = generateShadows(lightBg, false, config);
     const darkShadows = generateShadows(darkBg, true, config);
 
-    css += `\n/* Shadows — ${shadowTypeLabel(opts.shadowType)}, scale ${scaleLabel(opts.shadowScale)} */\n`;
+    css += `\n/* Shadows — ${shadowTypeLabel(effectiveShadowType(opts))}, scale ${scaleLabel(opts.shadowScale)} */\n`;
     css += `:root {\n`;
     for (const s of lightShadows) {
       css += `  --shadow-${s.name}: ${s.shadow};\n`;
@@ -238,7 +253,7 @@ export function generateLlmBriefing(opts: ShapeExportOptions): string {
   // Shadows
   md += `## Shadows\n\n`;
   if (opts.shadowEnabled) {
-    md += `- **Style:** ${shadowTypeLabel(opts.shadowType)}\n`;
+    md += `- **Style:** ${shadowTypeLabel(effectiveShadowType(opts))}\n`;
     md += `- **Scale:** ${scaleLabel(opts.shadowScale)} (5 levels: xs, sm, md, lg, xl)\n`;
     md += `- **Strength:** ${opts.shadowStrength}\n`;
     md += `- **Blur scale:** ${opts.shadowBlurScale}\n`;

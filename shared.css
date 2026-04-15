@@ -545,3 +545,53 @@
     -moz-appearance: textfield;
   }
 }
+
+/* Style-specific button hover / active feedback. Shared across color, type, shape, system, symbol apps. */
+
+.neobrutalism-press {
+  transition: transform 120ms ease-out;
+  --press-x: 0px;
+  --press-y: 0px;
+}
+.neobrutalism-press:hover {
+  transform: translate(calc(var(--press-x) * 0.5), calc(var(--press-y) * 0.5));
+}
+.neobrutalism-press:active {
+  transform: translate(var(--press-x), var(--press-y));
+}
+
+.paper-press {
+  transition: transform 120ms ease-out, filter 120ms ease-out;
+}
+.paper-press:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.paper-press:active {
+  transform: translateY(0);
+  filter: brightness(0.92);
+}
+
+.glass-press {
+  transition: filter 120ms ease-out, transform 120ms ease-out;
+}
+.glass-press:hover {
+  filter: brightness(1.1);
+}
+.glass-press:active {
+  filter: brightness(0.9);
+  transform: scale(0.98);
+}
+
+.neomorph-press {
+  transition:
+    filter 200ms cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+.neomorph-press:hover {
+  filter: brightness(1.03);
+}
+.neomorph-press:active {
+  filter: brightness(0.95);
+  box-shadow: none !important;
+}

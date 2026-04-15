@@ -356,24 +356,22 @@ export function SurfacePanel({
               </div>
             );
           }
-          const cardBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(card.bg) : borderMutedHex;
-          const showCardBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
+          const cardBorder = brutalistEnabled ? brutalBorder(card.bg) : borderMutedHex;
+          const showCardBorder = brutalistEnabled ? true : !!bw;
           return (
-            <div key={card.name} className="relative">
-              {brutalEcho('md', br, card.bg)}
-              <div
-                className="relative p-2.5 text-caption flex flex-col justify-between min-h-20"
-                style={{
-                  backgroundColor: card.bg,
-                  color: textHex,
-                  border: showCardBorder ? `${bw || 1}px solid ${cardBorder}` : 'none',
-                  borderRadius: br,
-                  boxShadow: brutalistEnabled ? undefined : shadowMd,
-                }}
-              >
-                <span className="font-medium">{card.name}</span>
-                <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
-              </div>
+            <div
+              key={card.name}
+              className="p-2.5 text-caption flex flex-col justify-between min-h-20"
+              style={{
+                backgroundColor: card.bg,
+                color: textHex,
+                border: showCardBorder ? `${bw || 1}px solid ${cardBorder}` : 'none',
+                borderRadius: br,
+                boxShadow: brutalistEnabled ? undefined : shadowMd,
+              }}
+            >
+              <span className="font-medium">{card.name}</span>
+              <span className="text-caption font-mono" style={{ color: mutedFgHex }}>{card.token}</span>
             </div>
           );
         })}
@@ -388,21 +386,34 @@ export function SurfacePanel({
         ] as const).map((btn) => {
           const btnR = Math.max(4, br - 2);
           const showBtnBorder = brutalistEnabled && brutalistVariant !== 'solid';
+          const pressCls =
+            brutalistEnabled ? 'neobrutalism-press' :
+            isGlass ? 'glass-press' :
+            isNeomorph ? 'neomorph-press' :
+            'paper-press';
+          const pressVars = brutalistEnabled
+            ? {
+                ['--press-x' as string]: `${brutalistOffsetX / brutalistScale}px`,
+                ['--press-y' as string]: `${brutalistOffsetY / brutalistScale}px`,
+              }
+            : {};
           return (
             <div key={btn.label} className="relative inline-flex">
               {brutalEcho('sm', btnR, btn.bg)}
-              <div
-                className="relative px-3 py-1.5 text-caption font-medium"
+              <button
+                className={`relative px-3 py-1.5 text-caption font-medium ${pressCls}`}
                 style={{
                   backgroundColor: btn.bg,
                   color: btn.fg,
                   borderRadius: btnR,
-                  border: showBtnBorder ? `${brutalistStrokeWidth}px solid ${brutalBorder(btn.bg)}` : undefined,
+                  border: showBtnBorder ? `${brutalistStrokeWidth}px solid ${brutalBorder(btn.bg)}` : 'none',
                   boxShadow: brutalistEnabled ? undefined : shadowSm,
+                  cursor: 'pointer',
+                  ...pressVars,
                 }}
               >
                 {btn.label}
-              </div>
+              </button>
             </div>
           );
         })}
