@@ -16,6 +16,7 @@ const SYSTEM_INDEX = path.join(STATIC_ROOT, 'system', 'index.html');
 const SHAPE_INDEX = path.join(STATIC_ROOT, 'shape', 'index.html');
 const SYMBOL_INDEX = path.join(STATIC_ROOT, 'symbol', 'index.html');
 const SPACE_INDEX = path.join(STATIC_ROOT, 'space', 'index.html');
+const QA_INDEX = path.join(STATIC_ROOT, 'qa', 'index.html');
 const ROOT_INDEX = path.join(STATIC_ROOT, 'index.html');
 
 const MIME_TYPES = {
@@ -73,6 +74,13 @@ try {
   spaceHtmlTemplate = fs.readFileSync(SPACE_INDEX, 'utf-8');
 } catch (e) {
   console.error('Could not read space index.html:', e.message);
+}
+
+let qaHtmlTemplate = '';
+try {
+  qaHtmlTemplate = fs.readFileSync(QA_INDEX, 'utf-8');
+} catch (e) {
+  console.error('Could not read qa index.html:', e.message);
 }
 
 const HEX_RE = /^[0-9a-fA-F]{6}$/;
@@ -206,10 +214,12 @@ const server = http.createServer((req, res) => {
     symbol: { template: symbolHtmlTemplate, label: 'Icon Style Recommender',     desc: 'icon style recommendation' },
     space:  { template: spaceHtmlTemplate,  label: 'Spacing & Layout Generator', desc: 'spacing and layout token set' },
     system: { template: systemHtmlTemplate, label: 'Design System',              desc: 'design system' },
+    qa:     { template: qaHtmlTemplate,     label: 'QA Gallery',                 desc: 'internal QA gallery' },
   };
 
   // SPA fallback for all tools — inject OG tags when ?t= or ?c= present
-  const toolMatch = pathname.match(/^\/(color|type|shape|symbol|space|system)(\/|$)/);
+  // /qa is a hidden internal gallery (noindex in its own HTML, Disallow in robots.txt)
+  const toolMatch = pathname.match(/^\/(color|type|shape|symbol|space|system|qa)(\/|$)/);
   if (toolMatch && !path.extname(pathname)) {
     const tool = toolMatch[1];
     const meta = TOOL_META[tool];
