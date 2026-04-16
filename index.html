@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>standby.design — Small tools for designers and developers</title>
+  <title>standby.design — Design tools for systems thinkers</title>
   <meta name="description" content="Free design tools: OKLCH color palette generator and fluid type scale generator. Export production-ready CSS custom properties, Tailwind v4 config, and design tokens." />
 
   <!-- Open Graph -->
@@ -156,12 +156,17 @@
       font-size: var(--text-body-s);
       color: var(--muted-foreground);
     }
+    header p.tagline {
+      margin-top: 0.25rem;
+      font-style: italic;
+      opacity: 0.75;
+    }
     .tools {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.25rem;
       width: 100%;
-      max-width: 720px;
+      max-width: 1080px;
     }
     .tool-card {
       --card-accent: var(--color-accent);
@@ -233,7 +238,35 @@
     .tool-card--shape  { --card-accent: oklch(0.6 0.12 50); }
     .tool-card--symbol { --card-accent: oklch(0.6 0.12 320); }
     .tool-card--space { --card-accent: oklch(0.6 0.1 110); }
+    .tool-card--motion { --card-accent: oklch(0.6 0.12 250); }
     .tool-card--system { --card-accent: oklch(0.6 0.1 160); }
+
+    .tool-card--soon {
+      cursor: default;
+      opacity: 0.55;
+    }
+    .tool-card--soon:hover {
+      border-color: var(--border);
+      background: var(--card);
+      transform: none;
+    }
+    .tool-card--soon:hover::before {
+      opacity: 0;
+    }
+    .tool-card__badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: var(--text-caption);
+      font-weight: 700;
+      line-height: var(--leading-caption);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.2rem 0.6rem;
+    }
 
     footer {
       margin-top: 4rem;
@@ -249,7 +282,10 @@
       height: 1.8em;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 960px) {
+      .tools { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
       .tools { grid-template-columns: 1fr; }
     }
   </style>
@@ -257,7 +293,8 @@
 <body>
   <header>
     <h1>standby.design</h1>
-    <p>Small tools for designers and developers.</p>
+    <p>Design tools for systems thinkers.</p>
+    <p class="tagline">Where human perception meets mathematical rigor.</p>
   </header>
 
   <div class="tools">
@@ -327,7 +364,19 @@
       <p>Spacing scales, breakpoints, container widths, and aspect ratios &mdash; production-ready layout tokens.</p>
     </a>
 
-    <a href="/system" class="tool-card tool-card--system" style="grid-column: 1 / -1;">
+    <div class="tool-card tool-card--motion tool-card--soon" aria-disabled="true">
+      <span class="tool-card__badge">Coming Soon</span>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--card-accent)">
+          <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.5.5 0 0 1-.96 0L9.24 3.18a.5.5 0 0 0-.96 0l-2.35 8.36A2 2 0 0 1 4 13H2"/>
+        </svg>
+      </div>
+      <span class="label">Motion</span>
+      <h2>Motion Token Generator</h2>
+      <p>Easing curves, durations, and transitions &mdash; production-ready motion tokens for CSS, Framer Motion, and Tailwind.</p>
+    </div>
+
+    <a href="/system" class="tool-card tool-card--system">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--card-accent)">
           <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/>
