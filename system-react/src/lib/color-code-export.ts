@@ -1,7 +1,6 @@
 // Code export — generates CSS custom property strings
 
 import { hexToOklch, contrastRatio, invertHex } from '@core/color-math';
-import { generateShadowValues } from '@core/shadows';
 import type { PaletteEntry } from '@core/palette';
 import type { FgContrastMode } from '@core/url-state/color';
 
@@ -71,12 +70,6 @@ function fmtSec(palette: PaletteEntry[], prefix: string, mode: 'css' | 'hex'): s
 }
 
 type Row = [string, string | null, string | number];
-
-function generateShadowTokens(bgHex: string, isDark: boolean): Row[] {
-  return generateShadowValues(bgHex, isDark).map(({ name, shadow }) =>
-    [`shadow-${name}`, '#direct', shadow] as Row
-  );
-}
 
 function buildBlock(sel: string, rows: Row[]): string {
   let o = `${sel} {\n`;
@@ -231,8 +224,6 @@ export function generateSemantic(
     [null as unknown as string, null, 'Border / Input / Ring'],
     ['border', 'surface', 300], ['border-muted', 'surface', 200],
     ['input', 'surface', 300], ['ring', 'surface', 400],
-    [null as unknown as string, null, 'Shadows'],
-    ...generateShadowTokens(surfMap[50]?.hex || '#F8F8F8', false),
     [null as unknown as string, null, 'Sidebar'],
     ['sidebar', 'surface', 25], ['sidebar-foreground', 'surface', 975],
     sbPrimLight, sbPrimFgLight,
@@ -263,8 +254,6 @@ export function generateSemantic(
     [null as unknown as string, null, 'Border / Input / Ring'],
     ['border', 'surface', 600], ['border-muted', 'surface', 700],
     ['input', 'surface', 700], ['ring', 'surface', 500],
-    [null as unknown as string, null, 'Shadows'],
-    ...generateShadowTokens(surfMap[875]?.hex || '#1A1A1A', true),
     [null as unknown as string, null, 'Sidebar'],
     ['sidebar', 'surface', 875], ['sidebar-foreground', 'surface', 25],
     sbPrimDark, sbPrimFgDark,
@@ -402,7 +391,6 @@ ${pinnedNote}${pinnedContrastWarning}
 | \`--border-muted\` | surface-100 | surface-800 | Subtle separators |
 | \`--input\` | surface-300 | surface-700 | Input borders |
 | \`--ring\` | surface-400 | surface-500 | Focus rings |
-| \`--shadow-*\` | xs–xl | xs–xl | Hue-matched shadows |
 
 ### Sidebar
 
@@ -426,7 +414,7 @@ ${accentPalettes.map(a => `- **${a.name}** (\`--${a.cssName}\`): \`-foreground\`
 2. **Tailwind**: All tokens are available as Tailwind utilities (\`bg-primary\`, \`text-foreground\`, \`border-border\`, etc.).
 3. **Dark mode**: Add \`.dark\` to \`<html>\` or a container. All semantic tokens remap automatically.
 4. **Borders**: Default to \`--border-muted\` for subtle separation. Use \`--border\` for visible borders (inputs, focused elements).
-5. **Shadows**: \`--shadow-xs\` through \`--shadow-xl\` — hue-matched to the surface palette.
+5. **Shadows and radii**: see standby.design/shape for hue-matched shadow tokens and border-radius scales.
 6. **Border-radius**: Base \`--radius: 0.625rem\`. Derived sizes: \`--radius-sm\` (0.6×) through \`--radius-4xl\` (2.6×).
 
 ## Primitive Scale Reference

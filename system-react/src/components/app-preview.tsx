@@ -54,6 +54,8 @@ interface Tokens {
   warning: string; warningVis: string;
   primarySecondary: string; successSecondary: string;
   accentSecondary: string; destructiveSecondary: string;
+  primarySecondaryFg: string; successSecondaryFg: string;
+  accentSecondaryFg: string; destructiveSecondaryFg: string;
   border: string;
   radius: number; borderW: number;
   shadow: string;
@@ -183,6 +185,10 @@ function buildTokens(
     successSecondary: successPal ? p(successPal.palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     accentSecondary: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 800 : 200) : (dark ? p(brand, 800) : p(brand, 200)),
     destructiveSecondary: dark ? p(error, 800) : p(error, 200),
+    primarySecondaryFg: dark ? p(brand, 50) : p(brand, 950),
+    successSecondaryFg: successPal ? p(successPal.palette, dark ? 50 : 950) : (dark ? p(brand, 50) : p(brand, 950)),
+    accentSecondaryFg: palette?.accentPalettes?.[0] ? p(palette.accentPalettes[0].palette, dark ? 50 : 950) : (dark ? p(brand, 50) : p(brand, 950)),
+    destructiveSecondaryFg: dark ? p(error, 50) : p(error, 950),
     border: dark ? p(surface, 700) : p(surface, 200),
     radius, borderW, shadow, shadowSm, shadowInset, isNeomorph,
     isGlass,
@@ -264,7 +270,13 @@ function BrutalistWrap({
 }
 
 /* ─── Card helper ─── */
-function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; style?: React.CSSProperties }) {
+function Card({ t, children, style, pad = '8px 10px' }: {
+  t: Tokens;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  /** Inner padding. Pass `'0 10px'` for list cards so rows provide the vertical rhythm and divider-to-content and edge-to-content gaps stay symmetric. */
+  pad?: string;
+}) {
   if (t.isGlass) {
     return (
       <div style={{
@@ -276,7 +288,7 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
         ...style,
       }}>
         <LiquidGlass depth={t.glassDepth} blur={t.glassBlur} dispersion={t.glassDispersion} cornerRadius={t.radius} onDark={t.isDark}>
-          <div style={{ padding: '8px 10px' }}>{children}</div>
+          <div style={{ padding: pad }}>{children}</div>
         </LiquidGlass>
       </div>
     );
@@ -287,7 +299,7 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
         backgroundColor: t.bgCard,
         borderRadius: t.radius,
         border: `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, t.bgCard)}`,
-        padding: '8px 10px',
+        padding: pad,
         ...style,
       }}>
         {children}
@@ -300,7 +312,7 @@ function Card({ t, children, style }: { t: Tokens; children: React.ReactNode; st
       borderRadius: t.radius,
       boxShadow: t.shadow,
       border: t.borderW ? `${t.borderW}px solid ${t.border}` : 'none',
-      padding: '8px 10px',
+      padding: pad,
       ...style,
     }}>
       {children}
@@ -439,14 +451,14 @@ function DashboardScreen({ t }: { t: Tokens }) {
       </Card>
 
       {/* Widget 4: Activity List */}
-      <Card t={t}>
-        <div style={{ fontSize: t.fs('body-s') || '0.8rem', fontWeight: 600, fontFamily: hFf, color: t.fg, marginBottom: '6px' }}>
+      <Card t={t} pad="0 10px">
+        <div style={{ fontSize: t.fs('body-s') || '0.8rem', fontWeight: 600, fontFamily: hFf, color: t.fg, padding: '8px 0 4px' }}>
           Recent Activity
         </div>
         {activities.map((act, i) => (
           <div key={act.name} style={{
             display: 'flex', alignItems: 'center', gap: '6px',
-            padding: '4px 0',
+            padding: '6px 0',
             borderBottom: i < activities.length - 1 ? `${t.borderW || 1}px solid ${t.border}` : 'none',
           }}>
             <div style={{
@@ -482,11 +494,16 @@ function DashboardScreen({ t }: { t: Tokens }) {
         ] as const).map((b) => {
           const btnR = Math.max(3, t.radius - 2);
           const isSolid = t.brutalistVariant === 'solid';
-          const echoBg = b.transparent ? t.bg : b.bg;
+          // Brutalism: outlined buttons need a solid surface behind them, otherwise the button's
+          // own border stacks on top of the echo's offset border and reads as two interlocking strokes.
+          // Give transparent buttons the card bg in brutalism so they look like Create/Delete structurally.
+          const effectiveBg = t.isNeobrutalism && b.transparent ? t.bgCard : b.bg;
+          const useTransparentFill = b.transparent && !t.isNeobrutalism;
+          const echoBg = useTransparentFill ? t.bg : effectiveBg;
           const btnStyle: React.CSSProperties = {
             flex: 1, padding: '4px 8px',
             borderRadius: btnR,
-            backgroundColor: b.transparent ? 'transparent' : b.bg,
+            backgroundColor: useTransparentFill ? 'transparent' : effectiveBg,
             color: b.fg,
             fontSize: t.fs('caption') || '0.65rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
             border: t.isNeobrutalism
@@ -821,32 +838,47 @@ function ProfileScreen({ t }: { t: Tokens }) {
         </div>
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: '6px', width: '100%', marginTop: '6px' }}>
-          <button className={pressClass(t)} style={{
-            flex: 1, padding: '4px 0', borderRadius: btnR, border: 'none',
-            backgroundColor: t.primary, color: t.primaryFg,
-            fontSize: '0.55rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-            ...pressVars(t),
-          }}>Edit Profile</button>
-          <button className={pressClass(t)} style={{
-            flex: 1, padding: '4px 0', borderRadius: btnR,
-            border: `${t.borderW || 1}px solid ${t.border}`,
-            backgroundColor: 'transparent', color: t.fg,
-            fontSize: '0.55rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-            ...pressVars(t),
-          }}>Share</button>
+          {([
+            { label: 'Edit Profile', bg: t.primary, fg: t.primaryFg, transparent: false },
+            { label: 'Share', bg: t.bgCard, fg: t.fg, transparent: true },
+          ] as const).map((b) => {
+            const isSolid = t.brutalistVariant === 'solid';
+            const effectiveBg = t.isNeobrutalism && b.transparent ? t.bgCard : b.bg;
+            const useTransparentFill = b.transparent && !t.isNeobrutalism;
+            const echoBg = useTransparentFill ? t.bg : effectiveBg;
+            const btnStyle: React.CSSProperties = {
+              flex: 1, padding: '4px 0', borderRadius: btnR,
+              backgroundColor: useTransparentFill ? 'transparent' : effectiveBg,
+              color: b.fg,
+              fontSize: '0.55rem', fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
+              border: t.isNeobrutalism
+                ? (isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, echoBg)}`)
+                : (b.transparent ? `${t.borderW || 1}px solid ${t.border}` : 'none'),
+              position: 'relative',
+              ...pressVars(t),
+            };
+            if (t.isNeobrutalism) {
+              return (
+                <BrutalistWrap key={b.label} t={t} level="sm" radius={btnR} bg={echoBg} style={{ flex: 1, display: 'flex' }}>
+                  <button className={pressClass(t)} style={{ ...btnStyle, flex: 'initial', width: '100%' }}>{b.label}</button>
+                </BrutalistWrap>
+              );
+            }
+            return <button key={b.label} className={pressClass(t)} style={btnStyle}>{b.label}</button>;
+          })}
         </div>
       </div>
 
       {/* Settings groups */}
       <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {settingsGroups.map((group, gi) => (
-          <Card t={t} key={gi}>
+          <Card t={t} key={gi} pad="0 10px">
             {group.items.map((item, i) => {
               const Icon = item.icon;
               return (
                 <div key={item.label} style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '5px 0',
+                  padding: '8px 0',
                   borderBottom: i < group.items.length - 1 ? `${t.borderW || 1}px solid ${t.border}` : 'none',
                 }}>
                   <div style={{
@@ -866,15 +898,34 @@ function ProfileScreen({ t }: { t: Tokens }) {
         ))}
 
         {/* Danger zone */}
-        <button className={pressClass(t)} style={{
-          width: '100%', padding: '6px 0', borderRadius: btnR, border: 'none',
-          backgroundColor: t.destructiveSecondary, color: t.destructive,
-          fontSize: fsCaption, fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-          ...pressVars(t),
-        }}>
-          <Trash2 size={10} /> Delete Account
-        </button>
+        {(() => {
+          const isSolid = t.brutalistVariant === 'solid';
+          const dangerBg = t.destructiveSecondary;
+          const dangerStyle: React.CSSProperties = {
+            width: '100%', padding: '6px 0', borderRadius: btnR,
+            backgroundColor: dangerBg, color: t.destructiveSecondaryFg,
+            fontSize: fsCaption, fontWeight: 600, fontFamily: bFf, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+            border: t.isNeobrutalism
+              ? (isSolid ? 'none' : `${t.brutalistStrokeWidth}px solid ${brutalBorder(t, dangerBg)}`)
+              : 'none',
+            position: 'relative',
+            ...pressVars(t),
+          };
+          const btn = (
+            <button className={pressClass(t)} style={dangerStyle}>
+              <Trash2 size={10} /> Delete Account
+            </button>
+          );
+          if (t.isNeobrutalism) {
+            return (
+              <BrutalistWrap t={t} level="sm" radius={btnR} bg={dangerBg}>
+                {btn}
+              </BrutalistWrap>
+            );
+          }
+          return btn;
+        })()}
       </div>
     </div>
   );

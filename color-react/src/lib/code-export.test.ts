@@ -99,7 +99,8 @@ describe('generateSemantic', () => {
     expect(output).toContain('--destructive');
     expect(output).toContain('--border');
     expect(output).toContain('--ring');
-    expect(output).toContain('--shadow-');
+    // Shadows moved to /shape
+    expect(output).not.toContain('--shadow-');
   });
 
   it('snapshot stability', () => {

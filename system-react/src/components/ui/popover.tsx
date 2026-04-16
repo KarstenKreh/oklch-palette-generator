@@ -7,8 +7,33 @@ function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+/**
+ * Accepts either:
+ *   <PopoverTrigger asChild><Button>...</Button></PopoverTrigger>  (Radix-style)
+ *   <PopoverTrigger render={<Button />}>...</PopoverTrigger>       (Base UI-style)
+ *
+ * `asChild` is translated to Base UI's `render` prop to avoid nested <button> elements.
+ */
+interface PopoverTriggerProps extends Omit<PopoverPrimitive.Trigger.Props, "render"> {
+  asChild?: boolean
+  render?: PopoverPrimitive.Trigger.Props["render"]
+}
+
+function PopoverTrigger({ asChild, children, render, ...rest }: PopoverTriggerProps) {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <PopoverPrimitive.Trigger
+        data-slot="popover-trigger"
+        render={children as React.ReactElement}
+        {...rest}
+      />
+    )
+  }
+  return (
+    <PopoverPrimitive.Trigger data-slot="popover-trigger" render={render} {...rest}>
+      {children}
+    </PopoverPrimitive.Trigger>
+  )
 }
 
 function PopoverContent({
@@ -45,8 +70,44 @@ function PopoverContent({
   )
 }
 
+function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="popover-header"
+      className={cn("flex flex-col gap-0.5 text-sm", className)}
+      {...props}
+    />
+  )
+}
+
+function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
+  return (
+    <PopoverPrimitive.Title
+      data-slot="popover-title"
+      className={cn("font-heading font-medium", className)}
+      {...props}
+    />
+  )
+}
+
+function PopoverDescription({
+  className,
+  ...props
+}: PopoverPrimitive.Description.Props) {
+  return (
+    <PopoverPrimitive.Description
+      data-slot="popover-description"
+      className={cn("text-muted-foreground", className)}
+      {...props}
+    />
+  )
+}
+
 export {
   Popover,
   PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
   PopoverTrigger,
 }

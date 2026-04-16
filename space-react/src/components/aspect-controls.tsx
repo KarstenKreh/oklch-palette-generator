@@ -2,21 +2,61 @@ import { useSpaceStore } from '@/store/space-store';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { NameInput } from '@/components/ui/name-input';
 import { formatAspect, aspectValue } from '@core/aspect';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
+
+const MAX_ASPECTS = 12;
+
+function nextAspectName(existing: string[]): string {
+  for (let i = 1; i < 20; i++) {
+    const candidate = `custom-${i}`;
+    if (!existing.includes(candidate)) return candidate;
+  }
+  return `custom-${existing.length + 1}`;
+}
 
 export function AspectControls() {
   const {
     aspectRatios, aspectIncludeReciprocals,
-    setAspectRatio, removeAspectRatio, setAspectIncludeReciprocals,
+    setAspectRatio, renameAspectRatio, removeAspectRatio, addAspectRatio, setAspectIncludeReciprocals,
   } = useSpaceStore();
+  const atMax = aspectRatios.length >= MAX_ASPECTS;
+  const allNames = aspectRatios.map((a) => a.name);
+
+  const handleAdd = () => {
+    addAspectRatio({
+      name: nextAspectName(aspectRatios.map((a) => a.name)),
+      w: 1,
+      h: 1,
+    });
+  };
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <label className="text-caption font-medium">Aspect ratios</label>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleAdd}
+          disabled={atMax}
+          aria-label="Add aspect ratio"
+          className="size-7"
+        >
+          <Plus className="size-3.5" />
+        </Button>
+      </div>
+
       <div className="space-y-1.5">
         {aspectRatios.map((a) => (
           <div key={a.name} className="flex items-center gap-2">
-            <span className="font-mono text-caption w-20">{a.name}</span>
+            <NameInput
+              value={a.name}
+              existing={allNames}
+              onCommit={(next) => renameAspectRatio(a.name, next)}
+              widthClass="w-28"
+            />
             <Input
               type="number"
               step={0.001}

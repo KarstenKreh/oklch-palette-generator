@@ -36,3 +36,19 @@ export function aspectValue(a: AspectRatio): number {
 export function reciprocal(a: AspectRatio): AspectRatio {
   return { name: `${a.name}-portrait`, w: a.h, h: a.w };
 }
+
+/**
+ * Expand the list (adding portrait variants if requested) and sort widest → tallest
+ * by w/h descending. Squares (1:1) and other equal-sided ratios sort at 1.0.
+ */
+export function expandAndSortAspects(
+  ratios: AspectRatio[],
+  includeReciprocals: boolean,
+): AspectRatio[] {
+  const all: AspectRatio[] = [];
+  for (const a of ratios) {
+    all.push(a);
+    if (includeReciprocals && a.w !== a.h) all.push(reciprocal(a));
+  }
+  return all.sort((a, b) => aspectValue(b) - aspectValue(a));
+}

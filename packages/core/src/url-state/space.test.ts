@@ -87,12 +87,18 @@ describe('space url-state — extended sections', () => {
     expect(decoded?.proseMaxCh).toBe(80);
   });
 
-  it('emits arr=1 when include reciprocals is true', () => {
+  it('emits arr=0 when include reciprocals is explicitly disabled', () => {
+    const state: SpaceUrlState = { ...DEFAULT_SPACE_URL_STATE, aspectIncludeReciprocals: false };
+    const encoded = encodeState(state);
+    expect(encoded).toContain('arr=0');
+    const decoded = decodeState(encoded);
+    expect(decoded?.aspectIncludeReciprocals).toBe(false);
+  });
+
+  it('omits arr= when include reciprocals is default (true)', () => {
     const state: SpaceUrlState = { ...DEFAULT_SPACE_URL_STATE, aspectIncludeReciprocals: true };
     const encoded = encodeState(state);
-    expect(encoded).toContain('arr=1');
-    const decoded = decodeState(encoded);
-    expect(decoded?.aspectIncludeReciprocals).toBe(true);
+    expect(encoded).not.toContain('arr=');
   });
 
   it('round-trips custom aspect ratios including golden', () => {

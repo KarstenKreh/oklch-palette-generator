@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useShapeStore } from '@/store/shape-store';
@@ -8,13 +7,36 @@ function sliderVal(v: number | readonly number[]): number {
   return Array.isArray(v) ? v[0] : v;
 }
 
-const SCALE_MIN = 1.0;
-const SCALE_MAX = 1.8;
-const CORRIDOR_MIN = 1.2;
-const CORRIDOR_MAX = 1.5;
-
-function snapScale(v: number): number {
-  return Math.round(v * 1000) / 1000;
+/** Small inline numeric input — mirrors the slider's bounds and integer stepping. */
+function NumInput({
+  value, onChange, min, max, step = 1, suffix,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+}) {
+  return (
+    <label className="inline-flex items-center gap-0.5 text-caption font-mono rounded px-1.5 py-0.5 border border-border/50 bg-muted/30 hover:border-border hover:bg-muted/60 focus-within:border-foreground/60 focus-within:bg-muted/60 transition-colors cursor-text">
+      <input
+        type="number"
+        value={Number.isFinite(value) ? value : ''}
+        min={min}
+        max={max}
+        step={step}
+        onChange={(e) => {
+          const raw = e.target.value;
+          if (raw === '' || raw === '-') return;
+          const n = Number(raw);
+          if (Number.isFinite(n)) onChange(Math.max(min, Math.min(max, n)));
+        }}
+        className="w-9 bg-transparent text-right tabular-nums text-muted-foreground focus:text-foreground outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      />
+      {suffix && <span className="text-muted-foreground">{suffix}</span>}
+    </label>
+  );
 }
 
 export function BrutalistShadowControls() {
@@ -22,17 +44,9 @@ export function BrutalistShadowControls() {
     shadowEnabled, setShadowEnabled,
     shadowOffsetX, setShadowOffsetX,
     shadowOffsetY, setShadowOffsetY,
-    shadowScale, setShadowScale,
     shadowStrength, setShadowStrength,
     brutalistVariant, setBrutalistVariant,
   } = useShapeStore();
-
-  const handleScaleChange = useCallback((v: number | readonly number[]) => {
-    setShadowScale(snapScale(sliderVal(v)));
-  }, [setShadowScale]);
-
-  const corridorLeft = ((CORRIDOR_MIN - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
-  const corridorRight = ((CORRIDOR_MAX - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
 
   return (
     <div className="space-y-3">
@@ -70,7 +84,7 @@ export function BrutalistShadowControls() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-caption font-medium text-muted-foreground">Offset X</span>
-              <span className="text-caption text-muted-foreground font-mono">{shadowOffsetX}px</span>
+              <NumInput value={shadowOffsetX} onChange={setShadowOffsetX} min={-12} max={12} suffix="px" />
             </div>
             <Slider
               value={[shadowOffsetX]}
@@ -85,7 +99,7 @@ export function BrutalistShadowControls() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-caption font-medium text-muted-foreground">Offset Y</span>
-              <span className="text-caption text-muted-foreground font-mono">{shadowOffsetY}px</span>
+              <NumInput value={shadowOffsetY} onChange={setShadowOffsetY} min={-12} max={12} suffix="px" />
             </div>
             <Slider
               value={[shadowOffsetY]}
@@ -96,38 +110,11 @@ export function BrutalistShadowControls() {
             />
           </div>
 
-          {/* Scale — elevation ladder for offset */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-caption font-medium text-muted-foreground">Scale</span>
-              <span className="text-caption text-muted-foreground font-mono">
-                {shadowScale.toFixed(3)}
-              </span>
-            </div>
-            <div className="relative">
-              <Slider
-                value={[shadowScale]}
-                onValueChange={handleScaleChange}
-                min={SCALE_MIN}
-                max={SCALE_MAX}
-                step={0.001}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
-                style={{ left: `${corridorLeft}%` }}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
-                style={{ left: `${corridorRight}%` }}
-              />
-            </div>
-          </div>
-
           {/* Strength */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-caption font-medium text-muted-foreground">Strength</span>
-              <span className="text-caption text-muted-foreground font-mono">{shadowStrength.toFixed(2)}</span>
+              <NumInput value={shadowStrength} onChange={setShadowStrength} min={0} max={1} step={0.05} />
             </div>
             <Slider
               value={[shadowStrength]}

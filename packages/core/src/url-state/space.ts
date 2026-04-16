@@ -55,7 +55,7 @@ export const DEFAULT_SPACE_URL_STATE: SpaceUrlState = {
   proseMaxCh: DEFAULT_PROSE_MAX_CH,
 
   aspectRatios: DEFAULT_ASPECT_RATIOS,
-  aspectIncludeReciprocals: false,
+  aspectIncludeReciprocals: true,
 };
 
 /* ── Encode helpers ── */
@@ -121,8 +121,9 @@ export function encodeState(s: SpaceUrlState): string {
     const arStr = s.aspectRatios.map(encodeAspect).join(';');
     ext.push(`ar=${arStr}`);
   }
-  if (s.aspectIncludeReciprocals) {
-    ext.push(`arr=1`);
+  // Default is true — emit arr=0 only when explicitly disabled.
+  if (!s.aspectIncludeReciprocals) {
+    ext.push(`arr=0`);
   }
 
   return ext.length > 0 ? `${head}|${ext.join('&')}` : head;
@@ -207,7 +208,8 @@ export function decodeState(raw: string): Partial<SpaceUrlState> | null {
   }
 
   const arr = params.get('arr');
-  if (arr === '1') result.aspectIncludeReciprocals = true;
+  if (arr === '0') result.aspectIncludeReciprocals = false;
+  else if (arr === '1') result.aspectIncludeReciprocals = true;
 
   return result;
 }

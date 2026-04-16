@@ -153,11 +153,16 @@ export const useShapeStore = create<ShapeState>((set) => ({
         borderRadius: 4,
         shadowOffsetX: 2,
         shadowOffsetY: 4,
+        shadowScale: 1,
         shadowStrength: 1.0,
         shadowColorMode: 'auto',
         ringWidth: 2,
         ringOffset: 4,
       };
+    }
+    // Leaving brutalism: restore default elevation ladder so paper/neomorph/glass have staggered shadows again.
+    if (prev.shapeStyle === 'neobrutalism' && v !== 'neobrutalism' && prev.shadowScale === 1) {
+      return { shapeStyle: v, shadowScale: 1.272 };
     }
     return { shapeStyle: v };
   }),

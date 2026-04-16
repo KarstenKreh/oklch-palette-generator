@@ -5,7 +5,7 @@
 import type { SpacingToken } from './spacing';
 import type { Breakpoint, Container } from './layout';
 import type { AspectRatio } from './aspect';
-import { formatAspect, reciprocal } from './aspect';
+import { formatAspect, expandAndSortAspects } from './aspect';
 import { sortBreakpoints, sortContainers } from './layout';
 
 export interface SpaceExportOptions {
@@ -20,15 +20,7 @@ export interface SpaceExportOptions {
   ratioLabel: string;
 }
 
-function expandAspects(ratios: AspectRatio[], includeReciprocals: boolean): AspectRatio[] {
-  if (!includeReciprocals) return ratios;
-  const all: AspectRatio[] = [];
-  for (const a of ratios) {
-    all.push(a);
-    if (a.w !== a.h) all.push(reciprocal(a));
-  }
-  return all;
-}
+const expandAspects = expandAndSortAspects;
 
 /** CSS Custom Properties */
 export function generateSpaceCss(opts: SpaceExportOptions): string {

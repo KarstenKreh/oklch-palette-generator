@@ -26,27 +26,28 @@ export interface SurfacePanelProps {
   shape?: Partial<ShapeUrlState> | null;
 }
 
-const DARK_FG = '#1A1A1A';
-const LIGHT_FG = '#FFFFFF';
-
-function chooseFg(
+/** Pick foreground from a palette's near-white and near-black steps by comparing actual contrasts.
+ *  More accurate than hypothetical pure-white/dark — palette-tinted extremes can beat either. */
+function choosePaletteFg(
   bgHex: string,
+  lightHex: string,
+  darkHex: string,
   mode: FgContrastMode,
 ): string {
-  const crWhite = contrastRatio(bgHex, LIGHT_FG);
-  const crDark = contrastRatio(bgHex, DARK_FG);
+  const crLight = contrastRatio(bgHex, lightHex);
+  const crDark = contrastRatio(bgHex, darkHex);
 
   switch (mode) {
     case 'best':
-      return crWhite >= crDark ? LIGHT_FG : DARK_FG;
+      return crLight >= crDark ? lightHex : darkHex;
     case 'preferLight':
-      if (crWhite >= 4.5) return LIGHT_FG;       // preferred passes → use it
-      if (crDark >= 4.5) return DARK_FG;          // only other passes → use other
-      return LIGHT_FG;                             // neither passes → honor preference
+      if (crLight >= 4.5) return lightHex;
+      if (crDark >= 4.5) return darkHex;
+      return lightHex;
     case 'preferDark':
-      if (crDark >= 4.5) return DARK_FG;          // preferred passes → use it
-      if (crWhite >= 4.5) return LIGHT_FG;        // only other passes → use other
-      return DARK_FG;                              // neither passes → honor preference
+      if (crDark >= 4.5) return darkHex;
+      if (crLight >= 4.5) return lightHex;
+      return darkHex;
   }
 }
 
@@ -260,9 +261,11 @@ export function SurfacePanel({
     ? (isDark && errorInvert ? invertHex(pinnedErrorHex) : pinnedErrorHex)
     : (isDark ? getHex(error, 400) : getHex(error, 600));
 
-  const primaryFg = chooseFg(primaryBg, fgContrastMode);
-  const secondaryFg = chooseFg(secondaryBg, fgContrastMode);
-  const destructiveFg = chooseFg(destructiveBg, fgContrastMode);
+  // Use palette extremes (25/975) as fg candidates — tinted near-white/near-black
+  // for richer contrast than pure #FFF/#1A1A1A, and per-palette consistency.
+  const primaryFg = choosePaletteFg(primaryBg, getHex(brand, 25), getHex(brand, 975), fgContrastMode);
+  const secondaryFg = choosePaletteFg(secondaryBg, getHex(brand, 25), getHex(brand, 975), fgContrastMode);
+  const destructiveFg = choosePaletteFg(destructiveBg, getHex(error, 25), getHex(error, 975), fgContrastMode);
 
   // Accent items for mini badges
   const accentItems = accentPalettes.map((accent) => {
@@ -421,54 +424,43 @@ export function SurfacePanel({
 
       {/* Badges: Error + Accents */}
       <div className="flex gap-2 flex-wrap">
-        {/* Error badge */}
+        {/* Error badge — stays flat across all styles, buttons carry the elevation signal */}
         {(() => {
           const errDotBg = isDark ? getHex(error, 400) : getHex(error, 600);
           const errBadgeBg = isDark ? getHex(errorSurface, 800) : getHex(errorSurface, 100);
           const errBadgeText = isDark ? getHex(error, 50) : getHex(error, 950);
           const errBorderHex = isDark ? getHex(errorSurface, 700) : getHex(errorSurface, 300);
-          const errBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(errBadgeBg) : errBorderHex;
-          const showErrBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
           return (
-            <div className="relative inline-flex">
-              {brutalEcho('sm', br, errBadgeBg)}
-              <div
-                className="relative inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
-                style={{
-                  backgroundColor: errBadgeBg,
-                  color: errBadgeText,
-                  border: showErrBorder ? `${bw || 1}px solid ${errBorder}` : 'none',
-                  borderRadius: br,
-                }}
-              >
-                <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
-                Error
-              </div>
+            <div
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+              style={{
+                backgroundColor: errBadgeBg,
+                color: errBadgeText,
+                border: bw ? `${bw}px solid ${errBorderHex}` : 'none',
+                borderRadius: br,
+              }}
+            >
+              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: errDotBg }} />
+              Error
             </div>
           );
         })()}
-        {/* Accent badges */}
-        {accentItems.map((item) => {
-          const accBorder = brutalistEnabled && brutalistVariant !== 'solid' ? brutalBorder(item.badgeBg) : item.badgeBorder;
-          const showAccBorder = brutalistEnabled ? brutalistVariant !== 'solid' : !!bw;
-          return (
-            <div key={item.name} className="relative inline-flex">
-              {brutalEcho('sm', br, item.badgeBg)}
-              <div
-                className="relative inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
-                style={{
-                  backgroundColor: item.badgeBg,
-                  color: item.badgeText,
-                  border: showAccBorder ? `${bw || 1}px solid ${accBorder}` : 'none',
-                  borderRadius: br,
-                }}
-              >
-                <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
-                {item.name}
-              </div>
-            </div>
-          );
-        })}
+        {/* Accent badges — also flat */}
+        {accentItems.map((item) => (
+          <div
+            key={item.name}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-caption font-semibold"
+            style={{
+              backgroundColor: item.badgeBg,
+              color: item.badgeText,
+              border: bw ? `${bw}px solid ${item.badgeBorder}` : 'none',
+              borderRadius: br,
+            }}
+          >
+            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: item.dotBg }} />
+            {item.name}
+          </div>
+        ))}
       </div>
 
     </div>

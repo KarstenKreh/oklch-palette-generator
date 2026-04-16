@@ -7,8 +7,33 @@ function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+/**
+ * Accepts either:
+ *   <PopoverTrigger asChild><Button>...</Button></PopoverTrigger>  (Radix-style)
+ *   <PopoverTrigger render={<Button />}>...</PopoverTrigger>       (Base UI-style)
+ *
+ * `asChild` is translated to Base UI's `render` prop to avoid nested <button> elements.
+ */
+interface PopoverTriggerProps extends Omit<PopoverPrimitive.Trigger.Props, "render"> {
+  asChild?: boolean
+  render?: PopoverPrimitive.Trigger.Props["render"]
+}
+
+function PopoverTrigger({ asChild, children, render, ...rest }: PopoverTriggerProps) {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <PopoverPrimitive.Trigger
+        data-slot="popover-trigger"
+        render={children as React.ReactElement}
+        {...rest}
+      />
+    )
+  }
+  return (
+    <PopoverPrimitive.Trigger data-slot="popover-trigger" render={render} {...rest}>
+      {children}
+    </PopoverPrimitive.Trigger>
+  )
 }
 
 function PopoverContent({

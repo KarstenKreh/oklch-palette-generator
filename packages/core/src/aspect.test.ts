@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_ASPECT_RATIOS, formatAspect, aspectValue, reciprocal } from './aspect';
+import { DEFAULT_ASPECT_RATIOS, formatAspect, aspectValue, reciprocal, expandAndSortAspects } from './aspect';
 
 describe('DEFAULT_ASPECT_RATIOS', () => {
   it('includes square, video, and golden', () => {
@@ -44,5 +44,32 @@ describe('reciprocal', () => {
     expect(reciprocal({ name: 'video', w: 16, h: 9 })).toEqual({
       name: 'video-portrait', w: 9, h: 16,
     });
+  });
+});
+
+describe('expandAndSortAspects', () => {
+  it('returns only landscape when reciprocals off, sorted widest-first', () => {
+    const input = [
+      { name: 'square', w: 1, h: 1 },
+      { name: 'video', w: 16, h: 9 },
+      { name: 'ultrawide', w: 21, h: 9 },
+    ];
+    const out = expandAndSortAspects(input, false);
+    expect(out.map((a) => a.name)).toEqual(['ultrawide', 'video', 'square']);
+  });
+
+  it('expands with portrait variants and sorts widest-first', () => {
+    const input = [
+      { name: 'square', w: 1, h: 1 },
+      { name: 'video', w: 16, h: 9 },
+    ];
+    const out = expandAndSortAspects(input, true);
+    expect(out.map((a) => a.name)).toEqual(['video', 'square', 'video-portrait']);
+  });
+
+  it('never duplicates squares (1:1 has no portrait)', () => {
+    const out = expandAndSortAspects([{ name: 'square', w: 1, h: 1 }], true);
+    expect(out).toHaveLength(1);
+    expect(out[0].name).toBe('square');
   });
 });

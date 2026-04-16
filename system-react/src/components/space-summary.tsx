@@ -1,6 +1,6 @@
 import type { SpacingToken } from '@core/spacing';
 import type { SpaceUrlState } from '@core/url-state/space';
-import { formatAspect, reciprocal, aspectValue } from '@core/aspect';
+import { formatAspect, expandAndSortAspects, aspectValue } from '@core/aspect';
 import { sortBreakpoints, sortContainers } from '@core/layout';
 
 function scaleLabel(s: SpaceUrlState): string {
@@ -18,9 +18,7 @@ export function SpaceSummary({
 }) {
   const bps = sortBreakpoints(spaceState.breakpoints);
   const cts = sortContainers(spaceState.containers);
-  const ratios = spaceState.aspectIncludeReciprocals
-    ? spaceState.aspectRatios.flatMap((a) => (a.w === a.h ? [a] : [a, reciprocal(a)]))
-    : spaceState.aspectRatios;
+  const ratios = expandAndSortAspects(spaceState.aspectRatios, spaceState.aspectIncludeReciprocals);
 
   const maxSpace = Math.max(...spacing.map((t) => t.rem), 1);
   const maxBp = Math.max(...bps.map((b) => b.minPx), 1920);

@@ -1,21 +1,59 @@
 import { useSpaceStore } from '@/store/space-store';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { NameInput } from '@/components/ui/name-input';
 import { sortContainers } from '@core/layout';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
+
+const MAX_CONTAINERS = 6;
+
+function nextContainerName(existing: string[]): string {
+  for (let i = 1; i < 20; i++) {
+    const candidate = `custom-${i}`;
+    if (!existing.includes(candidate)) return candidate;
+  }
+  return `custom-${existing.length + 1}`;
+}
 
 export function ContainerControls() {
-  const { containers, proseMaxCh, setContainer, removeContainer, setProseMaxCh } = useSpaceStore();
+  const { containers, proseMaxCh, setContainer, renameContainer, removeContainer, addContainer, setProseMaxCh } = useSpaceStore();
+  const allNames = containers.map((c) => c.name);
   const sorted = sortContainers(containers);
+  const atMax = containers.length >= MAX_CONTAINERS;
+
+  const handleAdd = () => {
+    const largest = sorted.length > 0 ? sorted[sorted.length - 1].maxPx : 1200;
+    addContainer({
+      name: nextContainerName(containers.map((c) => c.name)),
+      maxPx: Math.round(largest * 1.272),
+    });
+  };
 
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-caption font-medium mb-1.5 block">Containers</label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="text-caption font-medium">Containers</label>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleAdd}
+            disabled={atMax}
+            aria-label="Add container"
+            className="size-7"
+          >
+            <Plus className="size-3.5" />
+          </Button>
+        </div>
         <div className="space-y-1.5">
           {sorted.map((c) => (
             <div key={c.name} className="flex items-center gap-2">
-              <span className="font-mono text-caption w-20">{c.name}</span>
+              <NameInput
+                value={c.name}
+                existing={allNames}
+                onCommit={(next) => renameContainer(c.name, next)}
+                widthClass="w-24"
+              />
               <Input
                 type="number"
                 value={c.maxPx}

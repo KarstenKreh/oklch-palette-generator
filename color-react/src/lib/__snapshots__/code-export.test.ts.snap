@@ -176,12 +176,6 @@ exports[`generateSemantic > snapshot stability 1`] = `
   --border-muted: var(--color-surface-200);
   --input: var(--color-surface-300);
   --ring: var(--color-surface-400);
-  /* Shadows */
-  --shadow-xs: 0 0.247rem 0.371rem oklch(0.05 0.01 247.90 / 0.052), 0 0.618rem 1.236rem oklch(0.05 0.01 247.90 / 0.078);
-  --shadow-sm: 0 0.314rem 0.472rem oklch(0.05 0.01 247.90 / 0.066), 0 0.786rem 1.572rem oklch(0.05 0.01 247.90 / 0.099);
-  --shadow-md: 0 0.400rem 0.600rem oklch(0.05 0.01 247.90 / 0.084), 0 1.000rem 2.000rem oklch(0.05 0.01 247.90 / 0.126);
-  --shadow-lg: 0 0.509rem 0.763rem oklch(0.05 0.01 247.90 / 0.107), 0 1.272rem 2.544rem oklch(0.05 0.01 247.90 / 0.160);
-  --shadow-xl: 0 0.647rem 0.971rem oklch(0.05 0.01 247.90 / 0.136), 0 1.618rem 3.236rem oklch(0.05 0.01 247.90 / 0.204);
   /* Sidebar */
   --sidebar: var(--color-surface-25);
   --sidebar-foreground: var(--color-surface-975);
@@ -226,12 +220,6 @@ exports[`generateSemantic > snapshot stability 1`] = `
   --border-muted: var(--color-surface-700);
   --input: var(--color-surface-700);
   --ring: var(--color-surface-500);
-  /* Shadows */
-  --shadow-xs: 0 0.247rem 0.371rem oklch(0.02 0.005 258.37 / 0.104), 0 0.618rem 1.236rem oklch(0.02 0.005 258.37 / 0.156);
-  --shadow-sm: 0 0.314rem 0.472rem oklch(0.02 0.005 258.37 / 0.132), 0 0.786rem 1.572rem oklch(0.02 0.005 258.37 / 0.198);
-  --shadow-md: 0 0.400rem 0.600rem oklch(0.02 0.005 258.37 / 0.168), 0 1.000rem 2.000rem oklch(0.02 0.005 258.37 / 0.252);
-  --shadow-lg: 0 0.509rem 0.763rem oklch(0.02 0.005 258.37 / 0.214), 0 1.272rem 2.544rem oklch(0.02 0.005 258.37 / 0.321);
-  --shadow-xl: 0 0.647rem 0.971rem oklch(0.02 0.005 258.37 / 0.272), 0 1.618rem 3.236rem oklch(0.02 0.005 258.37 / 0.408);
   /* Sidebar */
   --sidebar: var(--color-surface-875);
   --sidebar-foreground: var(--color-surface-25);

@@ -20,7 +20,7 @@ export function SectionNav() {
           type="button"
           onClick={() => setActive(s.id)}
           className={cn(
-            'px-3 py-2 text-caption font-medium transition-colors border-b-2 -mb-px',
+            'px-3 py-2 text-caption font-medium cursor-pointer transition-colors border-b-2 -mb-px',
             active === s.id
               ? 'border-primary text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground',

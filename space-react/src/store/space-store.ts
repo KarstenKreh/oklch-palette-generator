@@ -39,6 +39,7 @@ export interface SpaceState {
 
   // Setters — breakpoints
   setBreakpoint: (name: string, minPx: number) => void;
+  renameBreakpoint: (oldName: string, newName: string) => void;
   addBreakpoint: (bp: Breakpoint) => void;
   removeBreakpoint: (name: string) => void;
   setFluidMinVw: (v: number) => void;
@@ -46,12 +47,14 @@ export interface SpaceState {
 
   // Setters — containers
   setContainer: (name: string, maxPx: number) => void;
+  renameContainer: (oldName: string, newName: string) => void;
   addContainer: (c: Container) => void;
   removeContainer: (name: string) => void;
   setProseMaxCh: (v: number) => void;
 
   // Setters — aspect ratios
   setAspectRatio: (name: string, w: number, h: number) => void;
+  renameAspectRatio: (oldName: string, newName: string) => void;
   addAspectRatio: (a: AspectRatio) => void;
   removeAspectRatio: (name: string) => void;
   setAspectIncludeReciprocals: (v: boolean) => void;
@@ -94,6 +97,14 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   setBreakpoint: (name, minPx) => set((s) => ({
     breakpoints: s.breakpoints.map((b) => (b.name === name ? { name, minPx } : b)),
   })),
+  renameBreakpoint: (oldName, newName) => set((s) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return s;
+    if (s.breakpoints.some((b) => b.name === trimmed)) return s;
+    return {
+      breakpoints: s.breakpoints.map((b) => (b.name === oldName ? { ...b, name: trimmed } : b)),
+    };
+  }),
   addBreakpoint: (bp) => set((s) => ({ breakpoints: [...s.breakpoints, bp] })),
   removeBreakpoint: (name) => set((s) => ({
     breakpoints: s.breakpoints.filter((b) => b.name !== name),
@@ -104,6 +115,14 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   setContainer: (name, maxPx) => set((s) => ({
     containers: s.containers.map((c) => (c.name === name ? { name, maxPx } : c)),
   })),
+  renameContainer: (oldName, newName) => set((s) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return s;
+    if (s.containers.some((c) => c.name === trimmed)) return s;
+    return {
+      containers: s.containers.map((c) => (c.name === oldName ? { ...c, name: trimmed } : c)),
+    };
+  }),
   addContainer: (c) => set((s) => ({ containers: [...s.containers, c] })),
   removeContainer: (name) => set((s) => ({
     containers: s.containers.filter((c) => c.name !== name),
@@ -113,6 +132,14 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   setAspectRatio: (name, w, h) => set((s) => ({
     aspectRatios: s.aspectRatios.map((a) => (a.name === name ? { name, w, h } : a)),
   })),
+  renameAspectRatio: (oldName, newName) => set((s) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return s;
+    if (s.aspectRatios.some((a) => a.name === trimmed)) return s;
+    return {
+      aspectRatios: s.aspectRatios.map((a) => (a.name === oldName ? { ...a, name: trimmed } : a)),
+    };
+  }),
   addAspectRatio: (a) => set((s) => ({ aspectRatios: [...s.aspectRatios, a] })),
   removeAspectRatio: (name) => set((s) => ({
     aspectRatios: s.aspectRatios.filter((a) => a.name !== name),

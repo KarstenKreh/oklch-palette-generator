@@ -30,11 +30,12 @@ function step(palette: PaletteEntry[], s: Step): string {
   return palette.find(e => e.step === s)!.hex;
 }
 
-/** Pick foreground from palette — decide direction via #FFF/#1A1A1A, return palette step. */
+/** Pick foreground from palette — compare actual step contrasts, return whichever wins.
+ *  (Previously used hypothetical pure-white/dark, which could pick a step that underperforms.) */
 export function pickFgFromPalette(bgHex: string, palette: PaletteEntry[], lightStep: Step, darkStep: Step): string {
-  const crWhite = contrastRatio('#FFFFFF', bgHex);
-  const crDark = contrastRatio('#1A1A1A', bgHex);
-  return crWhite >= crDark ? step(palette, lightStep) : step(palette, darkStep);
+  const lightHex = step(palette, lightStep);
+  const darkHex = step(palette, darkStep);
+  return contrastRatio(lightHex, bgHex) >= contrastRatio(darkHex, bgHex) ? lightHex : darkHex;
 }
 
 /**

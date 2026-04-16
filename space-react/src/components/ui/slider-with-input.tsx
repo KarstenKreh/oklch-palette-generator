@@ -67,30 +67,9 @@ export function SliderWithInput({
 
   return (
     <div className="space-y-2">
-      {label && <span className="text-caption text-muted-foreground block">{label}</span>}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Slider
-            min={min}
-            max={max}
-            step={step}
-            value={[value]}
-            onValueChange={handleSlider}
-          />
-          {corridor && (
-            <>
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
-                style={{ left: `${corridorLeft}%` }}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
-                style={{ left: `${corridorRight}%` }}
-              />
-            </>
-          )}
-        </div>
-        <div className="relative shrink-0">
+      <div className="flex items-center justify-between gap-3">
+        {label && <span className="text-caption text-muted-foreground">{label}</span>}
+        <div className="relative shrink-0 ml-auto">
           <Input
             type="number"
             min={min}
@@ -108,6 +87,27 @@ export function SliderWithInput({
             </span>
           )}
         </div>
+      </div>
+      <div className="relative">
+        <Slider
+          min={min}
+          max={max}
+          step={step}
+          value={[value]}
+          onValueChange={handleSlider}
+        />
+        {corridor && (
+          <>
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+              style={{ left: `${corridorLeft}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-px h-3 bg-muted-foreground/30 pointer-events-none"
+              style={{ left: `${corridorRight}%` }}
+            />
+          </>
+        )}
       </div>
     </div>
   );

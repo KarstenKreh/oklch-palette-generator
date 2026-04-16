@@ -1,11 +1,9 @@
 import { useSpaceStore } from '@/store/space-store';
-import { formatAspect, aspectValue, reciprocal } from '@core/aspect';
+import { formatAspect, aspectValue, expandAndSortAspects } from '@core/aspect';
 
 export function AspectPreview() {
   const { aspectRatios, aspectIncludeReciprocals } = useSpaceStore();
-  const ratios = aspectIncludeReciprocals
-    ? aspectRatios.flatMap((a) => (a.w === a.h ? [a] : [a, reciprocal(a)]))
-    : aspectRatios;
+  const ratios = expandAndSortAspects(aspectRatios, aspectIncludeReciprocals);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

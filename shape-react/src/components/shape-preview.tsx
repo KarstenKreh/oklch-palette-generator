@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { TriangleAlert, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useShapeStore } from '@/store/shape-store';
 import { generateShadows, generateNeumorphicInset, type ShadowConfig } from '@core/shadows';
 import { deriveSurface } from '@core/surface';
-import { contrastRatio, hexToOklch, oklchToHex, maxChromaInGamut } from '@core/color-math';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { hexToOklch, oklchToHex, maxChromaInGamut } from '@core/color-math';
+import { LiquidGlass } from '@core/liquid-glass';
+import { BrutalistEcho as CoreBrutalistEcho } from '@core/brutalist-echo';
 
 /** Derive a brutalist border color by darkening the bg by ~1 palette step (ΔL ≈ 0.10 in OKLCH).
  *  Darkens in both light and dark modes — keeps the hue, Gamut-safe chroma. */
@@ -13,24 +14,6 @@ function deriveBorderFromBg(bgHex: string): string {
   const shifted = Math.max(0.05, L - 0.10);
   const maxC = maxChromaInGamut(shifted, H);
   return oklchToHex(shifted, Math.min(C, maxC * 0.95), H);
-}
-import { LiquidGlass } from '@core/liquid-glass';
-import { BrutalistEcho as CoreBrutalistEcho } from '@core/brutalist-echo';
-
-/** Dynamic contrast warning — renders a small alert icon with tooltip when ratio < WCAG AA (4.5). */
-function ContrastWarning({ fg, bg, label }: { fg: string; bg: string; label: string }) {
-  const ratio = contrastRatio(fg, bg);
-  if (ratio >= 4.5) return null;
-  return (
-    <Tooltip>
-      <TooltipTrigger>
-        <TriangleAlert className="size-3 text-amber-500 shrink-0" aria-label={`Kontrast-Warnung: ${label}`} />
-      </TooltipTrigger>
-      <TooltipContent>
-        Kontrast {ratio.toFixed(2)}:1 — unter WCAG AA (4.5:1) für {label}.
-      </TooltipContent>
-    </Tooltip>
-  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -243,7 +226,6 @@ function PreviewPanel({ isDark }: { isDark: boolean }) {
                 }}
               >
                 {label}
-                <ContrastWarning fg={fg} bg={bg} label={`${label}-Button`} />
               </button>
             </div>
           );
